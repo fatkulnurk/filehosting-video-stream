@@ -17,10 +17,13 @@
                 <h2 class="subtitle is-capitalized">
                     Size: {{ $file->size_format }} <span class="has-text-weight-bold">.</span> Mime Type: {{ $file->mime_type }}
                 </h2>
-                <form>
+                <form action="{{ route('file-download', $file->code) }}" method="POST">
                     @csrf
+                    <input type="hidden" name="code" value="{{ $file->code }}">
+                    <input type="hidden" name="hash" value="{{ $file->path_hash }}">
+                    <input type="hidden" name="key" value="{{ $file->expired_time }}">
                     <div class="buttons is-centered">
-                        <a href="{{ route('register') }}" class="button is-light is-rounded is-inverted">Download File</a>
+                        <button class="button is-light is-rounded is-inverted">Download File</button>
                     </div>
                 </form>
             </div>

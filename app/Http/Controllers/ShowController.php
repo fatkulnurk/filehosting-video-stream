@@ -17,7 +17,7 @@ class ShowController extends Controller
         return view('pages.show.index', compact('file'));
     }
 
-    public function download($code, Request $request)
+    public function download(Request $request)
     {
         $code = $request->input('code');
         $path = base64_decode($request->input('hash'));
@@ -32,6 +32,6 @@ class ShowController extends Controller
             ->firstOrFail();
 
         return Storage::disk($file->storageServer->name)
-            ->download($file->path);
+            ->download($file->path, config('app.name') . '-' . $file->client_original_name);
     }
 }

@@ -40,7 +40,7 @@ FHV Stream have features:
 - [x] File Manager (CRUD)
 - [x] Multi Storage Server
 - [x] Download Page
-- [x] Embed Page
+- [x] Embed Video Script
 - [x] 
 - [ ] Auto Generate Thumbnail
 - [ ] Auto Convert To MP4

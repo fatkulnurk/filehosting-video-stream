@@ -14,12 +14,6 @@ class EmbedController extends Controller
     {
         $file = File::where('code', $code)->firstOrFail();
 
-//        dd([
-//            'path' => $file->path,
-//            'path_hash' => $file->path_hash,
-//            'path_decode' => Crypt::decrypt($file->path_hash),
-//        ]);
-
         return view('pages.embed.index', compact('file'));
     }
 }

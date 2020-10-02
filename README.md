@@ -40,9 +40,11 @@ FHV Stream have features:
 - [x] File Manager (CRUD)
 - [x] Multi Storage Server
 - [x] Download Page
-- [x] Embed Video Script
-- [x] 
+- [x] Embed Video Script (disable download and right click)
+- [x] Expired Direct Download Link (default 24 hours)
+- [x] Expired Streaming Video Direct Link (default 24 hours)
 - [ ] Auto Generate Thumbnail
+- [ ] Statistic Download
 - [ ] Auto Convert To MP4
 - [ ] Reward System
 - [ ] Affiliate System

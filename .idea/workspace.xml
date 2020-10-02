@@ -20,10 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="10a05ade-5eb0-4e07-8e26-9d833e56efa3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/EmbedController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/EmbedController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/views/pages/show/index.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/pages/show/index.blade.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -202,7 +199,7 @@
       <workItem from="1601477548532" duration="11000" />
       <workItem from="1601480583108" duration="8687000" />
       <workItem from="1601528361667" duration="30196000" />
-      <workItem from="1601635799651" duration="20617000" />
+      <workItem from="1601635799651" duration="20997000" />
     </task>
     <servers />
   </component>
@@ -253,9 +250,9 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="184" y="8" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1601480603997" />
-    <state x="346" y="49" width="672" height="678" key="search.everywhere.popup" timestamp="1601660790337">
+    <state x="346" y="49" width="672" height="678" key="search.everywhere.popup" timestamp="1601661230863">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="346" y="49" width="672" height="678" key="search.everywhere.popup/0.0.1366.728@0.0.1366.728" timestamp="1601660790337" />
+    <state x="346" y="49" width="672" height="678" key="search.everywhere.popup/0.0.1366.728@0.0.1366.728" timestamp="1601661230863" />
   </component>
 </project>

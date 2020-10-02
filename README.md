@@ -38,6 +38,8 @@ FHV Stream have features:
 ![alt text](https://github.com/fatkulnurk/filehosting-video-stream/raw/main/docs/images/1-home.png "Home")
 
 ---
+![alt text](https://github.com/fatkulnurk/filehosting-video-stream/raw/main/docs/images/2-dashboard.png "Home")
+---
 ---
 ---
 

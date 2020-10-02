@@ -1,4 +1,4 @@
-<x-guest-layout title="Upload File">
+<x-guest-layout title="FHV Stream">
     <section class="hero is-medium is-primary is-vcentered has-text-centered">
         <div class="hero-body">
             <div class="container">

@@ -32,6 +32,11 @@ FHV Stream have features:
 ...
 ```
 
+**Screeshot App**
+
+
+![alt text](https://github.com/fatkulnurk/filehosting-video-stream/raw/master/src/docs/images/1-home.png "Home")
+
 **TO-DO**
 
 - [x] File Upload

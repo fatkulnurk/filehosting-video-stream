@@ -46,7 +46,7 @@
                         Dashboard
                     </a>
                     <a class="navbar-item" href="{{ route('dashboard.files.create') }}">
-                        Upload
+                        Upload Video
                     </a>
                     <a class="navbar-item" href="{{ route('dashboard.files.index') }}">
                         My Files
@@ -64,7 +64,8 @@
                             </a>
                             <hr class="navbar-divider">
                             <div class="navbar-item">
-                                <form>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
                                     <button class="button">Logout</button>
                                 </form>
                             </div>
@@ -86,6 +87,7 @@
     </div>
 
     <main class="container mt-3">
+        <x-bulma.notification-alert/>
         {{ $slot }}
     </main>
 

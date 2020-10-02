@@ -7,21 +7,15 @@ use App\Services\Times\Time;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
+use function GuzzleHttp\Psr7\str;
 
-class ShowController extends Controller
+class StorageUrlController extends Controller
 {
-    public function show($code, Request $request)
+    public function __invoke(Request $request)
     {
-        $file = File::where('code', $code)->firstOrFail();
-
-        return view('pages.show.index', compact('file'));
-    }
-
-    public function download($code, Request $request)
-    {
-        $code = $request->input('code');
-        $path = base64_decode($request->input('hash'));
-        $expiredTimeHash = (string) base64_decode($request->input('key'));
+        $code = $request->query('code');
+        $path = base64_decode($request->query('hash'));
+        $expiredTimeHash = (string) base64_decode($request->query('key'));
 
         if (!(new Time())->checkExpiredTime($expiredTimeHash)) {
             abort(404);

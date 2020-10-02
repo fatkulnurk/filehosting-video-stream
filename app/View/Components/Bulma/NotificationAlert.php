@@ -4,7 +4,7 @@ namespace App\View\Components\Bulma;
 
 use Illuminate\View\Component;
 
-class AlertError extends Component
+class NotificationAlert extends Component
 {
     /**
      * Create a new component instance.
@@ -23,6 +23,6 @@ class AlertError extends Component
      */
     public function render()
     {
-        return view('components.bulma.alert-error');
+        return view('components.bulma.notification-alert');
     }
 }

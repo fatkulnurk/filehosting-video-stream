@@ -6,6 +6,15 @@ use Illuminate\View\Component;
 
 class GuestLayout extends Component
 {
+    public $title;
+    public $showHero = false;
+
+    public function __construct($title = 'Dashboard', $showHero = false)
+    {
+        $this->title = $title;
+        $this->showHero = $showHero;
+    }
+
     /**
      * Get the view / contents that represents the component.
      *

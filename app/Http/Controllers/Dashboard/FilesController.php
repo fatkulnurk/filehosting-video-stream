@@ -36,20 +36,39 @@ class FilesController extends Controller
     public function index(Request $request)
     {
         $directories = Directory::query();
+        $files = File::query();
         $parrentDirectory = 0;
+        $directoryName = '...';
+
         if ($request->has('folder_id')) {
-            $parrentDirectory = Directory::where('user_id', Auth::id())->where('id', $request->query('folder_id'))->first()->directory_parrent_id;
+            $directory = Directory::select('directory_parrent_id', 'name')
+                ->where('user_id', Auth::id())
+                ->where('id', $request->query('folder_id'))
+                ->first();
+
+            $directoryName = $directory->name;
+            $parrentDirectory = $directory
+                ->directory_parrent_id;
+
             $directories = $directories->where('directory_parrent_id', $request->query('folder_id'));
+            $files = $files->where('directory_id', $request->query('folder_id'));
+        } else {
+            $directories = $directories->where('directory_parrent_id', null);
         }
 
-        $directories = $directories->where('user_id', Auth::id())->get();
-
-        $files = File::where('user_id', Auth::id())
+        $files = $files
+            ->where('user_id', Auth::id())
             ->where('name', 'like', '%'. $request->query('search') .'%')
             ->orderBy('id', 'desc')
-            ->paginate(1);
+            ->paginate(10);
 
-        return view('dashboard.files.index', compact('directories', 'files', 'parrentDirectory'));
+        $directories = $directories
+            ->where('user_id', Auth::id())
+            ->get();
+
+        return view('dashboard.files.index', compact(
+            'directories', 'files', 'parrentDirectory', 'directoryName'
+        ));
     }
 
     /**
@@ -59,7 +78,9 @@ class FilesController extends Controller
      */
     public function create()
     {
-        $directories = Directory::with('childrenDirectory')->where('directory_parrent_id', null)->get();
+        $directories = Directory::with('childrenDirectory')
+            ->where('directory_parrent_id', null)
+            ->get();
 
         return view('dashboard.files.create', compact('directories'));
     }
@@ -72,7 +93,7 @@ class FilesController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'video' => 'required|mimetypes:video/avi,video/mpeg,video/quicktime,video/mp4|max:10240000',
             'directory_id' => 'nullable'
         ]);
@@ -81,43 +102,10 @@ class FilesController extends Controller
 
         $fileDatabase = $this->fileService->store($request, $directoryID);
 
-        dd($fileDatabase);
-
-        $fileDatabase = '';
-
-        if ($request->hasFile('video')) {
-            $file = $request->file('video');
-
-            $randomString = Str::random(15);
-            $randomCode = Str::random(15);
-            $random = $randomString . '-=-' . $randomCode . '-=-' . time();
-            $randomHash = md5($random);
-
-            $filename = $random . '.' . $file->getClientOriginalExtension();
-            $fileStore = $file->storeAs(
-                'videos', $filename, StorageServerHelper::getActiveKey()
-            );
-
-            $fileDatabase = File::create([
-                'user_id' => Auth::id(),
-                'directory_id' => $directoryID,
-                'storage_server_id' => StorageServerHelper::getActiveID(),
-                'code' => $randomHash . '-' . time(),
-                'client_original_name' => $file->getClientOriginalName(),
-                'client_original_mime_type' => $file->getClientMimeType(),
-                'client_original_extension' => $file->getClientOriginalExtension(),
-                'name' => $filename,
-                'mime_type' => $file->getMimeType(),
-                'extension' => $file->extension(),
-                'path' => $fileStore,
-                'size' => $file->getSize(),
-            ]);
-
-            return redirect()
-                ->route('dashboard.files.index')
-                ->with('success', 'Berhasil di upload')
-                ->with('file', $fileDatabase);
-        }
+        return redirect()
+            ->route('dashboard.files.index')
+            ->with('success', 'Berhasil di upload')
+            ->with('file', $fileDatabase);
     }
 
     /**

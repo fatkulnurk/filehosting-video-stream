@@ -34,6 +34,14 @@ FHV Stream have features:
 
 **TO-DO**
 
+- [x] File Upload
+- [x] Create Unlimited Nested Folder
+- [x] Manage Folder (CRUD)
+- [x] File Manager (CRUD)
+- [x] Multi Storage Server
+- [x] Download Page
+- [x] Embed Page
+- [x] 
 - [ ] Auto Generate Thumbnail
 - [ ] Auto Convert To MP4
 - [ ] Reward System

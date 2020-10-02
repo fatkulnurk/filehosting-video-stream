@@ -49,4 +49,9 @@ class FileService implements FileServiceInterface
             return $fileDatabase;
         }
     }
+
+    public function delete($fileID)
+    {
+        File::findOrFail($fileID)->delete();
+    }
 }

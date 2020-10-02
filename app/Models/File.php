@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Helpers\SizeHelper;
+use App\Services\Times\Time;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Crypt;
 
 class File extends Model
 {
@@ -13,21 +16,30 @@ class File extends Model
 
     protected $guarded = [];
 
-    protected $appends = ['size_format'];
+    protected $appends = ['size_format', 'path_hash', 'expired_time'];
+
+    protected $with = [
+        'storageServer'
+    ];
 
 
     public function getSizeFormatAttribute($value)
     {
-        $size = $this->size;
-        $precision = 2;
-        if ($size > 0) {
-            $size = (int) $size;
-            $base = log($size) / log(1024);
-            $suffixes = array(' bytes', ' KB', ' MB', ' GB', ' TB');
+        return (new SizeHelper())->convert($this->size);
+    }
 
-            return round(pow(1024, $base - floor($base)), $precision) . $suffixes[floor($base)];
-        } else {
-            return $size;
-        }
+    public function getPathHashAttribute($value)
+    {
+        return base64_encode(Crypt::encrypt($this->path));
+    }
+
+    public function getExpiredTimeAttribute($value)
+    {
+        return (new Time())->getExpiredTime();
+    }
+
+    public function storageServer()
+    {
+        return $this->belongsTo(StorageServer::class);
     }
 }

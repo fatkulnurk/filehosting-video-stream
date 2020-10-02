@@ -23,4 +23,9 @@ class Directory extends Model
         return $this->hasMany(Directory::class, 'directory_parrent_id', 'id')
             ->with(['childrenDirectory']);
     }
+
+    public function files()
+    {
+        return $this->hasMany(File::class);
+    }
 }

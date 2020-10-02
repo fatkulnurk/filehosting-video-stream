@@ -28,8 +28,6 @@
                 @foreach ($element as $page => $url)
                     @if ($page == $paginator->currentPage())
                         <li aria-current="page"><span class="pagination-link is-current">{{ $page }}</span></li>
-                    @else
-                        <li><a class="pagination-link" href="{{ $url }}">{{ $page }}</a></li>
                     @endif
                 @endforeach
             @endif

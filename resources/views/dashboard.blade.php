@@ -4,11 +4,25 @@
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                <x-jet-welcome />
+    <div class="section">
+        <div class="columns">
+            <div class="column is-4">
+                <div class="box">
+                    <h3 class="title is-3">{{ $directory }} Directory</h3>
+                    <p class="subtitle is-5">Total Directory Created</p>
+                </div>
+            </div>
+            <div class="column is-4">
+                <div class="box">
+                    <h3 class="title is-3">{{ $file }} File</h3>
+                    <p class="subtitle is-5">Total Video/Files Uploaded</p>
+                </div>
+            </div>
+            <div class="column is-4">
+                <div class="box">
+                    <h3 class="title is-3">{{ $sizeFormat }}</h3>
+                    <p class="subtitle is-5">Total Space Used</p>
+                </div>
             </div>
         </div>
     </div>

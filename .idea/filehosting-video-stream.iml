@@ -132,5 +132,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="alpine" level="application" />
     <orderEntry type="library" name="all" level="application" />
+    <orderEntry type="library" name="videojs-ie8" level="application" />
+    <orderEntry type="library" name="video-js" level="application" />
+    <orderEntry type="library" name="video" level="application" />
   </component>
 </module>

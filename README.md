@@ -1,4 +1,6 @@
 # FileHosting-VIDEO-STREAM (FHV Stream)
+
+### (still under development)
 FileHosting-VIDEO-STREAM (FHV Stream) is a file hosting script, but focus on video sharing and embed. 
 Don't waste your money buying scripts with similar features for thousands of dollars, just use this script and it costs nothing.
 

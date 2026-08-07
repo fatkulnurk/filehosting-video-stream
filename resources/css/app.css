@@ -1,0 +1,207 @@
+@import 'tailwindcss';
+
+@source '../../storage/framework/views/*.php';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../**/*.vue';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------------
+ * Design tokens — the single source of color truth for the whole app.
+ * Change a value here and every page/component updates automatically.
+ * ------------------------------------------------------------------------ */
+
+@theme {
+    /* Typography */
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Brand (primary action / identity). Formerly "teal". */
+    --color-brand-50: #f0fdfa;
+    --color-brand-100: #ccfbf1;
+    --color-brand-200: #99f6e4;
+    --color-brand-300: #5eead4;
+    --color-brand-400: #2dd4bf;
+    --color-brand-500: #14b8a6;
+    --color-brand-600: #0d9488;
+    --color-brand-700: #0f766e;
+    --color-brand-800: #115e59;
+    --color-brand-900: #134e4a;
+
+    /* Surfaces. */
+    --color-surface: #ffffff;
+    --color-surface-muted: #f9fafb; /* was gray-50 */
+    --color-surface-soft: #f3f4f6; /* was gray-100 */
+
+    /* Lines / borders. */
+    --color-line: #d1d5db; /* was gray-300 */
+    --color-line-soft: #e5e7eb; /* was gray-200 */
+
+    /* Ink (readable text) & neutrals. */
+    --color-ink: #111827; /* was gray-900 */
+    --color-ink-strong: #1f2937; /* was gray-800 */
+    --color-ink-body: #374151; /* was gray-700 */
+    --color-ink-muted: #4b5563; /* was gray-600 */
+    --color-ink-soft: #6b7280; /* was gray-500 */
+    --color-ink-faint: #9ca3af; /* was gray-400 */
+    --color-ink-fainter: #d1d5db; /* was gray-300 */
+
+    /* Status colors. */
+    --color-success-50: #ecfdf5;
+    --color-success-100: #d1fae5;
+    --color-success-200: #a7f3d0;
+    --color-success-400: #34d399;
+    --color-success-500: #10b981;
+    --color-success-600: #059669;
+    --color-success-700: #047857;
+
+    --color-danger-50: #fef2f2;
+    --color-danger-100: #fee2e2;
+    --color-danger-200: #fecaca;
+    --color-danger-400: #f87171;
+    --color-danger-500: #ef4444;
+    --color-danger-600: #dc2626;
+    --color-danger-700: #b91c1c;
+
+    --color-warning-50: #fffbeb;
+    --color-warning-100: #fef3c7;
+    --color-warning-200: #fde68a;
+    --color-warning-400: #fbbf24;
+    --color-warning-500: #f59e0b;
+    --color-warning-600: #d97706;
+    --color-warning-700: #b45309;
+
+    --color-info-50: #eff6ff;
+    --color-info-200: #bfdbfe;
+    --color-info-500: #3b82f6;
+    --color-info-600: #2563eb;
+    --color-info-700: #1d4ed8;
+
+    --color-accent-50: #faf5ff;
+    --color-accent-100: #f3e8ff;
+    --color-accent-500: #a855f7;
+    --color-accent-600: #9333ea;
+    --color-accent-700: #7e22ce;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* ------------------------------------------------------------------------
+ * Video Player Controls - Override Tailwind preflight for player libraries
+ * Ensures buttons and controls are always visible
+ * ------------------------------------------------------------------------ */
+
+/* Plyr Player */
+.plyr {
+    --plyr-color-main: var(--color-brand-600, #0d9488);
+    --plyr-video-background: #000;
+}
+
+.plyr__controls {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)) !important;
+    padding: 10px !important;
+    z-index: 10 !important;
+}
+
+.plyr__control {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.plyr__control--overlaid {
+    background: rgba(0, 0, 0, 0.5) !important;
+    opacity: 1 !important;
+}
+
+.plyr__control svg {
+    fill: currentColor !important;
+}
+
+.plyr__progress__buffer {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.plyr--video .plyr__controls {
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)) !important;
+}
+
+/* Video.js Player */
+.video-js {
+    font-family: inherit;
+}
+
+.video-js .vjs-control-bar {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)) !important;
+    z-index: 10 !important;
+}
+
+.video-js .vjs-big-play-button {
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 2px solid rgba(255, 255, 255, 0.8) !important;
+}
+
+.video-js .vjs-button > .vjs-icon-placeholder:before {
+    font-size: 1.8em !important;
+}
+
+.video-js .vjs-play-progress,
+.video-js .vjs-volume-level {
+    background: var(--color-brand-500, #14b8a6) !important;
+}
+
+.video-js .vjs-slider:focus {
+    box-shadow: 0 0 1em rgba(255, 255, 255, 0.5) !important;
+}
+
+/* DPlayer */
+.dplayer {
+    position: relative;
+}
+
+.dplayer .dplayer-controller {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 10 !important;
+}
+
+.dplayer .dplayer-controller-mask {
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)) !important;
+}
+
+.dplayer .dplayer-icon {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.dplayer .dplayer-icon:hover {
+    opacity: 0.8 !important;
+}
+
+.dplayer .dplayer-bar-wrap .dplayer-bar {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.dplayer .dplayer-bar-wrap .dplayer-bar .dplayer-played {
+    background: var(--color-brand-500, #14b8a6) !important;
+}
+
+/* Ensure video containers have proper stacking context */
+.plyr-react,
+.video-js,
+.dplayer {
+    position: relative;
+    z-index: 1;
+}

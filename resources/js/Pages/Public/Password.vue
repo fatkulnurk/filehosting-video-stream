@@ -1,0 +1,44 @@
+<script setup>
+import { reactive, ref } from 'vue';
+import { router } from '@inertiajs/vue3';
+import { LockClosedIcon } from '@heroicons/vue/24/outline';
+
+const props = defineProps({ file: Object, error: String });
+
+const form = reactive({ password: '' });
+const processing = ref(false);
+
+const submit = () => {
+    processing.value = true;
+    router.post(route('public.unlock', props.file.id), form, {
+        onFinish: () => (processing.value = false),
+    });
+};
+</script>
+
+<template>
+    <div class="min-h-screen bg-surface-soft flex items-center justify-center p-4">
+        <div class="max-w-sm w-full">
+            <div class="bg-surface rounded-2xl shadow-lg p-8">
+                <div class="text-center mb-6">
+                    <LockClosedIcon class="w-12 h-12 mx-auto text-brand-700" />
+                    <h1 class="text-xl font-bold text-ink mt-4">This file is password protected</h1>
+                    <p class="text-sm text-ink-soft mt-1">{{ file.name }} ({{ file.formatted_size }})</p>
+                </div>
+
+                <div v-if="error" class="bg-danger-50 border border-danger-200 text-danger-600 px-4 py-3 rounded-lg text-sm mb-4">
+                    {{ error }}
+                </div>
+
+                <form @submit.prevent="submit" class="space-y-4">
+                    <input v-model="form.password" type="password" placeholder="Enter password" required autofocus
+                        class="w-full rounded-lg border-line border px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand-500" />
+                    <button type="submit" :disabled="processing"
+                        class="w-full bg-brand-600 hover:bg-brand-700 text-white font-medium py-2.5 rounded-lg disabled:opacity-50">
+                        {{ processing ? 'Checking...' : 'Unlock File' }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</template>

@@ -20,7 +20,10 @@ FSH Stream lets users upload, organize, share, and stream files (including video
 - Sharing files & directories with other users (view / download permissions)
 - Storage packages & subscriptions/quota per user
 - API keys, webhooks, and activity logs
-- Admin panel (users, storage servers, storage packages, logs) under `/admin`
+- **Cloud Downloads** — add files from a URL or a torrent (magnet / `.torrent`) directly into
+  storage, with live status/progress tracking and **hash-based dedup** (the same torrent is reused
+  instantly instead of re-downloading when the bytes already exist)
+- Admin panel (users, storage servers, storage packages, downloader clients, logs) under `/admin`
 - **System-managed storage pool**: storage servers are selected automatically by the system
   (least-utilized active server), not owned by individual users.
 
@@ -36,6 +39,7 @@ FSH Stream lets users upload, organize, share, and stream files (including video
 | Storage drivers | Local, S3, Wasabi, B2, Azure Blob, GCS, Dropbox, FTP, SFTP |
 | Queue | Database driver (`QUEUE_CONNECTION=database`) |
 | Auth | Laravel Fortify (2FA, sessions) |
+| Torrent client | Transmission (via `fatkulnurk/torrent` SDK), `.torrent` parsing via `arokettu/bencode` |
 
 ### Supported storage drivers
 
@@ -72,8 +76,9 @@ FSH Stream lets users upload, organize, share, and stream files (including video
 - A MySQL-compatible database (default config points to MySQL `fhv_stream`);
   SQLite is used for unit tests.
 
-> Note: for the async **upload-from-URL** feature, a queue worker must be running
-> (`php artisan queue:work` / `queue:listen`), otherwise queued downloads never execute.
+> Note: for the async **Cloud Downloads** feature (upload from URL / torrent), a queue worker must
+> be running (`php artisan queue:work` / `queue:listen`) and, for torrents, a scheduler
+> (`php artisan schedule:work`) — otherwise queued downloads never execute / are never imported.
 
 ---
 
@@ -109,6 +114,34 @@ Herd users can simply open the site through their local domain
 ```bash
 php artisan queue:work   # or queue:listen
 ```
+
+### Torrent server & Cloud Downloads (optional)
+
+Cloud Downloads supports both plain URLs (no external service needed) and **torrents**, which
+require a running Transmission server and a scheduler for progress monitoring/import.
+
+1. Configure Transmission (either via `docker compose` or your own instance):
+   ```bash
+   docker compose up -d transmission
+   ```
+2. Set environment variables (see `.env.example`):
+   ```dotenv
+   TRANSMISSION_HOST=http://127.0.0.1
+   TRANSMISSION_PORT=9091
+   TRANSMISSION_USER=admin
+   TRANSMISSION_PASS=
+   TORRENT_DOWNLOAD_DIR=
+   TORRENT_CONTAINER_DOWNLOAD_DIR=/downloads
+   ```
+3. Register the downloader client in the admin panel (`/admin/downloaders`) and test the connection.
+4. Run the scheduler so torrent progress is polled and completed files are imported:
+   ```bash
+   php artisan schedule:work
+   ```
+
+Torrent files are downloaded into a shared volume, imported into the storage pool (medialibrary),
+then the temporary data is removed. When the same torrent info-hash is added again and its files
+are still present, they are reused instantly without re-downloading.
 
 ---
 
@@ -159,7 +192,8 @@ Migrations are consolidated **by domain** into six files under `database/migrati
 
 ### Authenticated
 - `GET /dashboard` — user dashboard
-- `GET /files` — file manager (upload, upload-from-URL, folders, favorites, shares, trash)
+- `GET /files` — file manager (upload, folders, favorites, shares, trash)
+- `GET /cloud-downloads` — Cloud Downloads (status/progress of URL & torrent downloads)
 - Profile, API keys, webhooks, activity logs, subscriptions
 
 ### Admin (`/admin/*`)
@@ -167,6 +201,7 @@ Migrations are consolidated **by domain** into six files under `database/migrati
 - `GET /admin/users` — manage users
 - `GET /admin/packages` — manage storage packages
 - `GET /admin/storage` — manage storage servers
+- `GET /admin/downloaders` — manage downloader clients (URL / torrent / Transmission)
 
 ---
 
@@ -184,9 +219,10 @@ Small but working: includes default unit + feature examples, migration success, 
 
 - **Not production ready.** No load-testing, hardening, or full E2E coverage.
 - Storage drivers may require environment credentials (S3, Azure, etc.) not included in `.env.example`.
-- The upload-from-URL feature downloads remote content server-side (with SSRF guards on built-in
-  private/blocked hosts), then stores it. This should be reviewed carefully for abuse (queue load,
-  SSRF edge cases, redirects, and quota) before enabling widely.
+- The Cloud Downloads feature fetches remote content server-side (with SSRF guards on built-in
+  private/blocked hosts) and downloads torrents via a Transmission client. Both should be reviewed
+  carefully for abuse (queue load, SSRF edge cases, redirects, quota, legal use of torrents) before
+  enabling widely.
 - API/webhook signing and 2FA use standard Laravel mechanisms but have not been audited.
 
 ---

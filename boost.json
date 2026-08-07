@@ -1,0 +1,22 @@
+{
+    "agents": [
+        "opencode",
+        "zed"
+    ],
+    "cloud": false,
+    "guidelines": true,
+    "mcp": true,
+    "nightwatch": false,
+    "packages": [
+        "spatie/laravel-medialibrary"
+    ],
+    "sail": false,
+    "skills": [
+        "infer-conventions",
+        "fortify-development",
+        "laravel-best-practices",
+        "inertia-vue-development",
+        "tailwindcss-development",
+        "medialibrary-development"
+    ]
+}

@@ -1,0 +1,18 @@
+services:
+  transmission:
+    image: lscr.io/linuxserver/transmission:4.1.1
+    container_name: fhv-transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      - USER=${TRANSMISSION_USER:-admin}
+      - PASS=${TRANSMISSION_PASS:-}
+    volumes:
+      - ./storage/downloader/config:/config
+      - ./storage/downloader/incoming:/downloads
+    ports:
+      - "9091:9091"
+      - "51413:51413"
+      - "51413:51413/udp"
+    restart: unless-stopped

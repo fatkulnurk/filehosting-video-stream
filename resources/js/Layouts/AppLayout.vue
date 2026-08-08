@@ -19,6 +19,7 @@ import {
 import FlashMessages from '@/Components/FlashMessages.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import Footer from '@/Components/Footer.vue';
 import { formatBytes } from '@/utils/format';
 
 defineProps({ title: { type: String, default: '' } });
@@ -182,6 +183,7 @@ const mobileMenu = ref(null);
                 <main class="flex-1 p-4 lg:p-8">
                     <slot />
                 </main>
+                <Footer />
             </div>
         </div>
     </div>

@@ -1,9 +1,14 @@
 <?php
 
-namespace App\Models;
+declare(strict_types=1);
+
+namespace App\Models\Downloads;
 
 use App\Enums\DownloadTaskStatus;
 use App\Enums\DownloadTaskType;
+use App\Models\Files\Directory;
+use App\Models\Files\File;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

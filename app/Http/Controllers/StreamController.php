@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Services\Interfaces\FileServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class StreamController extends Controller
@@ -14,7 +17,7 @@ class StreamController extends Controller
         private FileServiceInterface $fileService
     ) {}
 
-    public function show(Request $request, string $id): BinaryFileResponse|StreamedResponse|\Symfony\Component\HttpFoundation\RedirectResponse
+    public function show(Request $request, string $id): BinaryFileResponse|StreamedResponse|RedirectResponse
     {
         $file = $this->fileService->getById($id);
 

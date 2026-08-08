@@ -1,11 +1,15 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Jobs\SendWebhookJob;
-use App\Models\Webhook;
-use App\Repositories\Interfaces\WebhookRepositoryInterface;
-use App\Services\Interfaces\WebhookServiceInterface;
+namespace App\Services\Webhooks;
+
+use App\Contracts\Repositories\Webhooks\WebhookRepositoryInterface;
+use App\Contracts\Services\Webhooks\WebhookServiceInterface;
+use App\Jobs\Webhooks\SendWebhookJob;
+use App\Models\Integrations\Webhook;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -42,9 +46,25 @@ class WebhookService implements WebhookServiceInterface
         return $this->webhookRepo->delete($id);
     }
 
-    public function getForUser(string $userId): \Illuminate\Database\Eloquent\Collection
+    public function getForUser(string $userId): Collection
     {
         return $this->webhookRepo->getForUser($userId);
+    }
+
+    public function getOwnedWebhook(string $userId, string $id): Webhook
+    {
+        $webhook = $this->webhookRepo->findOwned($userId, $id);
+
+        if (! $webhook) {
+            abort(404);
+        }
+
+        return $webhook;
+    }
+
+    public function paginateLogs(string $webhookId, array $params): LengthAwarePaginator
+    {
+        return $this->webhookRepo->paginateLogs($webhookId, $params);
     }
 
     public function verifySignature(Webhook $webhook, string $payload, string $signature): bool
@@ -74,7 +94,7 @@ class WebhookService implements WebhookServiceInterface
         $webhooks = $this->webhookRepo->getActiveForUser($userId ?? '');
 
         if (! $userId) {
-            $webhooks = \App\Models\Webhook::where('is_active', true)->get();
+            $webhooks = Webhook::where('is_active', true)->get();
         }
 
         foreach ($webhooks as $webhook) {

@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Repositories;
+declare(strict_types=1);
 
-use App\Models\FileVersion;
-use App\Repositories\Interfaces\FileVersionRepositoryInterface;
+namespace App\Repositories\Files;
+
+use App\Contracts\Repositories\Files\FileVersionRepositoryInterface;
+use App\Models\Files\FileVersion;
 use Illuminate\Database\Eloquent\Collection;
 
 class FileVersionRepository implements FileVersionRepositoryInterface

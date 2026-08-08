@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Models\File;
-use App\Models\Profile;
-use App\Services\Interfaces\StorageQuotaServiceInterface;
+namespace App\Services\Storage;
+
+use App\Contracts\Services\Storage\StorageQuotaServiceInterface;
+use App\Models\Files\File;
+use App\Models\Users\Profile;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\Cache;
 
 class StorageQuotaService implements StorageQuotaServiceInterface
@@ -64,7 +67,7 @@ class StorageQuotaService implements StorageQuotaServiceInterface
 
     public function getLimit(string $userId): ?int
     {
-        $user = \App\Models\User::find($userId);
+        $user = User::find($userId);
 
         if (! $user) {
             return null;

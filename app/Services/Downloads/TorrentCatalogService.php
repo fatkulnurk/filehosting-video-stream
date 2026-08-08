@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Models\Torrent;
-use App\Repositories\Interfaces\TorrentRepositoryInterface;
-use App\Services\Interfaces\TorrentCatalogServiceInterface;
+namespace App\Services\Downloads;
+
+use App\Contracts\Repositories\Downloads\TorrentRepositoryInterface;
+use App\Contracts\Services\Downloads\TorrentCatalogServiceInterface;
+use App\Models\Downloads\Torrent;
 use Illuminate\Support\Facades\Storage;
 
 class TorrentCatalogService implements TorrentCatalogServiceInterface

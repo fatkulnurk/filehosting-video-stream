@@ -9,6 +9,166 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ------------------------------------------------------------------------
+ * Reusable UI classes — single source for repeated component styling.
+ * ------------------------------------------------------------------------ */
+
+@layer components {
+    /* Buttons */
+    .btn {
+        @apply inline-flex items-center justify-center gap-1.5 font-medium rounded-lg disabled:opacity-50 cursor-pointer transition-colors;
+    }
+    .btn-primary {
+        @apply bg-brand-600 hover:bg-brand-700 text-white;
+    }
+    .btn-secondary {
+        @apply bg-surface border border-line hover:bg-surface-muted text-ink-body;
+    }
+    .btn-danger {
+        @apply bg-danger-50 text-danger-600 border border-danger-200 hover:bg-danger-100;
+    }
+    .btn-ghost {
+        @apply text-ink-muted hover:bg-surface-soft hover:text-ink-strong;
+    }
+    .btn-sm {
+        @apply px-3 py-1.5 text-sm;
+    }
+    .btn-md {
+        @apply px-4 py-2 text-sm;
+    }
+    .btn-lg {
+        @apply px-6 py-2.5 text-sm;
+    }
+    .btn-icon {
+        @apply p-1.5 rounded hover:bg-surface-soft text-ink-faint hover:text-brand-800;
+    }
+    .btn-icon-danger {
+        @apply p-1.5 rounded hover:bg-danger-100 text-ink-faint hover:text-danger-600;
+    }
+
+    /* Badges */
+    .badge {
+        @apply inline-flex items-center rounded-full font-medium;
+    }
+    .badge-sm {
+        @apply px-2 py-0.5 text-xs;
+    }
+    .badge-md {
+        @apply px-2.5 py-1 text-xs;
+    }
+    .badge-neutral {
+        @apply bg-surface-soft text-ink-soft;
+    }
+    .badge-success {
+        @apply bg-success-50 text-success-600;
+    }
+    .badge-danger {
+        @apply bg-danger-50 text-danger-600;
+    }
+    .badge-warning {
+        @apply bg-warning-50 text-warning-600;
+    }
+    .badge-info {
+        @apply bg-info-50 text-info-600;
+    }
+    .badge-accent {
+        @apply bg-accent-50 text-accent-600;
+    }
+    .badge-brand {
+        @apply bg-brand-50 text-brand-700;
+    }
+
+    /* Alerts */
+    .alert {
+        @apply px-4 py-3 rounded-lg text-sm font-medium;
+    }
+    .alert-success {
+        @apply bg-success-600 text-white;
+    }
+    .alert-danger {
+        @apply bg-danger-600 text-white;
+    }
+    .alert-warning {
+        @apply bg-warning-600 text-white;
+    }
+    .alert-info {
+        @apply bg-info-600 text-white;
+    }
+    .alert-success-soft {
+        @apply bg-success-50 border border-success-200 text-success-700;
+    }
+    .alert-danger-soft {
+        @apply bg-danger-50 border border-danger-200 text-danger-600;
+    }
+    .alert-warning-soft {
+        @apply bg-warning-50 border border-warning-200 text-warning-700;
+    }
+    .alert-info-soft {
+        @apply bg-info-50 border border-info-200 text-info-700;
+    }
+
+    /* Form controls */
+    .input {
+        @apply w-full rounded-lg border border-line px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500;
+    }
+    .select {
+        @apply rounded-lg border border-line px-3 py-2 text-sm;
+    }
+    .label {
+        @apply block text-sm font-medium text-ink-body mb-1;
+    }
+    .hint {
+        @apply text-xs text-ink-faint;
+    }
+    .form-error {
+        @apply text-sm text-danger-600;
+    }
+
+    /* Panels */
+    .panel {
+        @apply bg-surface rounded-xl shadow;
+    }
+    .panel-border {
+        @apply bg-surface rounded-2xl shadow border;
+    }
+    .panel-pad {
+        @apply p-5;
+    }
+
+    /* Links */
+    .link {
+        @apply text-brand-700 hover:underline;
+    }
+
+    /* Dropzone */
+    .dropzone {
+        @apply border-2 border-dashed rounded-xl text-center cursor-pointer transition flex flex-col items-center justify-center;
+    }
+    .dropzone-idle {
+        @apply border-line hover:border-brand-400 hover:bg-surface-muted;
+    }
+    .dropzone-active {
+        @apply border-brand-500 bg-brand-50;
+    }
+
+    /* Typography helpers */
+    .page-title {
+        @apply text-2xl font-bold text-ink;
+    }
+    .section-title {
+        @apply text-lg font-semibold text-ink;
+    }
+    .text-soft {
+        @apply text-ink-soft;
+    }
+    .text-faint {
+        @apply text-ink-faint;
+    }
+    .text-muted {
+        @apply text-ink-muted;
+    }
+}
+
+/* ------------------------------------------------------------------------
  * Design tokens — the single source of color truth for the whole app.
  * Change a value here and every page/component updates automatically.
  * ------------------------------------------------------------------------ */

@@ -6,8 +6,6 @@
 .phpactor.json
 .phpunit.result.cache
 
-# Never commit docs
-/docs
 
 # AI tooling folders
 /.ai

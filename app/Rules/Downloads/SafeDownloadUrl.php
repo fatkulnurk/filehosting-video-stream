@@ -26,7 +26,7 @@ class SafeDownloadUrl implements ValidationRule
             return;
         }
 
-        if (! $this->isHostSafe($value)) {
+        if (! self::isHostSafe($value)) {
             $fail('The :attribute points to a private or blocked address.');
 
             return;
@@ -34,12 +34,12 @@ class SafeDownloadUrl implements ValidationRule
 
         $resolved = $this->resolveRedirects($value);
 
-        if ($resolved && ! $this->isHostSafe($resolved)) {
+        if ($resolved && ! self::isHostSafe($resolved)) {
             $fail('The :attribute redirects to a private or blocked address.');
         }
     }
 
-    private function isHostSafe(string $url): bool
+    public static function isHostSafe(string $url): bool
     {
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
 
@@ -51,10 +51,16 @@ class SafeDownloadUrl implements ValidationRule
             return false;
         }
 
-        $ip = filter_var($host, FILTER_VALIDATE_IP) ?: gethostbynamel($host)[0] ?? null;
+        $ips = gethostbynamel($host);
 
-        if ($ip && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+        if ($ips === false || $ips === []) {
             return false;
+        }
+
+        foreach ($ips as $ip) {
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                return false;
+            }
         }
 
         return true;

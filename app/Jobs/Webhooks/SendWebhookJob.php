@@ -6,6 +6,7 @@ namespace App\Jobs\Webhooks;
 
 use App\Models\Integrations\Webhook;
 use App\Models\Integrations\WebhookLog;
+use App\Rules\Webhooks\SafeWebhookUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -30,6 +31,10 @@ class SendWebhookJob implements ShouldQueue
         $start = microtime(true);
 
         try {
+            if (! SafeWebhookUrl::isHostSafe($this->webhook->url)) {
+                throw new \RuntimeException('Webhook URL points to a private or blocked address.');
+            }
+
             $json = json_encode($this->payload);
 
             $signature = $this->webhook->secret_hash

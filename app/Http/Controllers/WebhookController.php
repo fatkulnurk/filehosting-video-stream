@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Enums\PackageFeature;
-use App\Http\Concerns\AppliesTableParams;
-use App\Http\Requests\WebhookRequest;
-use App\Models\Webhook;
-use App\Services\Interfaces\ActivityLogServiceInterface;
-use App\Services\Interfaces\WebhookServiceInterface;
+use App\Contracts\Services\ActivityLogs\ActivityLogServiceInterface;
+use App\Contracts\Services\Webhooks\WebhookServiceInterface;
+use App\Http\Requests\Webhooks\WebhookRequest;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -63,6 +63,8 @@ class WebhookController extends Controller
 
     public function update(WebhookRequest $request, string $id)
     {
+        $this->webhookService->getOwnedWebhook(auth()->id(), $id);
+
         $this->webhookService->update($id, [
             'url' => $request->url,
             'events' => $request->events,
@@ -74,6 +76,8 @@ class WebhookController extends Controller
 
     public function destroy(string $id)
     {
+        $this->webhookService->getOwnedWebhook(auth()->id(), $id);
+
         $this->webhookService->delete($id);
 
         return redirect()->route('webhooks.index')->with('success', 'Webhook deleted');
@@ -81,7 +85,7 @@ class WebhookController extends Controller
 
     public function regenerate(string $id)
     {
-        $webhook = Webhook::where('user_id', auth()->id())->findOrFail($id);
+        $webhook = $this->webhookService->getOwnedWebhook(auth()->id(), $id);
 
         $secret = $this->webhookService->regenerateSecret($webhook);
 
@@ -92,22 +96,9 @@ class WebhookController extends Controller
     {
         $params = $this->tableParams($request);
 
-        $webhook = Webhook::where('user_id', auth()->id())->findOrFail($id);
+        $webhook = $this->webhookService->getOwnedWebhook(auth()->id(), $id);
 
-        $logs = $this->applyTableQuery(
-            \App\Models\WebhookLog::query()->where('webhook_id', $id),
-            $params,
-            searchable: ['event'],
-            sortable: [
-                'event' => 'event',
-                'status' => 'success',
-                'response' => 'response_code',
-                'duration' => 'duration_ms',
-                'created_at' => 'created_at',
-            ],
-            defaultSort: 'created_at',
-            defaultDirection: 'desc',
-        )->paginate($params['per_page'])->withQueryString();
+        $logs = $this->webhookService->paginateLogs($id, $params);
 
         return Inertia::render('Webhooks/Logs', [
             'webhook' => $webhook,

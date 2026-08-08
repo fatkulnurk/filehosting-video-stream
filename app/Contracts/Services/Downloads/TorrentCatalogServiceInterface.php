@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Services\Interfaces;
+declare(strict_types=1);
 
-use App\Models\Torrent;
+namespace App\Contracts\Services\Downloads;
+
+use App\Models\Downloads\Torrent;
 
 interface TorrentCatalogServiceInterface
 {

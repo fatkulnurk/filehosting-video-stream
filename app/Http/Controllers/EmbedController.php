@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Services\Interfaces\FileServiceInterface;
-use App\Services\Interfaces\SubtitleServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Contracts\Services\Files\SubtitleServiceInterface;
 use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 

@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Services\Interfaces;
+declare(strict_types=1);
 
-use App\Models\Directory;
-use App\Models\DirectoryShare;
+namespace App\Contracts\Services\Directories;
+
+use App\Models\Files\Directory;
+use App\Models\Files\DirectoryShare;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface DirectoryShareServiceInterface
 {
@@ -21,4 +25,10 @@ interface DirectoryShareServiceInterface
     public function getAccessibleDirectories(string $userId): Collection;
 
     public function removeShare(string $shareId): bool;
+
+    public function findUserByEmail(string $email): ?User;
+
+    public function paginateSharedWithMe(string $userId, array $params): LengthAwarePaginator;
+
+    public function getShareForOwner(string $shareId, string $userId): DirectoryShare;
 }

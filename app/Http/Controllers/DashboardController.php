@@ -1,26 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Models\File;
-use App\Services\Interfaces\StatsServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Contracts\Services\Files\StatsServiceInterface;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function __invoke(StatsServiceInterface $statsService)
-    {
+    public function __invoke(
+        StatsServiceInterface $statsService,
+        FileServiceInterface $fileService,
+    ) {
         $userId = auth()->id();
-
-        $recentFiles = File::where('user_id', $userId)
-            ->with('media')
-            ->latest()
-            ->limit(5)
-            ->get();
 
         return Inertia::render('Dashboard/Index', [
             'stats' => $statsService->getDashboardStats($userId),
-            'recentFiles' => $recentFiles,
+            'recentFiles' => $fileService->getRecentFiles($userId, 5),
         ]);
     }
 }

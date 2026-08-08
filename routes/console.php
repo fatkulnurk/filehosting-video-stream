@@ -1,12 +1,13 @@
 <?php
 
-use App\Jobs\CleanupDownloadsJob;
-use App\Jobs\CleanupExpiredLinksJob;
-use App\Jobs\CleanupOldLogsJob;
-use App\Jobs\ExpireSubscriptionsJob;
-use App\Jobs\MonitorTorrentDownloadsJob;
-use App\Jobs\PurgeTrashJob;
-use App\Jobs\SyncStorageStatsJob;
+declare(strict_types=1);
+use App\Jobs\ActivityLogs\CleanupOldLogsJob;
+use App\Jobs\Downloads\CleanupDownloadsJob;
+use App\Jobs\Downloads\MonitorTorrentDownloadsJob;
+use App\Jobs\Files\CleanupExpiredLinksJob;
+use App\Jobs\Files\PurgeTrashJob;
+use App\Jobs\Storage\SyncStorageStatsJob;
+use App\Jobs\Subscriptions\ExpireSubscriptionsJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;

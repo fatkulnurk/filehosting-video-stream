@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Http\Concerns\AppliesTableParams;
-use App\Http\Requests\ShareDirectoryRequest;
-use App\Models\Directory;
-use App\Models\DirectoryShare;
-use App\Models\User;
-use App\Services\Interfaces\DirectoryShareServiceInterface;
+use App\Contracts\Services\Directories\DirectoryServiceInterface;
+use App\Contracts\Services\Directories\DirectoryShareServiceInterface;
+use App\Http\Requests\Directories\ShareDirectoryRequest;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,14 +16,17 @@ class DirectoryShareController extends Controller
     use AppliesTableParams;
 
     public function __construct(
-        private DirectoryShareServiceInterface $shareService
+        private DirectoryShareServiceInterface $shareService,
+        private DirectoryServiceInterface $directoryService
     ) {}
 
     public function store(ShareDirectoryRequest $request, string $directory)
     {
-        $directoryModel = Directory::where('user_id', auth()->id())->findOrFail($directory);
+        $directoryModel = $this->directoryService->getOwnedDirectory(auth()->id(), $directory);
 
-        $targetUser = User::where('email', $request->shared_with)->first();
+        $targetUser = $this->shareService->findUserByEmail($request->shared_with);
+
+        abort_if(! $targetUser, 404, 'User not found');
 
         $share = $this->shareService->share(
             $directoryModel,
@@ -39,26 +42,9 @@ class DirectoryShareController extends Controller
     public function sharedWithMe(Request $request)
     {
         $params = $this->tableParams($request);
+        $params['filters'] = $request->only(['permission']);
 
-        $shares = $this->applyFilters(
-            $this->applyTableQuery(
-                DirectoryShare::query()
-                    ->where('shared_with', auth()->id())
-                    ->with('directory', 'sharedByUser', 'sharedWithUser'),
-                $params,
-                searchable: [],
-                sortable: [
-                    'dir' => \DB::raw('(SELECT d.name FROM directories d WHERE d.id = directory_shares.directory_id)'),
-                    'shared_by' => \DB::raw('(SELECT u.name FROM users u WHERE u.id = directory_shares.shared_by)'),
-                    'permission' => 'permission',
-                    'created_at' => 'created_at',
-                ],
-                defaultSort: 'created_at',
-                defaultDirection: 'desc',
-            ),
-            $request,
-            ['permission' => 'permission'],
-        )->paginate($params['per_page'])->withQueryString();
+        $shares = $this->shareService->paginateSharedWithMe(auth()->id(), $params);
 
         return Inertia::render('Directories/SharedWithMe', [
             'shares' => $shares,
@@ -68,11 +54,7 @@ class DirectoryShareController extends Controller
 
     public function destroy(string $id)
     {
-        $share = \App\Models\DirectoryShare::findOrFail($id);
-
-        if ($share->shared_by !== auth()->id() && $share->directory->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->shareService->getShareForOwner($id, auth()->id());
 
         $this->shareService->removeShare($id);
 

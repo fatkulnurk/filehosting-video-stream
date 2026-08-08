@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Jobs;
+declare(strict_types=1);
 
-use App\Services\Interfaces\TrashServiceInterface;
+namespace App\Jobs\Files;
+
+use App\Contracts\Services\Files\TrashServiceInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

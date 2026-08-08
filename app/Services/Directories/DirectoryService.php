@@ -1,11 +1,15 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Models\Directory;
-use App\Repositories\Interfaces\DirectoryRepositoryInterface;
-use App\Services\Interfaces\DirectoryServiceInterface;
-use Illuminate\Support\Collection;
+namespace App\Services\Directories;
+
+use App\Contracts\Repositories\Directories\DirectoryRepositoryInterface;
+use App\Contracts\Services\Directories\DirectoryServiceInterface;
+use App\Models\Files\Directory;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
@@ -49,7 +53,7 @@ class DirectoryService implements DirectoryServiceInterface
 
     private function slugExists(string $userId, ?string $parentId, string $slug): bool
     {
-        return \App\Models\Directory::where('user_id', $userId)
+        return Directory::where('user_id', $userId)
             ->where('parent_id', $parentId)
             ->where('slug', $slug)
             ->exists();
@@ -103,7 +107,7 @@ class DirectoryService implements DirectoryServiceInterface
 
     private function updateDescendantPaths(string $directoryId, string $oldPrefix, string $newPrefix): void
     {
-        $children = \App\Models\Directory::where('parent_id', $directoryId)->get();
+        $children = Directory::where('parent_id', $directoryId)->get();
 
         foreach ($children as $child) {
             $childPath = str_replace($oldPrefix, $newPrefix, $child->path);
@@ -146,17 +150,17 @@ class DirectoryService implements DirectoryServiceInterface
         return $updated;
     }
 
-    public function getTree(string $userId): Collection
+    public function getTree(string $userId): SupportCollection
     {
         return $this->directoryRepository->getTree($userId);
     }
 
-    public function getPath(string $id, string $userId): Collection
+    public function getPath(string $id, string $userId): SupportCollection
     {
         return $this->directoryRepository->getPath($id, $userId);
     }
 
-    public function getBreadcrumbs(string $id): Collection
+    public function getBreadcrumbs(string $id): SupportCollection
     {
         return $this->directoryRepository->getBreadcrumbs($id);
     }
@@ -171,5 +175,52 @@ class DirectoryService implements DirectoryServiceInterface
         }
 
         return $ids;
+    }
+
+    public function getChildDirectories(string $userId, ?string $parentId): Collection
+    {
+        return $this->directoryRepository->getUserDirectories($userId, $parentId);
+    }
+
+    public function getOwnedDirectory(string $userId, string $id): Directory
+    {
+        $directory = $this->directoryRepository->findById($id);
+
+        if (! $directory || $directory->user_id !== $userId) {
+            abort(404);
+        }
+
+        return $directory;
+    }
+
+    public function getDirectoryForAdmin(string $id): Directory
+    {
+        $directory = $this->directoryRepository->findWithTrashed($id);
+
+        if (! $directory) {
+            abort(404);
+        }
+
+        return $directory;
+    }
+
+    public function forceDelete(Directory $directory): bool
+    {
+        return $this->directoryRepository->forceDelete($directory->id);
+    }
+
+    public function paginateAllForAdmin(array $params): LengthAwarePaginator
+    {
+        return $this->directoryRepository->paginateAdmin($params);
+    }
+
+    public function countAllWithTrashed(string $userId): int
+    {
+        return $this->directoryRepository->countAllWithTrashed($userId);
+    }
+
+    public function getLatestForUser(string $userId, int $limit = 10): Collection
+    {
+        return $this->directoryRepository->getLatestForUser($userId, $limit);
     }
 }

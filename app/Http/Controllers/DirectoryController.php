@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Events\DirectoryCreated;
-use App\Events\DirectoryDeleted;
-use App\Http\Requests\DirectoryRequest;
-use App\Http\Requests\MoveRequest;
-use App\Models\Directory;
-use App\Services\Interfaces\DirectoryServiceInterface;
-use App\Services\Interfaces\FileServiceInterface;
-use App\Services\Interfaces\StorageServiceInterface;
+use App\Contracts\Services\Directories\DirectoryServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Contracts\Services\Storage\StorageServiceInterface;
+use App\Events\Directories\DirectoryCreated;
+use App\Events\Directories\DirectoryDeleted;
+use App\Http\Requests\Directories\DirectoryRequest;
+use App\Http\Requests\Files\MoveRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
 class DirectoryController extends Controller
@@ -28,36 +30,30 @@ class DirectoryController extends Controller
 
     public function show(Request $request, string $directory)
     {
-        $directoryModel = $this->directoryService->getBreadcrumbs($directory)->first();
-
-        if (! $directoryModel || $directoryModel->user_id !== auth()->id()) {
-            abort(404);
-        }
+        $this->directoryService->getOwnedDirectory(auth()->id(), $directory);
 
         $userId = auth()->id();
         $search = $request->input('search');
 
-        $files = \App\Models\File::where('user_id', $userId)
-            ->with('media')
-            ->where('directory_id', $directory)
-            ->when($search, fn ($q) => $q->where('name', 'LIKE', "%{$search}%"))
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
-
-        $directories = \App\Models\Directory::where('user_id', $userId)
-            ->where('parent_id', $directory)
-            ->withCount('files')
-            ->orderBy('name')
-            ->get();
+        [$files, $directories, $breadcrumbs, $directoryTree] = Concurrency::run([
+            fn () => $this->fileService->paginateForDirectory($userId, $directory, [
+                'search' => $search ?? '',
+                'sort' => null,
+                'direction' => 'asc',
+                'per_page' => 20,
+            ]),
+            fn () => $this->directoryService->getChildDirectories($userId, $directory),
+            fn () => $this->directoryService->getBreadcrumbs($directory),
+            fn () => $this->directoryService->getTree($userId),
+        ]);
 
         return Inertia::render('Files/Index', [
             'files' => $files,
             'directories' => $directories,
             'currentDirectory' => $directory,
-            'breadcrumbs' => $this->directoryService->getBreadcrumbs($directory),
+            'breadcrumbs' => $breadcrumbs,
             'search' => $search,
-            'directoryTree' => $this->directoryService->getTree($userId),
+            'directoryTree' => $directoryTree,
             'storageQuota' => [
                 'used' => auth()->user()->storageUsed(),
                 'limit' => auth()->user()->storageLimit(),

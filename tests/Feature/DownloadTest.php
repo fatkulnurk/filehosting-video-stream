@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
-use App\Jobs\DownloadFromUrlJob;
-use App\Jobs\DownloadTorrentJob;
-use App\Models\DownloadTask;
-use App\Models\User;
+use App\Jobs\Downloads\DownloadFromUrlJob;
+use App\Jobs\Downloads\DownloadTorrentJob;
+use App\Models\Downloads\DownloadTask;
+use App\Models\Users\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;

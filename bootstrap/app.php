@@ -1,5 +1,8 @@
 <?php
 
+declare(strict_types=1);
+use App\Exceptions\Directories\DirectoryNotFoundException;
+use App\Exceptions\Files\FileNotFoundException;
 use App\Http\Middleware\ApiKeyRateLimiter;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -7,6 +10,7 @@ use App\Http\Middleware\UserActionRateLimiter;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Inertia\Inertia;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -28,13 +32,17 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->shouldRenderJsonWhen(
+            fn ($request) => $request->is('api/*') || $request->expectsJson()
+        );
+
         $exceptions->render(function (HttpException $e, $request) {
-            if ($request->is('api/*') || $request->expectsJson()) {
-                return null;
+            if ($request->expectsJson()) {
+                return null; // let Laravel render JSON for API requests
             }
 
             if ($e->getStatusCode() >= 400 && $e->getStatusCode() < 500) {
-                return \Inertia\Inertia::render('Error', [
+                return Inertia::render('Error', [
                     'status' => $e->getStatusCode(),
                     'message' => $e->getMessage(),
                 ])->toResponse($request)->setStatusCode($e->getStatusCode());
@@ -42,4 +50,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return null;
         });
+
+        // Expected not-found errors should not spam the logs.
+        $exceptions->dontReport([
+            FileNotFoundException::class,
+            DirectoryNotFoundException::class,
+        ]);
     })->create();

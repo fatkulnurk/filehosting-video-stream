@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Http\Concerns\AppliesTableParams;
-use App\Http\Requests\ApiKeyRequest;
-use App\Models\ApiKey;
-use App\Services\Interfaces\ActivityLogServiceInterface;
-use App\Services\Interfaces\ApiKeyServiceInterface;
+use App\Contracts\Services\ActivityLogs\ActivityLogServiceInterface;
+use App\Contracts\Services\ApiKeys\ApiKeyServiceInterface;
+use App\Http\Requests\ApiKeys\ApiKeyRequest;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -23,22 +24,8 @@ class ApiKeyController extends Controller
     {
         $params = $this->tableParams($request);
 
-        $apiKeys = $this->applyTableQuery(
-            ApiKey::query()->where('user_id', auth()->id()),
-            $params,
-            searchable: ['name'],
-            sortable: [
-                'name' => 'name',
-                'rate' => 'rate_limit',
-                'last_used' => 'last_used_at',
-                'created_at' => 'created_at',
-            ],
-            defaultSort: 'created_at',
-            defaultDirection: 'desc',
-        )->paginate($params['per_page'])->withQueryString();
-
         return Inertia::render('ApiKeys/Index', [
-            'apiKeys' => $apiKeys,
+            'apiKeys' => $this->apiKeyService->paginateForUser(auth()->id(), $params),
             'filters' => $this->tableFilters($params),
         ]);
     }

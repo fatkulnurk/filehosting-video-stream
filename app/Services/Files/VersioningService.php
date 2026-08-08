@@ -1,14 +1,19 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Models\File;
-use App\Models\FileVersion;
-use App\Repositories\Interfaces\FileVersionRepositoryInterface;
-use App\Services\Interfaces\StorageQuotaServiceInterface;
-use App\Services\Interfaces\VersioningServiceInterface;
+namespace App\Services\Files;
+
+use App\Contracts\Repositories\Files\FileVersionRepositoryInterface;
+use App\Contracts\Services\Files\VersioningServiceInterface;
+use App\Contracts\Services\Storage\StorageQuotaServiceInterface;
+use App\Exceptions\Files\StorageQuotaExceededException;
+use App\Models\Files\File;
+use App\Models\Files\FileVersion;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class VersioningService implements VersioningServiceInterface
@@ -21,7 +26,7 @@ class VersioningService implements VersioningServiceInterface
     public function createVersion(File $file, UploadedFile $uploadedFile, string $userId, ?string $changelog = null): FileVersion
     {
         if (! $this->quotaService->canUpload($userId, $uploadedFile->getSize())) {
-            throw new \App\Exceptions\StorageQuotaExceededException('Storage quota exceeded');
+            throw new StorageQuotaExceededException('Storage quota exceeded');
         }
 
         $currentMedia = $file->getFirstMedia();
@@ -108,7 +113,7 @@ class VersioningService implements VersioningServiceInterface
         return $version;
     }
 
-    public function getVersions(File $file): \Illuminate\Database\Eloquent\Collection
+    public function getVersions(File $file): Collection
     {
         return $this->versionRepo->getForFile($file->id);
     }
@@ -122,7 +127,7 @@ class VersioningService implements VersioningServiceInterface
         }
 
         try {
-            \Illuminate\Support\Facades\Storage::disk($version->disk)->delete($version->path);
+            Storage::disk($version->disk)->delete($version->path);
         } catch (\Throwable) {
             // ignore
         }

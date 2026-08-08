@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use App\Models\Directory;
-use App\Models\StoragePackage;
-use App\Models\StorageServer;
-use App\Models\User;
-use App\Models\UserSubscription;
-use App\Services\Interfaces\FileServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Models\Files\Directory;
+use App\Models\Storage\StorageServer;
+use App\Models\Subscriptions\StoragePackage;
+use App\Models\Subscriptions\UserSubscription;
+use App\Models\Users\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -113,7 +115,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => $name,
                 'role' => $role,
-                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
         );
@@ -185,7 +187,8 @@ class DatabaseSeeder extends Seeder
         }
 
         foreach ($spec['children'] ?? [] as $childName => $childSpec) {
-            $this->buildSubtree($user, $dir->id, $childName, $childSpec);
+            // Array keys that look like integers (e.g. "2025") become int — cast back to string.
+            $this->buildSubtree($user, $dir->id, (string) $childName, $childSpec);
         }
     }
 

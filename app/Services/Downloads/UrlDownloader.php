@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Services\Interfaces\UrlDownloaderInterface;
+namespace App\Services\Downloads;
+
+use App\Contracts\Services\Downloads\UrlDownloaderInterface;
 use Illuminate\Support\Facades\Http;
 
 class UrlDownloader implements UrlDownloaderInterface

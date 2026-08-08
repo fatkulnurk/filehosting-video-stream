@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Services\Interfaces;
+declare(strict_types=1);
 
-use App\Models\FileChecksum;
+namespace App\Contracts\Services\Files;
+
+use App\Models\Files\FileChecksum;
 use Illuminate\Http\UploadedFile;
 
 interface FileDeduplicationServiceInterface

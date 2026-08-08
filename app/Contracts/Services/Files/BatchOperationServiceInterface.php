@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Services\Interfaces;
+declare(strict_types=1);
+
+namespace App\Contracts\Services\Files;
 
 interface BatchOperationServiceInterface
 {

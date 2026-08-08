@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Models\DownloadServer;
+namespace App\Services\Downloads;
+
+use App\Models\Downloads\DownloadServer;
 use Fatkulnurk\Torrent\Data\Torrent;
 use Fatkulnurk\Torrent\TorrentClientManager;
 

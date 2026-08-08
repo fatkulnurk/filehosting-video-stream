@@ -27,6 +27,19 @@ if (! function_exists('generate_public_code')) {
     }
 }
 
+if (! function_exists('safe_disposition_name')) {
+    /**
+     * Sanitize a user-supplied file name for use inside a Content-Disposition header.
+     */
+    function safe_disposition_name(string $name): string
+    {
+        $name = preg_replace('/[\r\n\x00-\x1F\x7F]+/', '', $name) ?? '';
+        $name = str_replace(['"', '\\'], '', $name);
+
+        return trim($name);
+    }
+}
+
 if (! function_exists('base32_decode')) {
     function base32_decode(string $input): string
     {

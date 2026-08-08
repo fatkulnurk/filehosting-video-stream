@@ -27,7 +27,7 @@ class FileResource extends JsonResource
             'is_image' => $this->isImage(),
             'public_url' => $this->public_url,
             'embed_url' => $this->embed_url,
-            'stream_url' => $this->stream_url,
+            'stream_url' => $this->signed_stream_url,
             'directory_id' => $this->directory_id,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),

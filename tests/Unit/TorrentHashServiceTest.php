@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit;
 
-use App\Services\TorrentHashService;
+use App\Services\Downloads\TorrentHashService;
 use Arokettu\Bencode\Bencode;
 use PHPUnit\Framework\TestCase;
 

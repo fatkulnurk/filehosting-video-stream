@@ -1,12 +1,16 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Models\File;
-use App\Models\FileShare;
-use App\Repositories\Interfaces\FileShareRepositoryInterface;
-use App\Services\Interfaces\FileShareServiceInterface;
+namespace App\Services\Files;
+
+use App\Contracts\Repositories\Files\FileShareRepositoryInterface;
+use App\Contracts\Services\Files\FileShareServiceInterface;
+use App\Models\Files\File;
+use App\Models\Files\FileShare;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 
 class FileShareService implements FileShareServiceInterface
@@ -65,5 +69,31 @@ class FileShareService implements FileShareServiceInterface
     public function removeShare(string $shareId): bool
     {
         return $this->shareRepo->delete($shareId);
+    }
+
+    public function findUserByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
+    }
+
+    public function paginateSharedWithMe(string $userId, array $params): LengthAwarePaginator
+    {
+        return $this->shareRepo->paginateSharedWithMe($userId, $params);
+    }
+
+    public function paginateSharedByMe(string $userId, array $params): LengthAwarePaginator
+    {
+        return $this->shareRepo->paginateSharedByMe($userId, $params);
+    }
+
+    public function getShareForOwner(string $shareId, string $userId): FileShare
+    {
+        $share = $this->shareRepo->findById($shareId);
+
+        if (! $share || ($share->shared_by !== $userId && $share->file->user_id !== $userId)) {
+            abort(403);
+        }
+
+        return $share;
     }
 }

@@ -1,16 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
+use App\Contracts\Services\Admin\AdminServiceInterface;
+use App\Contracts\Services\Directories\DirectoryServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Contracts\Services\Files\StatsServiceInterface;
+use App\Contracts\Services\Files\SubtitleServiceInterface;
+use App\Contracts\Services\Files\VersioningServiceInterface;
 use App\Http\Controllers\Controller;
-use App\Http\Concerns\AppliesTableParams;
-use App\Models\File;
-use App\Models\User;
-use App\Services\Interfaces\FileServiceInterface;
-use App\Services\Interfaces\StatsServiceInterface;
-use App\Services\Interfaces\SubtitleServiceInterface;
-use App\Services\Interfaces\VersioningServiceInterface;
+use App\Http\Requests\Admin\StoreFileRequest;
+use App\Http\Requests\Admin\UpdateFileRequest;
+use App\Http\Requests\Admin\UserDirectoriesRequest;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
 class AdminFileController extends Controller
@@ -21,77 +27,52 @@ class AdminFileController extends Controller
         private FileServiceInterface $fileService,
         private StatsServiceInterface $statsService,
         private SubtitleServiceInterface $subtitleService,
-        private VersioningServiceInterface $versioningService
+        private VersioningServiceInterface $versioningService,
+        private AdminServiceInterface $adminService,
+        private DirectoryServiceInterface $directoryService
     ) {}
 
     public function index(Request $request)
     {
         $params = $this->tableParams($request);
+        $params['filters'] = $request->only(['user_id', 'status', 'type']);
 
-        $files = $this->applyTableQuery(
-            $this->applyFilters(
-                File::query()
-                    ->with(['user', 'media'])
-                    ->withTrashed(),
-                $request,
-                [
-                    'user_id' => fn ($q, $v) => $q->where('user_id', $v),
-                    'status' => [
-                        'public' => fn ($q) => $q->where('is_public', true),
-                        'private' => fn ($q) => $q->where('is_public', false),
-                        'trashed' => fn ($q) => $q->onlyTrashed(),
-                        'active' => fn ($q) => $q->whereNull('deleted_at'),
-                    ],
-                    'type' => [
-                        'video' => fn ($q) => $q->whereHas('media', fn ($m) => $m->where('mime_type', 'LIKE', 'video/%')),
-                        'image' => fn ($q) => $q->whereHas('media', fn ($m) => $m->where('mime_type', 'LIKE', 'image/%')),
-                        'document' => fn ($q) => $q->whereDoesntHave('media', fn ($m) => $m->where('mime_type', 'LIKE', 'video/%')->orWhere('mime_type', 'LIKE', 'image/%')),
-                    ],
-                ]
-            ),
-            $params,
-            searchable: ['name'],
-            sortable: [
-                'name' => 'name',
-                'user' => \DB::raw("(SELECT u.name FROM users u WHERE u.id = files.user_id)"),
-                'size' => \DB::raw("(SELECT COALESCE(SUM(size),0) FROM media WHERE media.model_id = files.id AND media.model_type = '".addslashes(File::class)."')"),
-                'views' => 'views',
-                'downloads' => 'downloads',
-                'created_at' => 'created_at',
-                'is_public' => 'is_public',
-            ],
-            defaultSort: 'created_at',
-            defaultDirection: 'desc',
-        )->paginate($params['per_page'])->withQueryString();
+        [$files, $users] = Concurrency::run([
+            fn () => $this->fileService->paginateAllForAdmin($params),
+            fn () => $this->adminService->getUsersForSelect(),
+        ]);
 
         return Inertia::render('Admin/Files/Index', [
             'files' => $files,
-            'users' => User::orderBy('name')->get(['id', 'name', 'email']),
+            'users' => $users,
             'filters' => $this->tableFiltersWith($params, $request, ['user_id', 'status', 'type']),
         ]);
     }
 
     public function show(string $id)
     {
-        $file = File::withTrashed()->with(['user', 'directory', 'checksum', 'versions'])->findOrFail($id);
+        $file = $this->fileService->getFileForAdmin($id);
+
+        [$subtitles, $stats, $versions] = Concurrency::run([
+            fn () => $this->subtitleService->getTracks($file),
+            fn () => $this->statsService->getFileStats($file),
+            fn () => $this->versioningService->getVersions($file),
+        ]);
 
         return Inertia::render('Admin/Files/Show', [
             'file' => $file,
             'streamUrl' => $file->signed_stream_url,
-            'subtitles' => $this->subtitleService->getTracks($file),
-            'stats' => $this->statsService->getFileStats($file),
-            'versions' => $this->versioningService->getVersions($file),
+            'subtitles' => $subtitles,
+            'stats' => $stats,
+            'versions' => $versions,
         ]);
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateFileRequest $request, string $id)
     {
-        $file = File::withTrashed()->findOrFail($id);
+        $file = $this->fileService->getFileForAdmin($id);
 
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'is_public' => ['sometimes', 'boolean'],
-        ]);
+        $data = $request->validated();
 
         $this->fileService->rename($file, $data['name']);
 
@@ -104,7 +85,7 @@ class AdminFileController extends Controller
 
     public function destroy(string $id)
     {
-        $file = File::withTrashed()->findOrFail($id);
+        $file = $this->fileService->getFileForAdmin($id);
 
         if (! $file->trashed()) {
             $this->fileService->delete($file);
@@ -115,7 +96,7 @@ class AdminFileController extends Controller
 
     public function forceDestroy(string $id)
     {
-        $file = File::withTrashed()->findOrFail($id);
+        $file = $this->fileService->getFileForAdmin($id);
 
         if ($file->trashed()) {
             $this->fileService->forceDelete($file);
@@ -127,15 +108,8 @@ class AdminFileController extends Controller
         return redirect()->route('admin.files.index')->with('success', 'File permanently deleted');
     }
 
-    public function store(Request $request)
+    public function store(StoreFileRequest $request)
     {
-        $request->validate([
-            'user_id' => ['required', 'uuid', 'exists:users,id'],
-            'directory_id' => ['nullable', 'uuid', 'exists:directories,id'],
-            'files' => ['required', 'array'],
-            'files.*' => ['file'],
-        ]);
-
         $userId = $request->user_id;
 
         $successCount = 0;
@@ -157,11 +131,9 @@ class AdminFileController extends Controller
         );
     }
 
-    public function directories(Request $request)
+    public function directories(UserDirectoriesRequest $request)
     {
-        $request->validate(['user_id' => ['required', 'uuid', 'exists:users,id']]);
-
-        $tree = app(\App\Services\Interfaces\DirectoryServiceInterface::class)->getTree($request->query('user_id'));
+        $tree = $this->directoryService->getTree($request->query('user_id'));
 
         $rows = [];
         $walk = function ($dirs, array $ancestors = []) use (&$walk, &$rows) {

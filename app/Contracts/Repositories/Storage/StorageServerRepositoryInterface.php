@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Repositories\Interfaces;
+declare(strict_types=1);
 
-use App\Models\StorageServer;
+namespace App\Contracts\Repositories\Storage;
+
+use App\Models\Storage\StorageServer;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface StorageServerRepositoryInterface
 {
@@ -30,4 +33,10 @@ interface StorageServerRepositoryInterface
     public function getCountForUser(string $userId): int;
 
     public function getGlobalStats(): array;
+
+    public function paginateServers(array $params): LengthAwarePaginator;
+
+    public function getBackupOptions(): Collection;
+
+    public function getLatest(int $limit = 10): Collection;
 }

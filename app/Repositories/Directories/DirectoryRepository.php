@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Repositories;
+declare(strict_types=1);
 
-use App\Models\Directory;
-use App\Repositories\Interfaces\DirectoryRepositoryInterface;
+namespace App\Repositories\Directories;
+
+use App\Contracts\Repositories\Directories\DirectoryRepositoryInterface;
+use App\Models\Files\Directory;
+use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection as SupportCollection;
 
 class DirectoryRepository implements DirectoryRepositoryInterface
@@ -17,6 +21,11 @@ class DirectoryRepository implements DirectoryRepositoryInterface
     public function findById(string $id): ?Directory
     {
         return Directory::find($id);
+    }
+
+    public function findWithTrashed(string $id): ?Directory
+    {
+        return Directory::withTrashed()->find($id);
     }
 
     public function getUserDirectories(string $userId, ?string $parentId = null): Collection
@@ -104,5 +113,71 @@ class DirectoryRepository implements DirectoryRepositoryInterface
     public function countAll(string $userId): int
     {
         return Directory::where('user_id', $userId)->count();
+    }
+
+    public function countAllWithTrashed(string $userId): int
+    {
+        return Directory::withTrashed()->where('user_id', $userId)->count();
+    }
+
+    public function getLatestForUser(string $userId, int $limit = 10): Collection
+    {
+        return Directory::withCount('files')
+            ->withTrashed()
+            ->where('user_id', $userId)
+            ->latest()
+            ->limit($limit)
+            ->get();
+    }
+
+    public function paginateAdmin(array $params): LengthAwarePaginator
+    {
+        $sortable = [
+            'name' => 'name',
+            'user' => \DB::raw('(SELECT u.name FROM users u WHERE u.id = directories.user_id)'),
+            'path' => 'path',
+            'files' => 'files_count',
+            'created_at' => 'created_at',
+        ];
+
+        $sort = $params['sort'] ?? null;
+        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $filters = $params['filters'] ?? [];
+
+        $query = Directory::query()
+            ->with(['user', 'parent'])
+            ->withCount('files')
+            ->withTrashed();
+
+        $userId = $filters['user_id'] ?? null;
+        if ($userId && $userId !== '') {
+            $query->where('user_id', $userId);
+        }
+
+        $status = $filters['status'] ?? null;
+        if ($status && $status !== 'all') {
+            match ($status) {
+                'active' => $query->whereNull('deleted_at'),
+                'trashed' => $query->onlyTrashed(),
+                default => null,
+            };
+        }
+
+        if (($params['search'] ?? '') !== '') {
+            $query->where('name', 'LIKE', '%'.$params['search'].'%');
+        }
+
+        if ($sort && isset($sortable[$sort])) {
+            $target = $sortable[$sort];
+            if ($target instanceof Expression) {
+                $query->orderByRaw($target->getValue($query->getQuery()->getGrammar()).' '.$direction);
+            } else {
+                $query->orderBy($target, $direction);
+            }
+        } else {
+            $query->orderByDesc('created_at');
+        }
+
+        return $query->paginate($params['per_page'])->withQueryString();
     }
 }

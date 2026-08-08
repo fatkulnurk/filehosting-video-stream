@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import VideoPlayer from '@/Components/VideoPlayer.vue';
+import Footer from '@/Components/Footer.vue';
 import { ArrowDownTrayIcon, CodeBracketIcon, LinkIcon } from '@heroicons/vue/24/outline';
 
 defineProps({ file: Object, subtitles: Array });
@@ -66,9 +67,7 @@ const copyText = (text, msg) => {
                 </div>
             </div>
 
-            <div class="text-center mt-8">
-                <a href="/" class="text-sm text-brand-700 hover:underline">Powered by FHV Stream</a>
-            </div>
+        <Footer />
         </div>
     </div>
 </template>

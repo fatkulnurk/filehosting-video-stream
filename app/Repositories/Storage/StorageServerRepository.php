@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Repositories;
+declare(strict_types=1);
 
-use App\Models\StorageServer;
-use App\Repositories\Interfaces\StorageServerRepositoryInterface;
+namespace App\Repositories\Storage;
+
+use App\Contracts\Repositories\Storage\StorageServerRepositoryInterface;
+use App\Models\Storage\StorageServer;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class StorageServerRepository implements StorageServerRepositoryInterface
 {
@@ -108,5 +111,60 @@ class StorageServerRepository implements StorageServerRepositoryInterface
     public function getCountForUser(string $userId): int
     {
         return StorageServer::where('user_id', $userId)->count();
+    }
+
+    public function paginateServers(array $params): LengthAwarePaginator
+    {
+        $sortable = [
+            'name' => 'name',
+            'driver' => 'driver',
+            'storage_used' => 'storage_used',
+            'created_at' => 'created_at',
+        ];
+
+        $sort = $params['sort'] ?? null;
+        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $filters = $params['filters'] ?? [];
+
+        $query = StorageServer::query();
+
+        $driver = $filters['driver'] ?? null;
+        if ($driver && $driver !== '' && $driver !== 'all') {
+            $query->where('driver', $driver);
+        }
+
+        $status = $filters['status'] ?? null;
+        if ($status && $status !== 'all') {
+            match ($status) {
+                'active' => $query->where('is_active', true),
+                'inactive' => $query->where('is_active', false),
+                default => null,
+            };
+        }
+
+        if (($params['search'] ?? '') !== '') {
+            $query->where('name', 'LIKE', '%'.$params['search'].'%');
+        }
+
+        if ($sort && isset($sortable[$sort])) {
+            $query->orderBy($sortable[$sort], $direction);
+        } else {
+            $query->orderByDesc('created_at');
+        }
+
+        return $query->paginate($params['per_page'])->withQueryString();
+    }
+
+    public function getBackupOptions(): Collection
+    {
+        return StorageServer::where('is_active', true)
+            ->where('is_primary', false)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
+    public function getLatest(int $limit = 10): Collection
+    {
+        return StorageServer::latest()->limit($limit)->get();
     }
 }

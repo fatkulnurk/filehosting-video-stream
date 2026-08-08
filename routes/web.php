@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminDirectoryController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\FileFavoriteController;
 use App\Http\Controllers\FileShareController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\StreamController;
@@ -33,6 +35,10 @@ use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+
+// Legal
+Route::get('/terms', [LegalController::class, 'terms'])->name('terms');
+Route::get('/privacy', [LegalController::class, 'privacy'])->name('privacy');
 
 // Public access
 Route::get('/f/{id}', [PublicController::class, 'show'])->name('public.show');

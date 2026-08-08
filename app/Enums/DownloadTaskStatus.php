@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums;
 
 enum DownloadTaskStatus: string
@@ -14,12 +16,12 @@ enum DownloadTaskStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Queued => 'Queued',
-            self::Processing => 'Processing',
-            self::Downloading => 'Downloading',
-            self::Completed => 'Completed',
-            self::Failed => 'Failed',
-            self::Cancelled => 'Cancelled',
+            self::Queued => __('downloads.queued'),
+            self::Processing => __('downloads.processing'),
+            self::Downloading => __('downloads.downloading'),
+            self::Completed => __('downloads.completed'),
+            self::Failed => __('downloads.failed'),
+            self::Cancelled => __('downloads.cancelled'),
         };
     }
 

@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Repositories\Interfaces;
+declare(strict_types=1);
 
-use App\Models\DownloadTask;
+namespace App\Contracts\Repositories\Downloads;
+
+use App\Models\Downloads\DownloadTask;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -16,6 +18,8 @@ interface DownloadTaskRepositoryInterface
     public function update(string $id, array $data): DownloadTask;
 
     public function getUserTasks(string $userId, int $perPage = 20): LengthAwarePaginator;
+
+    public function paginateForUser(string $userId, array $params): LengthAwarePaginator;
 
     public function getActiveByType(string $type): Collection;
 

@@ -32,6 +32,25 @@ FSH Stream lets users upload, organize, share, and stream files (including video
 
 ---
 
+## Screenshots
+
+| | |
+|---|---|
+| **Landing page** | **Login** |
+| ![Landing page](docs/screenshots/landing.png) | ![Login](docs/screenshots/login.png) |
+| **Register** | **Dashboard** |
+| ![Register](docs/screenshots/register.png) | ![Dashboard](docs/screenshots/dashboard.png) |
+| **File manager** | **File player** |
+| ![File manager](docs/screenshots/files.png) | ![File player](docs/screenshots/file-player.png) |
+| **Cloud Downloads** | **Admin — Users** |
+| ![Cloud Downloads](docs/screenshots/cloud-downloads.png) | ![Admin users](docs/screenshots/admin-users.png) |
+| **Admin — Storage** | **Admin — Packages** |
+| ![Admin storage](docs/screenshots/admin-storage.png) | ![Admin packages](docs/screenshots/admin-packages.png) |
+| **Admin — Subscriptions** | |
+| ![Admin subscriptions](docs/screenshots/admin-subscriptions.png) | |
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -287,7 +306,7 @@ API keys are sent via the `X-API-Key` header, carry explicit permissions (`file.
 php artisan test
 ```
 
-74 tests / 159 assertions currently passing. Covers:
+79 tests / 166 assertions currently passing. Covers:
 
 - Auth/admin access control (`AdminAccessTest`)
 - Cloud downloads & torrent jobs (`DownloadTest`, `DownloadJobTest`, `AdminDownloaderTest`)
@@ -296,6 +315,7 @@ php artisan test
 - Strict enum validation & sorting/filtering (`StrictEnumValidationTest`)
 - Security hardening (`SecurityFixTest`): password-protected streams, webhook SSRF, password
   minimums, unlock throttling, signed stream URLs, header sanitization
+- Auth feedback (`AuthFeedbackTest`): login/register errors, anti-enumeration password reset
 
 ---
 

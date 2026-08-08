@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
-use App\Services\Interfaces\StorageServiceInterface;
+use App\Contracts\Services\Storage\StorageServiceInterface;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class StorageServiceProvider extends ServiceProvider
@@ -15,7 +18,7 @@ class StorageServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->booted(function () {
-            if (\Illuminate\Support\Facades\Schema::hasTable('storage_servers')
+            if (Schema::hasTable('storage_servers')
                 && ! app()->runningUnitTests()) {
                 $storageService = app(StorageServiceInterface::class);
                 $storageService->registerAllDisks();

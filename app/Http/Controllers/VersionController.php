@@ -1,25 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Models\File;
-use App\Services\Interfaces\VersioningServiceInterface;
-use Illuminate\Http\Request;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Contracts\Services\Files\VersioningServiceInterface;
+use App\Http\Requests\Files\StoreVersionRequest;
 
 class VersionController extends Controller
 {
     public function __construct(
-        private VersioningServiceInterface $versioningService
+        private VersioningServiceInterface $versioningService,
+        private FileServiceInterface $fileService
     ) {}
 
-    public function store(Request $request, string $id)
+    public function store(StoreVersionRequest $request, string $id)
     {
-        $request->validate([
-            'file' => ['required', 'file'],
-            'changelog' => ['nullable', 'string', 'max:1000'],
-        ]);
-
-        $file = File::where('user_id', auth()->id())->findOrFail($id);
+        $file = $this->fileService->getOwnedFile(auth()->id(), $id);
 
         $version = $this->versioningService->createVersion(
             $file,
@@ -33,7 +31,7 @@ class VersionController extends Controller
 
     public function restore(string $id, string $version)
     {
-        $file = File::where('user_id', auth()->id())->findOrFail($id);
+        $file = $this->fileService->getOwnedFile(auth()->id(), $id);
 
         $this->versioningService->restore($file, $version);
 
@@ -42,7 +40,7 @@ class VersionController extends Controller
 
     public function destroy(string $id, string $version)
     {
-        $file = File::where('user_id', auth()->id())->findOrFail($id);
+        $file = $this->fileService->getOwnedFile(auth()->id(), $id);
 
         $this->versioningService->delete($file, $version);
 

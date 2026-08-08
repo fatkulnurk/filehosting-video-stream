@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Policies;
+declare(strict_types=1);
 
-use App\Models\Directory;
-use App\Models\User;
-use App\Services\Interfaces\DirectoryShareServiceInterface;
+namespace App\Policies\Directories;
+
+use App\Contracts\Services\Directories\DirectoryShareServiceInterface;
+use App\Models\Files\Directory;
+use App\Models\Users\User;
 
 class DirectoryPolicy
 {

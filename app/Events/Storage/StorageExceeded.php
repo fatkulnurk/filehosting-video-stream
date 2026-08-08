@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Events;
+declare(strict_types=1);
 
-use App\Models\User;
+namespace App\Events\Storage;
+
+use App\Models\Users\User;
 use Illuminate\Foundation\Events\Dispatchable;
 
 class StorageExceeded

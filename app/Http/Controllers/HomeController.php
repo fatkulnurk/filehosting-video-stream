@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Repositories\Interfaces\StoragePackageRepositoryInterface;
+use App\Contracts\Repositories\Storage\StoragePackageRepositoryInterface;
 use Inertia\Inertia;
 
 class HomeController extends Controller

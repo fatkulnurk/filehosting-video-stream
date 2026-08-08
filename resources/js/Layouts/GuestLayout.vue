@@ -1,5 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
+import Footer from '@/Components/Footer.vue';
 </script>
 
 <template>
@@ -12,8 +13,6 @@ import { Link } from '@inertiajs/vue3';
                 <slot />
             </div>
         </main>
-        <footer class="text-center text-brand-300 text-xs py-6">
-            FileHosting Video Stream — Open Source File Hosting
-        </footer>
+        <Footer dark />
     </div>
 </template>

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\SubscriptionStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreSubscriptionRequest extends FormRequest
 {
@@ -18,7 +20,7 @@ class StoreSubscriptionRequest extends FormRequest
         return [
             'user_id' => ['required', 'uuid', 'exists:users,id'],
             'package_id' => ['required', 'uuid', 'exists:storage_packages,id'],
-            'status' => ['sometimes', 'string', 'in:active,cancelled,expired'],
+            'status' => ['sometimes', 'string', Rule::enum(SubscriptionStatus::class)],
         ];
     }
 }

@@ -19,7 +19,7 @@ class DownloadServerRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'driver' => ['required', Rule::in(DownloaderDriver::supported())],
+            'driver' => ['required', 'string', Rule::enum(DownloaderDriver::class)],
             'is_active' => ['sometimes', 'boolean'],
             'config' => ['sometimes', 'array'],
         ];

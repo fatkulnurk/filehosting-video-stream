@@ -26,7 +26,7 @@ class StoragePackageRequest extends FormRequest
             'file_limit' => ['nullable', 'integer', 'min:1'],
             'max_file_size' => ['nullable', 'integer', 'min:1'],
             'features' => ['nullable', 'array'],
-            'features.*' => ['string', Rule::in(array_column(PackageFeature::cases(), 'value'))],
+            'features.*' => ['string', Rule::enum(PackageFeature::class)],
             'price_monthly' => ['required', 'numeric', 'min:0'],
             'price_yearly' => ['required', 'numeric', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\Role;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ChangeRoleRequest extends FormRequest
 {
@@ -16,7 +18,7 @@ class ChangeRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'role' => ['required', 'in:member,admin'],
+            'role' => ['required', 'string', Rule::enum(Role::class)],
         ];
     }
 }

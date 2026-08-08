@@ -31,7 +31,7 @@ class StorageServerRequest extends FormRequest
         return array_merge([
             'user_id' => ['nullable', 'uuid', 'exists:users,id'],
             'name' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9_-]+$/i', Rule::unique('storage_servers')->ignore($this->route('server'))],
-            'driver' => ['required', 'string', Rule::in(StorageDriver::supported())],
+            'driver' => ['required', 'string', Rule::enum(StorageDriver::class)],
             'is_primary' => ['sometimes', 'boolean'],
             'backup_storage_server_id' => ['nullable', 'uuid', 'exists:storage_servers,id'],
             'auto_backup' => ['sometimes', 'boolean'],

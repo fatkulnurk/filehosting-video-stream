@@ -49,7 +49,7 @@ jobs:
             - name: Create minimal Vite manifest for tests
               run: |
                   mkdir -p public/build/assets
-                  printf '%s' '{"resources/js/app.js":{"file":"assets/app.js","isEntry":true,"src":"resources/js/app.js"},"resources/css/app.css":{"file":"assets/app.css"}}' > public/build/manifest.json
+                  printf '%s' '{"resources/js/app.js":{"file":"assets/app.js","name":"app","src":"resources/js/app.js","isEntry":true,"css":["assets/app.css"]},"resources/css/app.css":{"file":"assets/app.css","name":"app","names":["app.css"],"src":"resources/css/app.css","isEntry":true}}' > public/build/manifest.json
 
             - name: Run Laravel Pint
               run: vendor/bin/pint --test

@@ -1,12 +1,16 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Models\Directory;
-use App\Models\DirectoryShare;
-use App\Repositories\Interfaces\DirectoryShareRepositoryInterface;
-use App\Services\Interfaces\DirectoryShareServiceInterface;
+namespace App\Services\Directories;
+
+use App\Contracts\Repositories\Directories\DirectoryShareRepositoryInterface;
+use App\Contracts\Services\Directories\DirectoryShareServiceInterface;
+use App\Models\Files\Directory;
+use App\Models\Files\DirectoryShare;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class DirectoryShareService implements DirectoryShareServiceInterface
 {
@@ -103,5 +107,26 @@ class DirectoryShareService implements DirectoryShareServiceInterface
     public function removeShare(string $shareId): bool
     {
         return $this->shareRepo->delete($shareId);
+    }
+
+    public function findUserByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
+    }
+
+    public function paginateSharedWithMe(string $userId, array $params): LengthAwarePaginator
+    {
+        return $this->shareRepo->paginateSharedWithMe($userId, $params);
+    }
+
+    public function getShareForOwner(string $shareId, string $userId): DirectoryShare
+    {
+        $share = $this->shareRepo->findById($shareId);
+
+        if (! $share || ($share->shared_by !== $userId && $share->directory->user_id !== $userId)) {
+            abort(403);
+        }
+
+        return $share;
     }
 }

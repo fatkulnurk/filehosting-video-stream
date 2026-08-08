@@ -1,27 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Events\FileDownloaded;
-use App\Http\Concerns\AppliesTableParams;
-use App\Http\Requests\MoveRequest;
-use App\Http\Requests\StoreFileRequest;
-use App\Http\Requests\StoreUrlRequest;
-use App\Http\Requests\UpdateFileSettingsRequest;
-use App\Models\Directory;
-use App\Models\File;
-use App\Repositories\Interfaces\DownloadTaskRepositoryInterface;
-use App\Services\Interfaces\BatchOperationServiceInterface;
-use App\Services\Interfaces\DirectoryServiceInterface;
-use App\Services\Interfaces\DownloaderServiceInterface;
-use App\Services\Interfaces\FileAccessServiceInterface;
-use App\Services\Interfaces\FileFavoriteServiceInterface;
-use App\Services\Interfaces\FileServiceInterface;
-use App\Services\Interfaces\StatsServiceInterface;
-use App\Services\Interfaces\StorageServiceInterface;
-use App\Services\Interfaces\SubtitleServiceInterface;
-use App\Services\Interfaces\VersioningServiceInterface;
+use App\Contracts\Services\Directories\DirectoryServiceInterface;
+use App\Contracts\Services\Downloads\DownloaderServiceInterface;
+use App\Contracts\Services\Files\BatchOperationServiceInterface;
+use App\Contracts\Services\Files\FileAccessServiceInterface;
+use App\Contracts\Services\Files\FileFavoriteServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Contracts\Services\Files\StatsServiceInterface;
+use App\Contracts\Services\Files\SubtitleServiceInterface;
+use App\Contracts\Services\Files\VersioningServiceInterface;
+use App\Contracts\Services\Storage\StorageServiceInterface;
+use App\Enums\DownloadTaskStatus;
+use App\Events\Files\FileDownloaded;
+use App\Http\Requests\Files\MoveRequest;
+use App\Http\Requests\Files\RenameFileRequest;
+use App\Http\Requests\Files\StoreFileRequest;
+use App\Http\Requests\Files\StoreUrlRequest;
+use App\Http\Requests\Files\UpdateFileSettingsRequest;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -37,50 +39,31 @@ class FileController extends Controller
         private StatsServiceInterface $statsService,
         private FileFavoriteServiceInterface $favoriteService,
         private FileAccessServiceInterface $accessService,
-        private VersioningServiceInterface $versioningService
+        private VersioningServiceInterface $versioningService,
+        private DownloaderServiceInterface $downloaderService,
+        private SubtitleServiceInterface $subtitleService,
+        private BatchOperationServiceInterface $batchService
     ) {}
 
     public function index(Request $request)
     {
         $params = $this->tableParams($request);
         $directoryId = $request->input('directory');
+        $userId = auth()->id();
 
-        $files = $this->applyTableQuery(
-            File::query()
-                ->where('user_id', auth()->id())
-                ->when($directoryId, fn ($q) => $q->where('directory_id', $directoryId))
-                ->when(! $directoryId, fn ($q) => $q->whereNull('directory_id'))
-                ->with('media'),
-            $params,
-            searchable: ['name'],
-            sortable: [
-                'name' => 'name',
-                'size' => \DB::raw("(SELECT COALESCE(SUM(size),0) FROM media WHERE media.model_id = files.id AND media.model_type = '".addslashes(File::class)."')"),
-                'views' => 'views',
-                'downloads' => 'downloads',
-                'created_at' => 'created_at',
-            ],
-            defaultSort: 'created_at',
-            defaultDirection: 'desc',
-        )->paginate($params['per_page'])->withQueryString();
-
-        $directories = Directory::where('user_id', auth()->id())
-            ->when($directoryId, fn ($q) => $q->where('parent_id', $directoryId))
-            ->when(! $directoryId, fn ($q) => $q->whereNull('parent_id'))
-            ->withCount('files')
-            ->orderBy('name')
-            ->get();
-
-        $breadcrumbs = $directoryId
-            ? $this->directoryService->getBreadcrumbs($directoryId)
-            : collect();
+        [$files, $directories, $breadcrumbs, $directoryTree] = Concurrency::run([
+            fn () => $this->fileService->paginateForDirectory($userId, $directoryId, $params),
+            fn () => $this->directoryService->getChildDirectories($userId, $directoryId),
+            fn () => $directoryId ? $this->directoryService->getBreadcrumbs($directoryId) : collect(),
+            fn () => $this->directoryService->getTree($userId),
+        ]);
 
         return Inertia::render('Files/Index', [
             'files' => $files,
             'directories' => $directories,
             'currentDirectory' => $directoryId,
             'breadcrumbs' => $breadcrumbs,
-            'directoryTree' => $this->directoryService->getTree(auth()->id()),
+            'directoryTree' => $directoryTree,
             'storageQuota' => [
                 'used' => auth()->user()->storageUsed(),
                 'limit' => auth()->user()->storageLimit(),
@@ -99,22 +82,27 @@ class FileController extends Controller
 
         $this->accessService->logAccess($id, 'view');
 
-        $subtitleService = app(SubtitleServiceInterface::class);
+        [$subtitles, $isFavorited, $stats, $versions] = Concurrency::run([
+            fn () => $this->subtitleService->getTracks($file),
+            fn () => $this->favoriteService->isFavorited(auth()->id(), $id),
+            fn () => $this->statsService->getFileStats($file),
+            fn () => $this->versioningService->getVersions($file),
+        ]);
 
         return Inertia::render('Files/Show', [
             'file' => $file->load('directory', 'checksum', 'versions', 'user'),
             'streamUrl' => $file->signed_stream_url,
-            'subtitles' => $subtitleService->getTracks($file),
-            'isFavorited' => $this->favoriteService->isFavorited(auth()->id(), $id),
-            'stats' => $this->statsService->getFileStats($file),
-            'versions' => $this->versioningService->getVersions($file),
+            'subtitles' => $subtitles,
+            'isFavorited' => $isFavorited,
+            'stats' => $stats,
+            'versions' => $versions,
         ]);
     }
 
     public function store(StoreFileRequest $request)
     {
         if ($request->hasFile('files')) {
-            $results = app(BatchOperationServiceInterface::class)->storeBatch(
+            $results = $this->batchService->storeBatch(
                 $request->file('files'),
                 $request->directory_id,
                 auth()->id()
@@ -137,17 +125,17 @@ class FileController extends Controller
 
     public function storeFromUrl(StoreUrlRequest $request)
     {
-        $task = app(DownloadTaskRepositoryInterface::class)->create([
+        $task = $this->downloaderService->createTask([
             'user_id' => auth()->id(),
             'type' => 'url',
             'source' => $request->url,
             'directory_id' => $request->directory_id,
             'disk' => $request->disk,
-            'status' => 'queued',
+            'status' => DownloadTaskStatus::Queued,
             'progress' => 0,
         ]);
 
-        app(DownloaderServiceInterface::class)->dispatch($task);
+        $this->downloaderService->dispatch($task);
 
         return redirect()->route('cloud-downloads.index')->with('success', 'Download from URL is queued.');
     }
@@ -173,10 +161,8 @@ class FileController extends Controller
         return redirect()->back()->with('success', 'File updated');
     }
 
-    public function rename(Request $request, string $id)
+    public function rename(RenameFileRequest $request, string $id)
     {
-        $request->validate(['name' => ['required', 'string', 'max:255']]);
-
         $file = $this->fileService->getById($id);
 
         if (! $file || $file->user_id !== auth()->id()) {

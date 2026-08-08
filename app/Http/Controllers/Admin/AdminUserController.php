@@ -1,18 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
+use App\Contracts\Services\Admin\AdminServiceInterface;
+use App\Contracts\Services\Directories\DirectoryServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Contracts\Services\Subscriptions\SubscriptionServiceInterface;
 use App\Http\Controllers\Controller;
-use App\Http\Concerns\AppliesTableParams;
-use App\Models\Directory;
-use App\Models\File;
-use App\Models\StoragePackage;
-use App\Models\User;
-use App\Models\UserSubscription;
-use App\Services\Interfaces\AdminServiceInterface;
-use App\Services\Interfaces\SubscriptionServiceInterface;
+use App\Http\Requests\Admin\ChangeRoleRequest;
+use App\Http\Requests\Admin\SetQuotaRequest;
+use App\Http\Requests\Admin\StoreUserRequest;
+use App\Http\Requests\Admin\UpdateUserRequest;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
 class AdminUserController extends Controller
@@ -21,33 +24,17 @@ class AdminUserController extends Controller
 
     public function __construct(
         private AdminServiceInterface $adminService,
-        private SubscriptionServiceInterface $subscriptionService
+        private SubscriptionServiceInterface $subscriptionService,
+        private FileServiceInterface $fileService,
+        private DirectoryServiceInterface $directoryService
     ) {}
 
     public function index(Request $request)
     {
         $params = $this->tableParams($request);
+        $params['filters'] = $request->only(['role']);
 
-        $users = $this->applyTableQuery(
-            $this->applyFilters(
-                User::query()->with('profile')->withCount('files'),
-                $request,
-                ['role' => 'role']
-            ),
-            $params,
-            searchable: ['name', 'email'],
-            sortable: [
-                'name' => 'name',
-                'email' => 'email',
-                'role' => 'role',
-                'files' => 'files_count',
-                'storage_used' => \DB::raw('(SELECT COALESCE(storage_used,0) FROM profiles WHERE profiles.user_id = users.id)'),
-                'storage_limit' => \DB::raw('(SELECT COALESCE(storage_limit,0) FROM profiles WHERE profiles.user_id = users.id)'),
-                'created_at' => 'created_at',
-            ],
-            defaultSort: 'created_at',
-            defaultDirection: 'desc',
-        )->paginate($params['per_page'])->withQueryString();
+        $users = $this->adminService->paginateUsersWithParams($params);
 
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
@@ -55,30 +42,11 @@ class AdminUserController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
-            'role' => ['sometimes', 'in:member,admin'],
-            'storage_limit' => ['sometimes', 'nullable', 'integer', 'min:0'],
-        ]);
+        $user = $this->adminService->createUser($request->only(['name', 'email', 'password', 'role', 'storage_limit']));
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role ?? 'member',
-            'email_verified_at' => now(),
-        ]);
-
-        $user->profile()->create([
-            'storage_limit' => $request->storage_limit,
-            'storage_used' => 0,
-        ]);
-
-        $defaultPackage = StoragePackage::query()->where('is_default', true)->first();
+        $defaultPackage = $this->subscriptionService->getDefaultPackage();
 
         if ($defaultPackage) {
             $this->subscriptionService->subscribe($user->id, $defaultPackage->id);
@@ -89,62 +57,51 @@ class AdminUserController extends Controller
 
     public function show(string $id)
     {
-        $user = User::with(['profile', 'subscriptions.storagePackage'])->findOrFail($id);
+        $user = $this->adminService->getUserById($id);
+
+        [$files, $directories, $fileCount, $directoryCount, $packages] = Concurrency::run([
+            fn () => $this->fileService->getLatestForUser($user->id, 10),
+            fn () => $this->directoryService->getLatestForUser($user->id, 10),
+            fn () => $this->fileService->countAllWithTrashed($user->id),
+            fn () => $this->directoryService->countAllWithTrashed($user->id),
+            fn () => $this->subscriptionService->getAllPackages(),
+        ]);
 
         return Inertia::render('Admin/Users/Show', [
             'user' => $user,
-            'files' => File::with(['media', 'directory'])
-                ->where('user_id', $user->id)
-                ->withTrashed()
-                ->latest()
-                ->limit(10)
-                ->get(),
-            'directories' => Directory::withCount('files')
-                ->where('user_id', $user->id)
-                ->withTrashed()
-                ->latest()
-                ->limit(10)
-                ->get(),
+            'files' => $files,
+            'directories' => $directories,
             'stats' => [
-                'files' => File::withTrashed()->where('user_id', $user->id)->count(),
-                'directories' => Directory::withTrashed()->where('user_id', $user->id)->count(),
+                'files' => $fileCount,
+                'directories' => $directoryCount,
                 'storage_used' => (int) ($user->profile?->storage_used ?? 0),
                 'storage_limit' => $user->profile?->storage_limit,
             ],
-            'packages' => StoragePackage::orderBy('name')->get(),
+            'packages' => $packages,
         ]);
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateUserRequest $request, string $id)
     {
-        $user = User::findOrFail($id);
-
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email,'.$user->id],
-        ]);
+        $user = $this->adminService->findUserById($id);
 
         $this->adminService->updateUser($user, $request->only('name', 'email'));
 
         return redirect()->back()->with('success', 'User updated');
     }
 
-    public function changeRole(Request $request, string $id)
+    public function changeRole(ChangeRoleRequest $request, string $id)
     {
-        $request->validate(['role' => ['required', 'in:member,admin']]);
-
-        $user = User::findOrFail($id);
+        $user = $this->adminService->findUserById($id);
 
         $this->adminService->changeRole($user, $request->role);
 
         return redirect()->back()->with('success', 'Role changed');
     }
 
-    public function setQuota(Request $request, string $id)
+    public function setQuota(SetQuotaRequest $request, string $id)
     {
-        $request->validate(['storage_limit' => ['nullable', 'integer', 'min:0']]);
-
-        $user = User::findOrFail($id);
+        $user = $this->adminService->findUserById($id);
 
         $this->adminService->setQuota($user, $request->storage_limit);
 
@@ -153,7 +110,7 @@ class AdminUserController extends Controller
 
     public function destroy(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = $this->adminService->findUserById($id);
 
         $this->adminService->deleteUser($user);
 

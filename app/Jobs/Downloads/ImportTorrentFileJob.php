@@ -1,15 +1,18 @@
 <?php
 
-namespace App\Jobs;
+declare(strict_types=1);
 
-use App\Models\DownloadServer;
-use App\Models\DownloadTask;
-use App\Models\File;
-use App\Repositories\Interfaces\DownloadTaskRepositoryInterface;
-use App\Repositories\Interfaces\TorrentRepositoryInterface;
-use App\Services\Interfaces\TorrentCatalogServiceInterface;
-use App\Services\Interfaces\TorrentImportServiceInterface;
-use App\Services\TorrentService;
+namespace App\Jobs\Downloads;
+
+use App\Contracts\Repositories\Downloads\DownloadTaskRepositoryInterface;
+use App\Contracts\Repositories\Downloads\TorrentRepositoryInterface;
+use App\Contracts\Services\Downloads\TorrentCatalogServiceInterface;
+use App\Contracts\Services\Downloads\TorrentImportServiceInterface;
+use App\Enums\DownloadTaskStatus;
+use App\Models\Downloads\DownloadServer;
+use App\Models\Downloads\DownloadTask;
+use App\Models\Files\File;
+use App\Services\Downloads\TorrentService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -84,7 +87,7 @@ class ImportTorrentFileJob implements ShouldQueue
             );
 
             $taskRepository->update($task->id, [
-                'status' => 'completed',
+                'status' => DownloadTaskStatus::Completed,
                 'progress' => 1.0,
                 'torrent_id' => $torrent->id,
                 'file_id' => $result['files'][0]['file']->id ?? null,
@@ -99,7 +102,7 @@ class ImportTorrentFileJob implements ShouldQueue
             ]);
 
             $taskRepository->update($task->id, [
-                'status' => 'failed',
+                'status' => DownloadTaskStatus::Failed,
                 'error' => $e->getMessage(),
             ]);
         }

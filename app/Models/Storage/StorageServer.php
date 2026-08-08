@@ -1,7 +1,12 @@
 <?php
 
-namespace App\Models;
+declare(strict_types=1);
 
+namespace App\Models\Storage;
+
+use App\Enums\StorageDriver;
+use App\Models\Files\FileChecksum;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -65,7 +70,7 @@ class StorageServer extends Model
 
     public function driverLabel(): string
     {
-        return \App\Enums\StorageDriver::tryFrom($this->driver)?->label() ?? $this->driver;
+        return StorageDriver::tryFrom($this->driver)?->label() ?? $this->driver;
     }
 
     public function getFormattedUsedAttribute(): string

@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Listeners;
+declare(strict_types=1);
 
-use App\Events\DirectoryCreated;
-use App\Events\DirectoryDeleted;
-use App\Events\FileDeleted;
-use App\Events\FileDownloaded;
-use App\Events\FileExpired;
-use App\Events\FileRestored;
-use App\Events\FileUploaded;
-use App\Events\StorageExceeded;
-use App\Events\SubscriptionExpired;
-use App\Services\Interfaces\WebhookServiceInterface;
+namespace App\Listeners\Webhooks;
+
+use App\Contracts\Services\Webhooks\WebhookServiceInterface;
+use App\Events\Directories\DirectoryCreated;
+use App\Events\Directories\DirectoryDeleted;
+use App\Events\Files\FileDeleted;
+use App\Events\Files\FileDownloaded;
+use App\Events\Files\FileExpired;
+use App\Events\Files\FileRestored;
+use App\Events\Files\FileUploaded;
+use App\Events\Storage\StorageExceeded;
+use App\Events\Subscriptions\SubscriptionExpired;
 use Illuminate\Events\Dispatcher;
 
 class WebhookSubscriber

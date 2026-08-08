@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Services\Interfaces;
+declare(strict_types=1);
 
-use App\Models\ApiKey;
-use App\Models\User;
+namespace App\Contracts\Services\ApiKeys;
+
+use App\Models\Integrations\ApiKey;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface ApiKeyServiceInterface
 {
@@ -15,4 +18,6 @@ interface ApiKeyServiceInterface
     public function revoke(string $userId, string $apiKeyId): bool;
 
     public function getForUser(string $userId): Collection;
+
+    public function paginateForUser(string $userId, array $params): LengthAwarePaginator;
 }

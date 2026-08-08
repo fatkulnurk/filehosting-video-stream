@@ -1,14 +1,18 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
+namespace App\Services\Storage;
+
+use App\Contracts\Repositories\Storage\StorageServerRepositoryInterface;
+use App\Contracts\Services\Files\FileMigrationServiceInterface;
+use App\Contracts\Services\Storage\StorageServiceInterface;
 use App\Enums\StorageDriver;
-use App\Exceptions\StorageMigrationRequiredException;
-use App\Models\File;
-use App\Models\StorageServer;
-use App\Repositories\Interfaces\StorageServerRepositoryInterface;
-use App\Services\Interfaces\FileMigrationServiceInterface;
-use App\Services\Interfaces\StorageServiceInterface;
+use App\Exceptions\Storage\StorageMigrationRequiredException;
+use App\Models\Files\File;
+use App\Models\Storage\StorageServer;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Config;
 
 class StorageService implements StorageServiceInterface
@@ -284,5 +288,26 @@ class StorageService implements StorageServiceInterface
     public function getGlobalStats(): array
     {
         return $this->storageServerRepository->getGlobalStats();
+    }
+
+    public function getServerById(string $id): StorageServer
+    {
+        $server = $this->storageServerRepository->findById($id);
+
+        if (! $server) {
+            abort(404);
+        }
+
+        return $server;
+    }
+
+    public function paginateServers(array $params): LengthAwarePaginator
+    {
+        return $this->storageServerRepository->paginateServers($params);
+    }
+
+    public function getBackupOptions(): Collection
+    {
+        return $this->storageServerRepository->getBackupOptions();
     }
 }

@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\Profiles\UpdateProfileRequest;
+use App\Http\Requests\Profiles\UploadAvatarRequest;
 use Inertia\Inertia;
 
 class ProfileController extends Controller
@@ -17,13 +20,8 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(Request $request)
+    public function update(UpdateProfileRequest $request)
     {
-        $request->validate([
-            'phone' => ['nullable', 'string', 'max:20'],
-            'bio' => ['nullable', 'string', 'max:1000'],
-        ]);
-
         auth()->user()->profile()->updateOrCreate(
             ['user_id' => auth()->id()],
             [
@@ -35,12 +33,8 @@ class ProfileController extends Controller
         return redirect()->back()->with('success', 'Profile updated');
     }
 
-    public function uploadAvatar(Request $request)
+    public function uploadAvatar(UploadAvatarRequest $request)
     {
-        $request->validate([
-            'avatar' => ['required', 'image', 'max:2048'],
-        ]);
-
         $path = $request->file('avatar')->store('avatars', 'public');
 
         auth()->user()->profile()->updateOrCreate(

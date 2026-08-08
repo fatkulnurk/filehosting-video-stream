@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Http\Concerns\AppliesTableParams;
-use App\Http\Requests\SubscribeRequest;
-use App\Models\UserSubscription;
-use App\Repositories\Interfaces\StoragePackageRepositoryInterface;
-use App\Services\Interfaces\ActivityLogServiceInterface;
-use App\Services\Interfaces\SubscriptionServiceInterface;
+use App\Contracts\Services\ActivityLogs\ActivityLogServiceInterface;
+use App\Contracts\Services\Subscriptions\SubscriptionServiceInterface;
+use App\Http\Requests\Subscriptions\SubscribeRequest;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
 class SubscriptionController extends Controller
@@ -17,41 +18,24 @@ class SubscriptionController extends Controller
 
     public function __construct(
         private SubscriptionServiceInterface $subscriptionService,
-        private StoragePackageRepositoryInterface $packageRepo,
         private ActivityLogServiceInterface $activityLog
     ) {}
 
     public function index(Request $request)
     {
         $userId = auth()->id();
-        $currentPackage = $this->subscriptionService->getUserPackage($userId);
 
         $params = $this->tableParams($request);
+        $params['filters'] = $request->only(['status']);
 
-        $history = $this->applyFilters(
-            $this->applyTableQuery(
-                UserSubscription::query()
-                    ->where('user_id', $userId)
-                    ->with('storagePackage'),
-                $params,
-                searchable: [],
-                sortable: [
-                    'status' => 'status',
-                    'start' => 'start_date',
-                    'end' => 'end_date',
-                    'package' => 'storage_package_id',
-                    'payment' => 'payment_method',
-                    'created_at' => 'created_at',
-                ],
-                defaultSort: 'created_at',
-                defaultDirection: 'desc',
-            ),
-            $request,
-            ['status' => 'status'],
-        )->paginate($params['per_page'])->withQueryString();
+        [$currentPackage, $history, $packages] = Concurrency::run([
+            fn () => $this->subscriptionService->getUserPackage($userId),
+            fn () => $this->subscriptionService->paginateForUser($userId, $params),
+            fn () => $this->subscriptionService->getActivePackages(),
+        ]);
 
         return Inertia::render('Subscriptions/Index', [
-            'packages' => $this->packageRepo->getActive(),
+            'packages' => $packages,
             'currentPackage' => $currentPackage,
             'history' => $history,
             'filters' => $this->tableFiltersWith($params, $request, ['status']),

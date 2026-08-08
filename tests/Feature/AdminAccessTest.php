@@ -201,7 +201,7 @@ class AdminAccessTest extends TestCase
         $this->assertEquals(['Beta.mp4'], $names);
 
         // Sort by views asc
-        $response = $this->actingAs($admin)->get(route('admin.files.index', ['sort' => 'views', 'direction' => 'asc', 'per_page' => 10]));
+        $response = $this->actingAs($admin)->get(route('admin.files.index', ['sort' => ['views' => 'asc'], 'per_page' => 10]));
         $payload = $response->viewData('page')['props'];
         $this->assertEquals(['Gamma.mp4', 'Alpha.mp4', 'Beta.mp4'], collect($payload['files']['data'])->pluck('name')->all());
     }
@@ -215,13 +215,13 @@ class AdminAccessTest extends TestCase
         File::create(['user_id' => $owner->id, 'name' => 'Private.mp4', 'slug' => 'private', 'is_public' => false]);
 
         // Filter by public status
-        $response = $this->actingAs($admin)->get(route('admin.files.index', ['status' => 'public', 'per_page' => 10]));
+        $response = $this->actingAs($admin)->get(route('admin.files.index', ['filter' => ['status' => 'public'], 'per_page' => 10]));
         $payload = $response->viewData('page')['props'];
         $this->assertEquals(['Public.mp4'], collect($payload['files']['data'])->pluck('name')->all());
         $this->assertEquals('public', $payload['filters']['status']);
 
         // Filter by private status
-        $response = $this->actingAs($admin)->get(route('admin.files.index', ['status' => 'private', 'per_page' => 10]));
+        $response = $this->actingAs($admin)->get(route('admin.files.index', ['filter' => ['status' => 'private'], 'per_page' => 10]));
         $payload = $response->viewData('page')['props'];
         $this->assertEquals(['Private.mp4'], collect($payload['files']['data'])->pluck('name')->all());
     }

@@ -1,15 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
+use App\Contracts\Services\Admin\AdminServiceInterface;
+use App\Contracts\Services\Directories\DirectoryServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
 use App\Http\Controllers\Controller;
-use App\Http\Concerns\AppliesTableParams;
-use App\Models\Directory;
-use App\Models\File;
-use App\Models\User;
-use App\Services\Interfaces\DirectoryServiceInterface;
-use App\Services\Interfaces\FileServiceInterface;
+use App\Http\Requests\Admin\StoreDirectoryRequest;
+use App\Http\Requests\Admin\UpdateDirectoryRequest;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
 class AdminDirectoryController extends Controller
@@ -18,56 +21,29 @@ class AdminDirectoryController extends Controller
 
     public function __construct(
         private DirectoryServiceInterface $directoryService,
-        private FileServiceInterface $fileService
+        private FileServiceInterface $fileService,
+        private AdminServiceInterface $adminService
     ) {}
 
     public function index(Request $request)
     {
         $params = $this->tableParams($request);
+        $params['filters'] = $request->only(['user_id', 'status']);
 
-        $directories = $this->applyTableQuery(
-            $this->applyFilters(
-                Directory::query()
-                    ->with(['user', 'parent'])
-                    ->withCount('files')
-                    ->withTrashed(),
-                $request,
-                [
-                    'user_id' => fn ($q, $v) => $q->where('user_id', $v),
-                    'status' => [
-                        'active' => fn ($q) => $q->whereNull('deleted_at'),
-                        'trashed' => fn ($q) => $q->onlyTrashed(),
-                    ],
-                ]
-            ),
-            $params,
-            searchable: ['name'],
-            sortable: [
-                'name' => 'name',
-                'user' => \DB::raw('(SELECT u.name FROM users u WHERE u.id = directories.user_id)'),
-                'path' => 'path',
-                'files' => 'files_count',
-                'created_at' => 'created_at',
-            ],
-            defaultSort: 'created_at',
-            defaultDirection: 'desc',
-        )->paginate($params['per_page'])->withQueryString();
+        [$directories, $users] = Concurrency::run([
+            fn () => $this->directoryService->paginateAllForAdmin($params),
+            fn () => $this->adminService->getUsersForSelect(),
+        ]);
 
         return Inertia::render('Admin/Directories/Index', [
             'directories' => $directories,
-            'users' => User::orderBy('name')->get(['id', 'name', 'email']),
+            'users' => $users,
             'filters' => $this->tableFiltersWith($params, $request, ['user_id', 'status']),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreDirectoryRequest $request)
     {
-        $request->validate([
-            'user_id' => ['required', 'uuid', 'exists:users,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'parent_id' => ['nullable', 'uuid', 'exists:directories,id'],
-        ]);
-
         $this->directoryService->create(
             $request->name,
             $request->parent_id,
@@ -77,11 +53,9 @@ class AdminDirectoryController extends Controller
         return redirect()->back()->with('success', 'Directory created');
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateDirectoryRequest $request, string $id)
     {
-        $request->validate(['name' => ['required', 'string', 'max:255']]);
-
-        $directory = Directory::withTrashed()->findOrFail($id);
+        $directory = $this->directoryService->getDirectoryForAdmin($id);
 
         $this->directoryService->update($directory, $request->name);
 
@@ -90,7 +64,7 @@ class AdminDirectoryController extends Controller
 
     public function destroy(string $id)
     {
-        $directory = Directory::withTrashed()->findOrFail($id);
+        $directory = $this->directoryService->getDirectoryForAdmin($id);
 
         if (! $directory->trashed()) {
             $this->directoryService->delete($directory);
@@ -101,15 +75,15 @@ class AdminDirectoryController extends Controller
 
     public function forceDestroy(string $id)
     {
-        $directory = Directory::withTrashed()->findOrFail($id);
+        $directory = $this->directoryService->getDirectoryForAdmin($id);
 
-        $files = File::withTrashed()->where('directory_id', $directory->id)->get();
+        $files = $this->fileService->getFilesInDirectoryWithTrashed($directory->id);
 
         foreach ($files as $file) {
             $this->fileService->forceDelete($file);
         }
 
-        $directory->forceDelete();
+        $this->directoryService->forceDelete($directory);
 
         return redirect()->route('admin.directories.index')->with('success', 'Directory permanently deleted');
     }

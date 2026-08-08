@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Services\Interfaces;
+declare(strict_types=1);
 
-use App\Models\Webhook;
+namespace App\Contracts\Services\Webhooks;
+
+use App\Models\Integrations\Webhook;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface WebhookServiceInterface
 {
@@ -14,6 +17,10 @@ interface WebhookServiceInterface
     public function delete(string $id): bool;
 
     public function getForUser(string $userId): Collection;
+
+    public function getOwnedWebhook(string $userId, string $id): Webhook;
+
+    public function paginateLogs(string $webhookId, array $params): LengthAwarePaginator;
 
     public function verifySignature(Webhook $webhook, string $payload, string $signature): bool;
 

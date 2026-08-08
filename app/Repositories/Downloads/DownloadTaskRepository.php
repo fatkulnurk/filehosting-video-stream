@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Repositories;
+declare(strict_types=1);
 
-use App\Models\DownloadTask;
-use App\Repositories\Interfaces\DownloadTaskRepositoryInterface;
+namespace App\Repositories\Downloads;
+
+use App\Contracts\Repositories\Downloads\DownloadTaskRepositoryInterface;
+use App\Models\Downloads\DownloadTask;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -34,6 +36,19 @@ class DownloadTaskRepository implements DownloadTaskRepositoryInterface
             ->where('user_id', $userId)
             ->latest()
             ->paginate($perPage);
+    }
+
+    public function paginateForUser(string $userId, array $params): LengthAwarePaginator
+    {
+        $sortable = ['type', 'status', 'progress', 'created_at'];
+        $sort = $params['sort'] ?? null;
+
+        return DownloadTask::with(['file', 'torrent', 'directory'])
+            ->where('user_id', $userId)
+            ->when(($params['search'] ?? '') !== '', fn ($q) => $q->where('source', 'LIKE', '%'.$params['search'].'%'))
+            ->when($sort && in_array($sort, $sortable, true), fn ($q) => $q->orderBy($sort, $params['direction'] ?? 'desc'), fn ($q) => $q->latest())
+            ->paginate($params['per_page'])
+            ->withQueryString();
     }
 
     public function getActiveByType(string $type): Collection

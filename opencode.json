@@ -1,8 +1,8 @@
 {
     "$schema": "https://opencode.ai/config.json",
     "instructions": [
-        ".agents/skills/ai-skills/laravel-full-skill/SKILL.md",
-        ".agents/skills/ai-skills/anti-ai-slop-bahasa-indonesia/SKILL.md"
+        "docs/ai-skills/laravel-full-skill/SKILL.md",
+        "docs/ai-skills/anti-ai-slop-bahasa-indonesia/SKILL.md"
     ],
     "mcp": {
         "laravel-boost": {

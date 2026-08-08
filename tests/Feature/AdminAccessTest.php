@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
-use App\Models\File;
-use App\Models\StoragePackage;
-use App\Models\User;
+use App\Models\Files\Directory;
+use App\Models\Files\File;
+use App\Models\Subscriptions\StoragePackage;
+use App\Models\Users\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -168,7 +171,7 @@ class AdminAccessTest extends TestCase
         $admin = User::factory()->admin()->create();
         $member = User::factory()->create();
 
-        \App\Models\Directory::create([
+        Directory::create([
             'user_id' => $member->id,
             'name' => 'Parent',
             'slug' => 'parent',

@@ -1,9 +1,7 @@
 <script setup>
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import Footer from '@/Components/Footer.vue';
-
-const page = usePage();
-const user = () => page.props.auth?.user;
+import PublicHeader from '@/Components/PublicHeader.vue';
 
 defineProps({
     appName: { type: String, default: 'FHV Stream' },
@@ -48,22 +46,9 @@ const sections = [
 
 <template>
     <div class="min-h-screen bg-surface-muted">
-        <header class="bg-brand-700">
-            <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-                <Link href="/" class="text-white text-xl font-bold">{{ appName }}</Link>
-                <div class="flex items-center gap-3">
-                    <template v-if="user()">
-                        <Link :href="route('dashboard')" class="text-white hover:text-brand-200 text-sm">Dashboard</Link>
-                    </template>
-                    <template v-else>
-                        <Link :href="route('login')" class="text-white hover:text-brand-200 text-sm">Login</Link>
-                        <Link :href="route('register')" class="bg-surface text-brand-700 px-4 py-1.5 rounded-lg text-sm font-medium">Register</Link>
-                    </template>
-                </div>
-            </div>
-        </header>
+        <PublicHeader :app-name="appName" />
 
-        <main class="max-w-4xl mx-auto px-4 py-12">
+        <main class="max-w-6xl mx-auto px-4 py-12">
             <h1 class="text-3xl font-bold text-ink mb-1">Terms of Service</h1>
             <p v-if="updatedAt" class="text-sm text-ink-soft mb-8">Last updated: {{ updatedAt }}</p>
 

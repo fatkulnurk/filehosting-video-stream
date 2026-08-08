@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
+use App\Contracts\Services\Storage\StorageServiceInterface;
 use App\Enums\StorageDriver;
 use App\Http\Controllers\Controller;
-use App\Http\Concerns\AppliesTableParams;
-use App\Http\Requests\StorageServerRequest;
-use App\Models\StorageServer;
-use App\Services\Interfaces\StorageServiceInterface;
+use App\Http\Requests\Storage\StorageServerRequest;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
 class AdminStorageController extends Controller
@@ -22,35 +24,12 @@ class AdminStorageController extends Controller
     public function index(Request $request)
     {
         $params = $this->tableParams($request);
+        $params['filters'] = $request->only(['driver', 'status']);
 
-        $servers = $this->applyTableQuery(
-            $this->applyFilters(
-                StorageServer::query(),
-                $request,
-                [
-                    'driver' => 'driver',
-                    'status' => [
-                        'active' => fn ($q) => $q->where('is_active', true),
-                        'inactive' => fn ($q) => $q->where('is_active', false),
-                    ],
-                ]
-            ),
-            $params,
-            searchable: ['name'],
-            sortable: [
-                'name' => 'name',
-                'driver' => 'driver',
-                'storage_used' => 'storage_used',
-                'created_at' => 'created_at',
-            ],
-            defaultSort: 'created_at',
-            defaultDirection: 'desc',
-        )->paginate($params['per_page'])->withQueryString();
-
-        $backupOptions = StorageServer::where('is_active', true)
-            ->where('is_primary', false)
-            ->orderBy('name')
-            ->get(['id', 'name']);
+        [$servers, $backupOptions] = Concurrency::run([
+            fn () => $this->storageService->paginateServers($params),
+            fn () => $this->storageService->getBackupOptions(),
+        ]);
 
         return Inertia::render('Admin/Storage/Index', [
             'servers' => $servers,
@@ -63,7 +42,7 @@ class AdminStorageController extends Controller
 
     public function show(string $id)
     {
-        $server = StorageServer::with('backupStorageServer')->findOrFail($id);
+        $server = $this->storageService->getServerById($id)->load('backupStorageServer');
 
         return Inertia::render('Admin/Storage/Show', [
             'server' => $server,
@@ -102,7 +81,7 @@ class AdminStorageController extends Controller
 
     public function deactivate(Request $request, string $id)
     {
-        $server = StorageServer::findOrFail($id);
+        $server = $this->storageService->getServerById($id);
 
         $this->authorize('delete', $server);
 
@@ -113,7 +92,7 @@ class AdminStorageController extends Controller
 
     public function destroy(string $id)
     {
-        $server = StorageServer::findOrFail($id);
+        $server = $this->storageService->getServerById($id);
 
         $this->authorize('delete', $server);
 

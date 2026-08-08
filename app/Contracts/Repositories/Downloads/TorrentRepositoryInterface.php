@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Repositories\Interfaces;
+declare(strict_types=1);
 
-use App\Models\Torrent;
-use App\Models\TorrentFile;
+namespace App\Contracts\Repositories\Downloads;
+
+use App\Models\Downloads\Torrent;
+use App\Models\Downloads\TorrentFile;
 
 interface TorrentRepositoryInterface
 {

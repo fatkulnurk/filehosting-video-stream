@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+declare(strict_types=1);
 
-use App\Rules\SafeDownloadUrl;
+namespace App\Http\Requests\Files;
+
+use App\Rules\Downloads\SafeDownloadUrl;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreUrlRequest extends FormRequest

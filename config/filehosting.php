@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'storage' => [
         'default_limit' => env('FILEHOSTING_DEFAULT_QUOTA', 10737418240),

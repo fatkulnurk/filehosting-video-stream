@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
+use App\Contracts\Services\Admin\AdminServiceInterface;
+use App\Contracts\Services\Subscriptions\SubscriptionServiceInterface;
 use App\Http\Controllers\Controller;
-use App\Http\Concerns\AppliesTableParams;
-use App\Models\StoragePackage;
-use App\Models\User;
-use App\Models\UserSubscription;
-use App\Services\Interfaces\SubscriptionServiceInterface;
+use App\Http\Requests\Admin\StoreSubscriptionRequest;
+use App\Http\Requests\Admin\UpdateSubscriptionRequest;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
 class AdminSubscriptionController extends Controller
@@ -16,60 +19,31 @@ class AdminSubscriptionController extends Controller
     use AppliesTableParams;
 
     public function __construct(
-        private SubscriptionServiceInterface $subscriptionService
+        private SubscriptionServiceInterface $subscriptionService,
+        private AdminServiceInterface $adminService
     ) {}
 
     public function index(Request $request)
     {
         $params = $this->tableParams($request);
+        $params['filters'] = $request->only(['status', 'package_id']);
 
-        $query = UserSubscription::query()
-            ->with(['user', 'storagePackage'])
-            ->join('users', 'users.id', '=', 'user_subscriptions.user_id')
-            ->join('storage_packages', 'storage_packages.id', '=', 'user_subscriptions.storage_package_id')
-            ->select('user_subscriptions.*');
-
-        $query = $this->applyFilters(
-            $query,
-            $request,
-            [
-                'status' => 'user_subscriptions.status',
-                'package_id' => 'user_subscriptions.storage_package_id',
-            ]
-        );
-
-        $subscriptions = $this->applyTableQuery(
-            $query,
-            $params,
-            searchable: ['users.name', 'storage_packages.name'],
-            sortable: [
-                'user' => 'users.name',
-                'package' => 'storage_packages.name',
-                'status' => 'user_subscriptions.status',
-                'start' => 'user_subscriptions.start_date',
-                'end' => 'user_subscriptions.end_date',
-                'created_at' => 'user_subscriptions.created_at',
-            ],
-            defaultSort: 'user_subscriptions.created_at',
-            defaultDirection: 'desc',
-        )->paginate($params['per_page'])->withQueryString();
+        [$subscriptions, $users, $packages] = Concurrency::run([
+            fn () => $this->subscriptionService->paginateAllForAdmin($params),
+            fn () => $this->adminService->getUsersForSelect(),
+            fn () => $this->subscriptionService->getAllPackages(),
+        ]);
 
         return Inertia::render('Admin/Subscriptions/Index', [
             'subscriptions' => $subscriptions,
-            'users' => User::orderBy('name')->get(['id', 'name', 'email']),
-            'packages' => StoragePackage::orderBy('name')->get(),
+            'users' => $users,
+            'packages' => $packages,
             'filters' => $this->tableFiltersWith($params, $request, ['status', 'package_id']),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreSubscriptionRequest $request)
     {
-        $request->validate([
-            'user_id' => ['required', 'uuid', 'exists:users,id'],
-            'package_id' => ['required', 'uuid', 'exists:storage_packages,id'],
-            'status' => ['sometimes', 'string', 'in:active,cancelled,expired'],
-        ]);
-
         try {
             $subscription = $this->subscriptionService->subscribe(
                 $request->user_id,
@@ -77,7 +51,7 @@ class AdminSubscriptionController extends Controller
             );
 
             if ($request->filled('status') && $request->status !== 'active') {
-                $subscription->update(['status' => $request->status]);
+                $this->subscriptionService->updateById($subscription->id, ['status' => $request->status]);
             }
 
             return redirect()->route('admin.subscriptions.index')->with('success', 'Subscription assigned');
@@ -86,26 +60,16 @@ class AdminSubscriptionController extends Controller
         }
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateSubscriptionRequest $request, string $id)
     {
-        $subscription = UserSubscription::findOrFail($id);
-
-        $data = $request->validate([
-            'package_id' => ['sometimes', 'uuid', 'exists:storage_packages,id'],
-            'status' => ['sometimes', 'string', 'in:active,cancelled,expired'],
-            'end_date' => ['sometimes', 'nullable', 'date'],
-        ]);
-
-        $subscription->update($data);
+        $this->subscriptionService->updateById($id, $request->validated());
 
         return redirect()->back()->with('success', 'Subscription updated');
     }
 
     public function cancel(string $userId)
     {
-        $user = User::findOrFail($userId);
-
-        $this->subscriptionService->cancelActiveSubscription($user->id);
+        $this->subscriptionService->cancelActiveSubscription($userId);
 
         return redirect()->back()->with('success', 'Active subscription cancelled');
     }

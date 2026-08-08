@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Services\Interfaces;
+declare(strict_types=1);
 
-use App\Models\File;
+namespace App\Contracts\Services\Files;
+
+use App\Models\Files\File;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 interface TrashServiceInterface
@@ -16,4 +18,6 @@ interface TrashServiceInterface
     public function getTrashedFiles(string $userId, int $perPage = 20): LengthAwarePaginator;
 
     public function purgeOlderThan(int $days): int;
+
+    public function purgeTrashed(string $userId): int;
 }

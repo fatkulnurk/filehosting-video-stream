@@ -28,6 +28,14 @@ class StreamController extends Controller
         $isOwner = $file->user_id === auth()->id();
         $isAdmin = auth()->user()?->isAdmin() ?? false;
 
+        if ($file->isPasswordProtected() && ! $isOwner && ! $isAdmin) {
+            $unlocked = $request->session()->get("file_unlocked_{$id}") === true;
+
+            if (! $unlocked) {
+                abort(403, 'Password required');
+            }
+        }
+
         if (! $file->is_public) {
             if (! $isOwner && ! $isAdmin) {
                 abort(403);
@@ -55,7 +63,7 @@ class StreamController extends Controller
 
             return response()->file($path, [
                 'Content-Type' => $media->mime_type,
-                'Content-Disposition' => 'inline; filename="'.$media->file_name.'"',
+                'Content-Disposition' => 'inline; filename="'.safe_disposition_name($media->file_name).'"',
                 'Accept-Ranges' => 'bytes',
             ]);
         }
@@ -93,7 +101,7 @@ class StreamController extends Controller
 
         $response->headers->set('Content-Type', $media->mime_type);
         $response->headers->set('Content-Length', $size);
-        $response->headers->set('Content-Disposition', 'inline; filename="'.$media->file_name.'"');
+        $response->headers->set('Content-Disposition', 'inline; filename="'.safe_disposition_name($media->file_name).'"');
         $response->headers->set('Accept-Ranges', 'bytes');
 
         return $response;

@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Contracts\Services\Files\FileServiceInterface;
 use App\Contracts\Services\Files\SubtitleServiceInterface;
 use App\Http\Requests\Files\StoreSubtitleRequest;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class SubtitleController extends Controller
@@ -51,7 +52,7 @@ class SubtitleController extends Controller
         return redirect()->back()->with('success', 'Subtitle removed');
     }
 
-    public function show(string $id, string $media): Response
+    public function show(Request $request, string $id, string $media): Response
     {
         $file = $this->fileService->getById($id);
 
@@ -64,6 +65,14 @@ class SubtitleController extends Controller
 
         if (! $file->is_public && ! $isOwner && ! $isAdmin) {
             abort(403);
+        }
+
+        if ($file->isPasswordProtected() && ! $isOwner && ! $isAdmin) {
+            $unlocked = $request->session()->get("file_unlocked_{$id}") === true;
+
+            if (! $unlocked) {
+                abort(403, 'Password required');
+            }
         }
 
         return $this->subtitleService->serve($file, $media);

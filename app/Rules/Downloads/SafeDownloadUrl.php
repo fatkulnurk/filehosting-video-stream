@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Rules;
+declare(strict_types=1);
+
+namespace App\Rules\Downloads;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;

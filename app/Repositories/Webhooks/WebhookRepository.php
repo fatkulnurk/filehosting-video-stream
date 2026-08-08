@@ -62,8 +62,7 @@ class WebhookRepository implements WebhookRepositoryInterface
             'created_at' => 'created_at',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
 
         $query = WebhookLog::query()->where('webhook_id', $webhookId);
 
@@ -71,8 +70,15 @@ class WebhookRepository implements WebhookRepositoryInterface
             $query->where('event', 'LIKE', '%'.$params['search'].'%');
         }
 
-        if ($sort && isset($sortable[$sort])) {
-            $query->orderBy($sortable[$sort], $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $query->orderBy($sortable[$field], $direction);
+            }
         } else {
             $query->orderByDesc('created_at');
         }

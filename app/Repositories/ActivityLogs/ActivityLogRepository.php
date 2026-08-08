@@ -28,16 +28,34 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
 
     public function paginateForUser(string $userId, array $params, ?string $action = null): LengthAwarePaginator
     {
-        $sortable = ['action', 'ip_address', 'description', 'created_at'];
-        $sort = $params['sort'] ?? null;
+        $sortable = [
+            'action' => 'action',
+            'ip_address' => 'ip_address',
+            'description' => 'description',
+            'created_at' => 'created_at',
+        ];
 
-        return ActivityLog::query()
+        $sorts = $params['sort'] ?? [];
+
+        $query = ActivityLog::query()
             ->where('user_id', $userId)
             ->when($action, fn ($q) => $q->where('action', $action))
-            ->when(($params['search'] ?? '') !== '', fn ($q) => $q->where('action', 'LIKE', '%'.$params['search'].'%'))
-            ->when($sort && in_array($sort, $sortable, true), fn ($q) => $q->orderBy($sort, $params['direction'] ?? 'asc'), fn ($q) => $q->latest())
-            ->paginate($params['per_page'])
-            ->withQueryString();
+            ->when(($params['search'] ?? '') !== '', fn ($q) => $q->where('action', 'LIKE', '%'.$params['search'].'%'));
+
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $query->orderBy($sortable[$field], $direction);
+            }
+        } else {
+            $query->latest();
+        }
+
+        return $query->paginate($params['per_page'])->withQueryString();
     }
 
     public function actionsForUser(string $userId): Collection
@@ -58,8 +76,7 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
             'created_at' => 'created_at',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
         $action = $params['filters']['action'] ?? null;
 
         $query = ActivityLog::query()->with('user');
@@ -72,12 +89,20 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
             $query->where('action', 'LIKE', '%'.$params['search'].'%');
         }
 
-        if ($sort && isset($sortable[$sort])) {
-            $target = $sortable[$sort];
-            if ($target instanceof Expression) {
-                $query->orderByRaw($target->getValue($query->getQuery()->getGrammar()).' '.$direction);
-            } else {
-                $query->orderBy($target, $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $target = $sortable[$field];
+
+                if ($target instanceof Expression) {
+                    $query->orderByRaw($target->getValue($query->getQuery()->getGrammar()).' '.$direction);
+                } else {
+                    $query->orderBy($target, $direction);
+                }
             }
         } else {
             $query->orderByDesc('created_at');

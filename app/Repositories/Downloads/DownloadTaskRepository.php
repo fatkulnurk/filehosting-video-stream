@@ -40,15 +40,37 @@ class DownloadTaskRepository implements DownloadTaskRepositoryInterface
 
     public function paginateForUser(string $userId, array $params): LengthAwarePaginator
     {
-        $sortable = ['type', 'status', 'progress', 'created_at'];
-        $sort = $params['sort'] ?? null;
+        $sortable = [
+            'type' => 'type',
+            'status' => 'status',
+            'progress' => 'progress',
+            'created_at' => 'created_at',
+        ];
 
-        return DownloadTask::with(['file', 'torrent', 'directory'])
+        $sorts = $params['sort'] ?? [];
+        $status = $params['filters']['status'] ?? null;
+        $type = $params['filters']['type'] ?? null;
+
+        $query = DownloadTask::with(['file', 'torrent', 'directory'])
             ->where('user_id', $userId)
-            ->when(($params['search'] ?? '') !== '', fn ($q) => $q->where('source', 'LIKE', '%'.$params['search'].'%'))
-            ->when($sort && in_array($sort, $sortable, true), fn ($q) => $q->orderBy($sort, $params['direction'] ?? 'desc'), fn ($q) => $q->latest())
-            ->paginate($params['per_page'])
-            ->withQueryString();
+            ->when($status && $status !== 'all', fn ($q) => $q->where('status', $status))
+            ->when($type && $type !== 'all', fn ($q) => $q->where('type', $type))
+            ->when(($params['search'] ?? '') !== '', fn ($q) => $q->where('source', 'LIKE', '%'.$params['search'].'%'));
+
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'desc';
+                $query->orderBy($sortable[$field], $direction);
+            }
+        } else {
+            $query->latest();
+        }
+
+        return $query->paginate($params['per_page'])->withQueryString();
     }
 
     public function getActiveByType(string $type): Collection

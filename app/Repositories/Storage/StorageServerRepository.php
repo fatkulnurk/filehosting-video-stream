@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories\Storage;
 
 use App\Contracts\Repositories\Storage\StorageServerRepositoryInterface;
+use App\Enums\StorageStatusFilter;
 use App\Models\Storage\StorageServer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -122,8 +123,7 @@ class StorageServerRepository implements StorageServerRepositoryInterface
             'created_at' => 'created_at',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
         $filters = $params['filters'] ?? [];
 
         $query = StorageServer::query();
@@ -135,9 +135,9 @@ class StorageServerRepository implements StorageServerRepositoryInterface
 
         $status = $filters['status'] ?? null;
         if ($status && $status !== 'all') {
-            match ($status) {
-                'active' => $query->where('is_active', true),
-                'inactive' => $query->where('is_active', false),
+            match (StorageStatusFilter::tryFrom($status)) {
+                StorageStatusFilter::Active => $query->where('is_active', true),
+                StorageStatusFilter::Inactive => $query->where('is_active', false),
                 default => null,
             };
         }
@@ -146,8 +146,15 @@ class StorageServerRepository implements StorageServerRepositoryInterface
             $query->where('name', 'LIKE', '%'.$params['search'].'%');
         }
 
-        if ($sort && isset($sortable[$sort])) {
-            $query->orderBy($sortable[$sort], $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $query->orderBy($sortable[$field], $direction);
+            }
         } else {
             $query->orderByDesc('created_at');
         }

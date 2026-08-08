@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories\Storage;
 
 use App\Contracts\Repositories\Storage\StoragePackageRepositoryInterface;
+use App\Enums\StorageStatusFilter;
 use App\Models\Subscriptions\StoragePackage;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -59,16 +60,15 @@ class StoragePackageRepository implements StoragePackageRepositoryInterface
             'created_at' => 'created_at',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
         $status = $params['filters']['status'] ?? null;
 
         $query = StoragePackage::query();
 
         if ($status && $status !== 'all') {
-            match ($status) {
-                'active' => $query->where('is_active', true),
-                'inactive' => $query->where('is_active', false),
+            match (StorageStatusFilter::tryFrom($status)) {
+                StorageStatusFilter::Active => $query->where('is_active', true),
+                StorageStatusFilter::Inactive => $query->where('is_active', false),
                 default => null,
             };
         }
@@ -77,8 +77,15 @@ class StoragePackageRepository implements StoragePackageRepositoryInterface
             $query->where('name', 'LIKE', '%'.$params['search'].'%');
         }
 
-        if ($sort && isset($sortable[$sort])) {
-            $query->orderBy($sortable[$sort], $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $query->orderBy($sortable[$field], $direction);
+            }
         } else {
             $query->orderBy('sort_order');
         }

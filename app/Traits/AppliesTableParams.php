@@ -16,18 +16,21 @@ trait AppliesTableParams
     protected array $perPageOptions = [10, 25, 50, 100];
 
     /**
-     * Resolve table params (search / sort / direction / per_page) from the request.
+     * Resolve table params (search / sort / per_page / filters) from the request.
      */
     protected function tableParams(Request $request, int $defaultPerPage = 10): array
     {
-        $sort = $request->input('sort');
-        $direction = strtolower((string) $request->input('direction', 'asc'));
+        $sort = $request->input('sort', []);
+
+        if (is_string($sort) && $sort !== '') {
+            $sort = [$sort => strtolower((string) $request->input('direction', 'asc'))];
+        }
 
         return [
             'search' => trim((string) $request->input('search', '')),
-            'sort' => is_string($sort) && $sort !== '' ? $sort : null,
-            'direction' => in_array($direction, ['asc', 'desc']) ? $direction : 'asc',
+            'sort' => is_array($sort) ? $sort : [],
             'per_page' => $this->resolvePerPage($request->input('per_page', $defaultPerPage), $defaultPerPage),
+            'filters' => (array) $request->input('filter', []),
         ];
     }
 
@@ -48,8 +51,7 @@ trait AppliesTableParams
     {
         return [
             'search' => $params['search'],
-            'sort' => $params['sort'],
-            'direction' => $params['direction'],
+            'sort' => $params['sort'] ?? [],
             'per_page' => $params['per_page'],
         ];
     }
@@ -77,15 +79,22 @@ trait AppliesTableParams
             });
         }
 
-        $sort = $params['sort'] ?? null;
-        $direction = $params['direction'] ?? $defaultDirection;
+        $sorts = $params['sort'] ?? [];
 
-        if ($sort && array_key_exists($sort, $sortable)) {
-            $target = $sortable[$sort];
-            if ($target instanceof Expression) {
-                $query->orderByRaw($target->getValue($query->getQuery()->getGrammar()).' '.$direction);
-            } else {
-                $query->orderBy($target, $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! array_key_exists($field, $sortable)) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'desc';
+                $target = $sortable[$field];
+
+                if ($target instanceof Expression) {
+                    $query->orderByRaw($target->getValue($query->getQuery()->getGrammar()).' '.$direction);
+                } else {
+                    $query->orderBy($target, $direction);
+                }
             }
         } elseif ($defaultSort) {
             $query->orderBy($defaultSort, $defaultDirection);
@@ -103,11 +112,11 @@ trait AppliesTableParams
     protected function applyFilters($query, Request $request, array $filters = [])
     {
         foreach ($filters as $key => $target) {
-            if (! $request->filled($key)) {
+            if (! $request->filled('filter.'.$key)) {
                 continue;
             }
 
-            $value = $request->input($key);
+            $value = $request->input('filter.'.$key);
 
             if ($value === 'all' || $value === '') {
                 continue;
@@ -143,7 +152,7 @@ trait AppliesTableParams
         $filters = $this->tableFilters($params);
 
         foreach ($keys as $key) {
-            $filters[$key] = $request->filled($key) ? $request->input($key) : '';
+            $filters[$key] = $request->filled('filter.'.$key) ? $request->input('filter.'.$key) : '';
         }
 
         return $filters;

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Repositories\Files;
 
 use App\Contracts\Repositories\Files\FileRepositoryInterface;
+use App\Enums\FileStatusFilter;
+use App\Enums\FileTypeFilter;
 use App\Models\Files\File;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Collection;
@@ -155,8 +157,7 @@ class FileRepository implements FileRepositoryInterface
             'created_at' => 'created_at',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
 
         $query = File::query()
             ->where('user_id', $userId)
@@ -168,8 +169,15 @@ class FileRepository implements FileRepositoryInterface
             $query->where('name', 'LIKE', '%'.$params['search'].'%');
         }
 
-        if ($sort && isset($sortable[$sort])) {
-            $this->applySortable($query, $sortable[$sort], $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $this->applySortable($query, $sortable[$field], $direction);
+            }
         } else {
             $query->orderByDesc('created_at');
         }
@@ -185,8 +193,7 @@ class FileRepository implements FileRepositoryInterface
             'deleted_at' => 'deleted_at',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
 
         $query = File::query()
             ->where('user_id', $userId)
@@ -197,8 +204,15 @@ class FileRepository implements FileRepositoryInterface
             $query->where('name', 'LIKE', '%'.$params['search'].'%');
         }
 
-        if ($sort && isset($sortable[$sort])) {
-            $this->applySortable($query, $sortable[$sort], $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $this->applySortable($query, $sortable[$field], $direction);
+            }
         } else {
             $query->orderByDesc('deleted_at');
         }
@@ -233,8 +247,7 @@ class FileRepository implements FileRepositoryInterface
             'is_public' => 'is_public',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
         $filters = $params['filters'] ?? [];
 
         $query = File::query()
@@ -248,21 +261,21 @@ class FileRepository implements FileRepositoryInterface
 
         $status = $filters['status'] ?? null;
         if ($status && $status !== 'all') {
-            match ($status) {
-                'public' => $query->where('is_public', true),
-                'private' => $query->where('is_public', false),
-                'trashed' => $query->onlyTrashed(),
-                'active' => $query->whereNull('deleted_at'),
+            match (FileStatusFilter::tryFrom($status)) {
+                FileStatusFilter::Public => $query->where('is_public', true),
+                FileStatusFilter::Private => $query->where('is_public', false),
+                FileStatusFilter::Trashed => $query->onlyTrashed(),
+                FileStatusFilter::Active => $query->whereNull('deleted_at'),
                 default => null,
             };
         }
 
         $type = $filters['type'] ?? null;
         if ($type && $type !== 'all') {
-            match ($type) {
-                'video' => $query->whereHas('media', fn ($m) => $m->where('mime_type', 'LIKE', 'video/%')),
-                'image' => $query->whereHas('media', fn ($m) => $m->where('mime_type', 'LIKE', 'image/%')),
-                'document' => $query->whereDoesntHave('media', fn ($m) => $m->where('mime_type', 'LIKE', 'video/%')->orWhere('mime_type', 'LIKE', 'image/%')),
+            match (FileTypeFilter::tryFrom($type)) {
+                FileTypeFilter::Video => $query->whereHas('media', fn ($m) => $m->where('mime_type', 'LIKE', 'video/%')),
+                FileTypeFilter::Image => $query->whereHas('media', fn ($m) => $m->where('mime_type', 'LIKE', 'image/%')),
+                FileTypeFilter::Document => $query->whereDoesntHave('media', fn ($m) => $m->where('mime_type', 'LIKE', 'video/%')->orWhere('mime_type', 'LIKE', 'image/%')),
                 default => null,
             };
         }
@@ -271,8 +284,15 @@ class FileRepository implements FileRepositoryInterface
             $query->where('name', 'LIKE', '%'.$params['search'].'%');
         }
 
-        if ($sort && isset($sortable[$sort])) {
-            $this->applySortable($query, $sortable[$sort], $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $this->applySortable($query, $sortable[$field], $direction);
+            }
         } else {
             $query->orderByDesc('created_at');
         }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories\Directories;
 
 use App\Contracts\Repositories\Directories\DirectoryRepositoryInterface;
+use App\Enums\DirectoryStatusFilter;
 use App\Models\Files\Directory;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Collection;
@@ -140,8 +141,7 @@ class DirectoryRepository implements DirectoryRepositoryInterface
             'created_at' => 'created_at',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
         $filters = $params['filters'] ?? [];
 
         $query = Directory::query()
@@ -156,9 +156,9 @@ class DirectoryRepository implements DirectoryRepositoryInterface
 
         $status = $filters['status'] ?? null;
         if ($status && $status !== 'all') {
-            match ($status) {
-                'active' => $query->whereNull('deleted_at'),
-                'trashed' => $query->onlyTrashed(),
+            match (DirectoryStatusFilter::tryFrom($status)) {
+                DirectoryStatusFilter::Active => $query->whereNull('deleted_at'),
+                DirectoryStatusFilter::Trashed => $query->onlyTrashed(),
                 default => null,
             };
         }
@@ -167,12 +167,20 @@ class DirectoryRepository implements DirectoryRepositoryInterface
             $query->where('name', 'LIKE', '%'.$params['search'].'%');
         }
 
-        if ($sort && isset($sortable[$sort])) {
-            $target = $sortable[$sort];
-            if ($target instanceof Expression) {
-                $query->orderByRaw($target->getValue($query->getQuery()->getGrammar()).' '.$direction);
-            } else {
-                $query->orderBy($target, $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $target = $sortable[$field];
+
+                if ($target instanceof Expression) {
+                    $query->orderByRaw($target->getValue($query->getQuery()->getGrammar()).' '.$direction);
+                } else {
+                    $query->orderBy($target, $direction);
+                }
             }
         } else {
             $query->orderByDesc('created_at');

@@ -66,8 +66,7 @@ class UserSubscriptionRepository implements UserSubscriptionRepositoryInterface
             'created_at' => 'created_at',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
         $status = $params['filters']['status'] ?? null;
 
         $query = UserSubscription::query()
@@ -78,8 +77,15 @@ class UserSubscriptionRepository implements UserSubscriptionRepositoryInterface
             $query->where('status', $status);
         }
 
-        if ($sort && isset($sortable[$sort])) {
-            $query->orderBy($sortable[$sort], $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $query->orderBy($sortable[$field], $direction);
+            }
         } else {
             $query->orderByDesc('created_at');
         }
@@ -98,8 +104,7 @@ class UserSubscriptionRepository implements UserSubscriptionRepositoryInterface
             'created_at' => 'user_subscriptions.created_at',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
         $status = $params['filters']['status'] ?? null;
         $packageId = $params['filters']['package_id'] ?? null;
 
@@ -124,8 +129,15 @@ class UserSubscriptionRepository implements UserSubscriptionRepositoryInterface
             });
         }
 
-        if ($sort && isset($sortable[$sort])) {
-            $query->orderBy($sortable[$sort], $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $query->orderBy($sortable[$field], $direction);
+            }
         } else {
             $query->orderByDesc('user_subscriptions.created_at');
         }

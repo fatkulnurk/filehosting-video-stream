@@ -51,19 +51,26 @@ class FileAccessLogRepository implements FileAccessLogRepositoryInterface
             'created_at' => 'created_at',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
 
         $query = FileAccessLog::query()
             ->where('user_id', $userId)
             ->with('file.media');
 
-        if ($sort && isset($sortable[$sort])) {
-            $target = $sortable[$sort];
-            if ($target instanceof Expression) {
-                $query->orderByRaw($target->getValue($query->getQuery()->getGrammar()).' '.$direction);
-            } else {
-                $query->orderBy($target, $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $target = $sortable[$field];
+
+                if ($target instanceof Expression) {
+                    $query->orderByRaw($target->getValue($query->getQuery()->getGrammar()).' '.$direction);
+                } else {
+                    $query->orderBy($target, $direction);
+                }
             }
         } else {
             $query->orderByDesc('created_at');

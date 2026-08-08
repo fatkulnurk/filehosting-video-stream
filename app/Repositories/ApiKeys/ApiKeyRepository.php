@@ -33,15 +33,40 @@ class ApiKeyRepository implements ApiKeyRepositoryInterface
 
     public function paginateForUser(string $userId, array $params): LengthAwarePaginator
     {
-        $sortable = ['name', 'rate_limit', 'last_used_at', 'created_at'];
-        $sort = $params['sort'] ?? null;
+        $sortable = [
+            'name' => 'name',
+            'rate_limit' => 'rate_limit',
+            'last_used_at' => 'last_used_at',
+            'created_at' => 'created_at',
+        ];
 
-        return ApiKey::query()
+        $sorts = $params['sort'] ?? [];
+
+        $query = ApiKey::query()
             ->where('user_id', $userId)
-            ->when(($params['search'] ?? '') !== '', fn ($q) => $q->where('name', 'LIKE', '%'.$params['search'].'%'))
-            ->when($sort && in_array($sort, $sortable, true), fn ($q) => $q->orderBy($sort, $params['direction'] ?? 'desc'), fn ($q) => $q->latest())
-            ->paginate($params['per_page'])
-            ->withQueryString();
+            ->when(($params['search'] ?? '') !== '', fn ($q) => $q->where('name', 'LIKE', '%'.$params['search'].'%'));
+
+        $this->applySorts($query, $sorts, $sortable, 'created_at');
+
+        return $query->paginate($params['per_page'])->withQueryString();
+    }
+
+    private function applySorts($query, array $sorts, array $sortable, string $defaultColumn): void
+    {
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'desc';
+                $query->orderBy($sortable[$field], $direction);
+            }
+
+            return;
+        }
+
+        $query->orderByDesc($defaultColumn);
     }
 
     public function update(string $id, array $data): ApiKey

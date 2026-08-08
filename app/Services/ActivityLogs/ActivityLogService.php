@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Models\ActivityLog;
-use App\Repositories\Interfaces\ActivityLogRepositoryInterface;
-use App\Services\Interfaces\ActivityLogServiceInterface;
+namespace App\Services\ActivityLogs;
+
+use App\Contracts\Repositories\ActivityLogs\ActivityLogRepositoryInterface;
+use App\Contracts\Services\ActivityLogs\ActivityLogServiceInterface;
+use App\Models\ActivityLogs\ActivityLog;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class ActivityLogService implements ActivityLogServiceInterface
 {
@@ -29,6 +32,26 @@ class ActivityLogService implements ActivityLogServiceInterface
     public function paginate(?string $userId = null, int $perPage = 30): LengthAwarePaginator
     {
         return $this->logRepo->paginate($userId, $perPage);
+    }
+
+    public function paginateForUser(string $userId, array $params, ?string $action = null): LengthAwarePaginator
+    {
+        return $this->logRepo->paginateForUser($userId, $params, $action);
+    }
+
+    public function paginateForAdmin(array $params): LengthAwarePaginator
+    {
+        return $this->logRepo->paginateForAdmin($params);
+    }
+
+    public function allActions(): Collection
+    {
+        return $this->logRepo->allActions();
+    }
+
+    public function actionsForUser(string $userId): Collection
+    {
+        return $this->logRepo->actionsForUser($userId);
     }
 
     public function cleanupOld(int $days): int

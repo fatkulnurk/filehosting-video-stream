@@ -93,7 +93,7 @@ const copySecret = () => navigator.clipboard.writeText(secretValue.value);
         </PageHeader>
 
         <div class="space-y-3">
-            <div v-for="webhook in webhooks" :key="webhook.id" class="bg-surface rounded-xl shadow p-5">
+            <div v-for="webhook in webhooks" :key="webhook.id" class="panel p-5">
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="flex items-center gap-2">
@@ -103,18 +103,18 @@ const copySecret = () => navigator.clipboard.writeText(secretValue.value);
                         <div class="mt-1 flex flex-wrap gap-1">
                             <Badge v-for="ev in webhook.events" :key="ev" variant="brand">{{ ev }}</Badge>
                         </div>
-                        <div class="mt-2 text-xs text-ink-faint">
+                        <div class="mt-2 text-xs text-faint">
                             {{ webhook.failure_count }} failure(s) · Last triggered: {{ webhook.last_triggered_at ? new Date(webhook.last_triggered_at).toLocaleString() : 'Never' }}
                         </div>
                     </div>
                     <div class="flex gap-1">
-                        <Link :href="route('webhooks.logs', webhook.id)" class="p-1.5 hover:bg-surface-soft rounded text-ink-soft hover:text-brand-800" title="Logs"><DocumentTextIcon class="w-4 h-4" /></Link>
-                        <button type="button" @click="regenerate(webhook)" class="p-1.5 hover:bg-surface-soft rounded text-ink-soft hover:text-warning-600" title="Regenerate secret"><ArrowPathIcon class="w-4 h-4" /></button>
-                        <button type="button" @click="remove(webhook)" class="p-1.5 hover:bg-danger-100 rounded text-ink-soft hover:text-danger-600" title="Delete"><TrashIcon class="w-4 h-4" /></button>
+                        <Link :href="route('webhooks.logs', webhook.id)" class="btn-icon" title="Logs"><DocumentTextIcon class="w-4 h-4" /></Link>
+                        <button type="button" @click="regenerate(webhook)" class="btn-icon hover:text-warning-600" title="Regenerate secret"><ArrowPathIcon class="w-4 h-4" /></button>
+                        <button type="button" @click="remove(webhook)" class="btn-icon-danger" title="Delete"><TrashIcon class="w-4 h-4" /></button>
                     </div>
                 </div>
             </div>
-            <div v-if="webhooks.length === 0" class="bg-surface rounded-xl shadow p-16 text-center text-ink-faint">
+            <div v-if="webhooks.length === 0" class="panel p-16 text-center text-faint">
                 No webhooks configured yet.
             </div>
         </div>
@@ -123,12 +123,11 @@ const copySecret = () => navigator.clipboard.writeText(secretValue.value);
         <Modal :show="showAdd" :title="editing ? 'Edit Webhook' : 'Create Webhook'" @close="showAdd = false">
             <form @submit.prevent="submit" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Endpoint URL</label>
-                    <input v-model="form.url" type="url" required placeholder="https://example.com/webhook"
-                        class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Endpoint URL</label>
+                    <input v-model="form.url" type="url" required placeholder="https://example.com/webhook" class="input" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-2">Events</label>
+                    <label class="label mb-2">Events</label>
                     <div class="space-y-1.5 max-h-40 overflow-y-auto">
                         <label v-for="ev in events" :key="ev" class="flex items-center text-sm text-ink-body">
                             <input v-model="form.events" type="checkbox" :value="ev" class="rounded mr-2" />
@@ -137,16 +136,15 @@ const copySecret = () => navigator.clipboard.writeText(secretValue.value);
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Secret (optional, for HMAC signing)</label>
-                    <input v-model="form.secret" type="text" :placeholder="editing ? '(keep blank to keep current)' : 'Auto-generated if empty'"
-                        class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Secret (optional, for HMAC signing)</label>
+                    <input v-model="form.secret" type="text" :placeholder="editing ? '(keep blank to keep current)' : 'Auto-generated if empty'" class="input" />
                 </div>
                 <label class="flex items-center text-sm text-ink-body">
                     <input v-model="form.is_active" type="checkbox" class="rounded mr-2" /> Active
                 </label>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showAdd = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">{{ editing ? 'Save' : 'Create' }}</button>
+                    <button type="button" @click="showAdd = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">{{ editing ? 'Save' : 'Create' }}</button>
                 </div>
             </form>
         </Modal>
@@ -154,13 +152,13 @@ const copySecret = () => navigator.clipboard.writeText(secretValue.value);
         <!-- Secret modal -->
         <Modal :show="showSecret" title="Webhook Secret" @close="showSecret = false">
             <div class="space-y-4">
-                <p class="text-sm text-ink-muted">Save this secret — it's shown only once. Use it to verify incoming signatures.</p>
+                <p class="text-sm text-muted">Save this secret — it's shown only once. Use it to verify incoming signatures.</p>
                 <div class="bg-surface-muted border rounded-lg p-3 flex items-center gap-2">
                     <code class="text-sm break-all flex-1">{{ secretValue }}</code>
-                    <button type="button" @click="copySecret" class="text-sm text-brand-700 hover:underline">Copy</button>
+                    <button type="button" @click="copySecret" class="link text-sm">Copy</button>
                 </div>
                 <div class="flex justify-end">
-                    <button type="button" @click="showSecret = false" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Done</button>
+                    <button type="button" @click="showSecret = false" class="btn btn-primary btn-md">Done</button>
                 </div>
             </div>
         </Modal>

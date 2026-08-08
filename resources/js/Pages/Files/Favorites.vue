@@ -35,7 +35,7 @@ const headers = [
             <template #cell-name="{ row }">
                 <div class="flex items-center gap-2">
                     <StarIcon class="w-4 h-4 text-warning-500" />
-                    <Link :href="route('files.show', row.file.id)" class="text-brand-700 hover:underline font-medium">{{ row.file.name }}</Link>
+                    <Link :href="route('files.show', row.file.id)" class="link font-medium">{{ row.file.name }}</Link>
                 </div>
             </template>
             <template #cell-size="{ row }">{{ formatBytes(mediaOf(row.file)?.size || 0) }}</template>

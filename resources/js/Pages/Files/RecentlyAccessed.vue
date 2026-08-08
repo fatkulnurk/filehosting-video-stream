@@ -34,8 +34,8 @@ const headers = [
         >
             <template #cell-name="{ row }">
                 <div class="flex items-center gap-2">
-                    <ClockIcon class="w-4 h-4 text-ink-faint" />
-                    <Link :href="route('files.show', row.file.id)" class="text-brand-700 hover:underline font-medium">{{ row.file.name }}</Link>
+                    <ClockIcon class="w-4 h-4 text-faint" />
+                    <Link :href="route('files.show', row.file.id)" class="link font-medium">{{ row.file.name }}</Link>
                 </div>
             </template>
             <template #cell-size="{ row }">{{ formatBytes(mediaOf(row.file)?.size || 0) }}</template>

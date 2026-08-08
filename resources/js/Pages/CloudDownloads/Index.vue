@@ -71,20 +71,20 @@ const openFile = (task) => {
             </template>
         </PageHeader>
 
-        <div v-if="tasks.data.length === 0" class="bg-surface rounded-xl shadow p-10 text-center">
-            <p class="text-sm text-ink-soft">No downloads yet. Upload files from a URL or torrent magnet link.</p>
+        <div v-if="tasks.data.length === 0" class="panel p-10 text-center">
+            <p class="text-sm text-soft">No downloads yet. Upload files from a URL or torrent magnet link.</p>
         </div>
 
-        <div v-else class="bg-surface rounded-xl shadow divide-y divide-line">
+        <div v-else class="panel divide-y divide-line">
             <div v-for="task in tasks.data" :key="task.id" class="p-4 flex items-center gap-4">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
                         <span
-                            class="text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-surface-soft text-ink-soft"
+                            class="text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-surface-soft text-soft"
                         >{{ task.type }}</span>
                         <span class="text-sm font-medium text-ink-strong truncate">{{ task.source_display }}</span>
                     </div>
-                    <div class="text-xs text-ink-faint mt-1">
+                    <div class="text-xs text-faint mt-1">
                         {{ new Date(task.created_at).toLocaleString() }}
                         <span v-if="task.torrent_id && task.torrent"> · {{ task.torrent.name }}</span>
                     </div>

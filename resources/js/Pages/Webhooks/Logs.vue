@@ -22,7 +22,7 @@ const headers = [
 <template>
     <div>
         <div class="mb-4">
-            <Link :href="route('webhooks.index')" class="text-sm text-brand-700 hover:underline">← Back to webhooks</Link>
+            <Link :href="route('webhooks.index')" class="link text-sm">← Back to webhooks</Link>
         </div>
 
         <PageHeader title="Webhook Logs" :subtitle="String(webhook.url)" />

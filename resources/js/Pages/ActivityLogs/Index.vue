@@ -40,7 +40,7 @@ const filterOptions = [
                 <code class="bg-surface-soft text-ink-body text-xs px-2 py-1 rounded">{{ row.action }}</code>
             </template>
             <template #cell-description="{ row }">
-                {{ row.description }} <span v-if="row.properties?.name" class="text-ink-faint">— {{ row.properties.name }}</span>
+                {{ row.description }} <span v-if="row.properties?.name" class="text-faint">— {{ row.properties.name }}</span>
             </template>
             <template #cell-ip="{ row }">{{ row.ip_address || '—' }}</template>
             <template #cell-time="{ row }">{{ new Date(row.created_at).toLocaleString() }}</template>

@@ -74,7 +74,7 @@ const filterOptions = [
             <template #cell-share="{ row }">{{ new Date(row.created_at).toLocaleDateString() }}</template>
             <template #cell-actions="{ row }">
                 <div class="flex justify-end gap-1">
-                    <button type="button" @click="removeShare(row)" class="p-1.5 hover:bg-danger-100 rounded text-ink-faint hover:text-danger-600"><TrashIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="removeShare(row)" class="btn-icon-danger"><TrashIcon class="w-4 h-4" /></button>
                 </div>
             </template>
             <template #empty>

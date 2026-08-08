@@ -59,11 +59,11 @@ watch(avatarFile, (val) => {
 
 <template>
     <div class="max-w-3xl space-y-6">
-        <h1 class="text-2xl font-bold text-ink">Profile Settings</h1>
+        <h1 class="page-title">Profile Settings</h1>
 
         <!-- Profile info -->
-        <div class="bg-surface rounded-xl shadow p-6">
-            <h2 class="text-lg font-semibold text-ink mb-4">Profile Information</h2>
+        <div class="panel p-6">
+            <h2 class="section-title mb-4">Profile Information</h2>
 
             <div class="flex items-center gap-4 mb-6">
                 <div class="w-16 h-16 rounded-full bg-brand-600 text-white flex items-center justify-center text-2xl font-bold">
@@ -77,46 +77,46 @@ watch(avatarFile, (val) => {
             <form @submit.prevent="submitProfile" class="space-y-4">
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Name</label>
-                        <input v-model="profileForm.name" type="text" placeholder="Your name" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Name</label>
+                        <input v-model="profileForm.name" type="text" placeholder="Your name" class="input" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Email</label>
-                        <input v-model="profileForm.email" type="email" placeholder="you@example.com" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Email</label>
+                        <input v-model="profileForm.email" type="email" placeholder="you@example.com" class="input" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Phone</label>
-                        <input v-model="profileForm.phone" type="text" placeholder="+1 (555) 000-0000" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Phone</label>
+                        <input v-model="profileForm.phone" type="text" placeholder="+1 (555) 000-0000" class="input" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Bio</label>
-                        <input v-model="profileForm.bio" type="text" placeholder="Tell us a little about yourself" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Bio</label>
+                        <input v-model="profileForm.bio" type="text" placeholder="Tell us a little about yourself" class="input" />
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Save Info</button>
-                    <button type="button" @click="submitProfileExtra" class="bg-surface-soft hover:bg-line-soft text-ink-body px-4 py-2 rounded-lg text-sm font-medium">Save Phone & Bio</button>
+                    <button type="submit" class="btn btn-primary btn-md">Save Info</button>
+                    <button type="button" @click="submitProfileExtra" class="btn btn-secondary btn-md">Save Phone & Bio</button>
                 </div>
             </form>
         </div>
 
         <!-- Password -->
-        <div class="bg-surface rounded-xl shadow p-6">
-            <h2 class="text-lg font-semibold text-ink mb-4">Update Password</h2>
+        <div class="panel p-6">
+            <h2 class="section-title mb-4">Update Password</h2>
             <form @submit.prevent="submitPassword" class="space-y-4 max-w-md">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Current Password</label>
-                    <input v-model="passwordForm.current_password" type="password" placeholder="Enter current password" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Current Password</label>
+                    <input v-model="passwordForm.current_password" type="password" placeholder="Enter current password" required class="input" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">New Password</label>
-                    <input v-model="passwordForm.password" type="password" placeholder="New password" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">New Password</label>
+                    <input v-model="passwordForm.password" type="password" placeholder="New password" required class="input" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Confirm New Password</label>
-                    <input v-model="passwordForm.password_confirmation" type="password" placeholder="Repeat new password" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Confirm New Password</label>
+                    <input v-model="passwordForm.password_confirmation" type="password" placeholder="Repeat new password" required class="input" />
                 </div>
-                <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Update Password</button>
+                <button type="submit" class="btn btn-primary btn-md">Update Password</button>
             </form>
         </div>
 

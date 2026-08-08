@@ -46,7 +46,7 @@ const filterOptions = [
             :filter-options="filterOptions"
         >
             <template #cell-file="{ row }">
-                <Link :href="route('files.show', row.file.id)" class="text-brand-700 hover:underline font-medium">{{ row.file.name }}</Link>
+                <Link :href="route('files.show', row.file.id)" class="link font-medium">{{ row.file.name }}</Link>
             </template>
             <template #cell-by="{ row }">{{ row.shared_by_user?.name || row.shared_by }}</template>
             <template #cell-permission="{ row }">

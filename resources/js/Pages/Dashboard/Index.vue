@@ -30,8 +30,8 @@ const statCards = [
 
 <template>
     <div>
-        <h1 class="text-2xl font-bold text-ink mb-1">Welcome back!</h1>
-        <p class="text-ink-soft mb-6">Manage your files, storage, and analytics.</p>
+        <h1 class="page-title mb-1">Welcome back!</h1>
+        <p class="text-soft mb-6">Manage your files, storage, and analytics.</p>
 
         <!-- Stats -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -44,7 +44,7 @@ const statCards = [
                 <div class="text-2xl font-bold text-brand-700">
                     {{ stat.key === 'storage' ? formatBytes(stats.storage_used) : stats[stat.key].toLocaleString() }}
                 </div>
-                <div class="text-sm text-ink-soft mt-0.5">
+                <div class="text-sm text-soft mt-0.5">
                     {{ stat.label }}
                     <template v-if="stat.key === 'storage' && stats.storage_limit">/ {{ formatBytes(stats.storage_limit) }}</template>
                     <template v-else-if="stat.key === 'storage'">(unlimited)</template>
@@ -54,13 +54,13 @@ const statCards = [
 
         <DataTable :headers="headers" :rows="recentFiles" client-sort :show-search="false">
             <template #cell-name="{ row }">
-                <Link :href="route('files.show', row.id)" class="text-brand-700 hover:underline">{{ row.name }}</Link>
+                <Link :href="route('files.show', row.id)" class="link">{{ row.name }}</Link>
             </template>
             <template #cell-size="{ row }">{{ formatBytes(row.media?.[0]?.size || 0) }}</template>
             <template #cell-views="{ row }">{{ row.views.toLocaleString() }}</template>
             <template #cell-downloads="{ row }">{{ row.downloads.toLocaleString() }}</template>
             <template #empty>
-                No files yet. <Link :href="route('files.index')" class="text-brand-700">Upload your first file</Link>
+                No files yet. <Link :href="route('files.index')" class="link">Upload your first file</Link>
             </template>
         </DataTable>
     </div>

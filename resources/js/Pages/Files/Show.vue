@@ -157,7 +157,7 @@ const deleteFile = async () => {
 
         <!-- Main -->
         <div class="lg:col-span-2 space-y-6">
-            <div class="bg-surface rounded-xl shadow p-5">
+            <div class="panel p-5">
                 <div v-if="isVideo" class="mb-4">
                     <VideoPlayer :src="streamUrl" :type="media.mime_type" :subtitles="subtitles || []" />
                 </div>
@@ -167,10 +167,10 @@ const deleteFile = async () => {
 
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <DocumentIcon v-if="!isVideo && !isImage" class="w-8 h-8 text-ink-faint" />
+                        <DocumentIcon v-if="!isVideo && !isImage" class="w-8 h-8 text-faint" />
                         <div>
                             <h1 class="text-xl font-bold text-ink">{{ file.name }}</h1>
-                            <p class="text-sm text-ink-soft">{{ media.file_name }}</p>
+                            <p class="text-sm text-soft">{{ media.file_name }}</p>
                         </div>
                     </div>
                     <div class="flex gap-2">
@@ -178,8 +178,7 @@ const deleteFile = async () => {
                             :class="isFavorited ? 'text-warning-500' : 'text-ink-faint hover:text-warning-500'">
                             <StarIcon class="w-6 h-6" />
                         </button>
-                        <Link :href="route('files.download', file.id)" title="Download"
-                            class="bg-brand-600 hover:bg-brand-700 text-white p-2 rounded-lg">
+                        <Link :href="route('files.download', file.id)" title="Download" class="btn-primary p-2">
                             <ArrowDownTrayIcon class="w-5 h-5" />
                         </Link>
                     </div>
@@ -188,19 +187,19 @@ const deleteFile = async () => {
                 <!-- Metadata -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                     <Card gradient :icon="DocumentIcon" iconColor="text-brand-600" iconBg="bg-brand-100" padding="p-4">
-                        <div class="text-sm text-ink-soft">Size</div>
+                        <div class="text-sm text-soft">Size</div>
                         <div class="font-semibold text-ink-strong">{{ formatBytes(media.size) }}</div>
                     </Card>
                     <Card gradient :icon="FilmIcon" iconColor="text-brand-600" iconBg="bg-brand-100" padding="p-4">
-                        <div class="text-sm text-ink-soft">Type</div>
+                        <div class="text-sm text-soft">Type</div>
                         <div class="font-semibold text-ink-strong">{{ media.mime_type }}</div>
                     </Card>
                     <Card gradient :icon="EyeIcon" iconColor="text-brand-600" iconBg="bg-brand-100" padding="p-4">
-                        <div class="text-sm text-ink-soft">Views</div>
+                        <div class="text-sm text-soft">Views</div>
                         <div class="font-semibold text-ink-strong">{{ file.views.toLocaleString() }}</div>
                     </Card>
                     <Card gradient :icon="ArrowDownTrayIcon" iconColor="text-brand-600" iconBg="bg-brand-100" padding="p-4">
-                        <div class="text-sm text-ink-soft">Downloads</div>
+                        <div class="text-sm text-soft">Downloads</div>
                         <div class="font-semibold text-ink-strong">{{ file.downloads.toLocaleString() }}</div>
                     </Card>
                 </div>
@@ -209,10 +208,10 @@ const deleteFile = async () => {
                 <div class="mt-6 space-y-3">
                     <div class="flex items-center gap-2">
                         <input :value="route('public.show', file.id)" readonly class="flex-1 text-xs bg-surface-muted border rounded-lg px-3 py-2" />
-                        <button type="button" @click="copyText(route('public.show', file.id), 'Link copied!')" class="inline-flex items-center gap-1 text-sm bg-surface-soft hover:bg-line-soft px-3 py-2 rounded-lg">
+                        <button type="button" @click="copyText(route('public.show', file.id), 'Link copied!')" class="btn btn-secondary btn-sm">
                             <LinkIcon class="w-4 h-4" /> Copy Link
                         </button>
-                        <button type="button" @click="copyText(file.embed_code, 'Embed code copied!')" class="inline-flex items-center gap-1 text-sm bg-surface-soft hover:bg-line-soft px-3 py-2 rounded-lg">
+                        <button type="button" @click="copyText(file.embed_code, 'Embed code copied!')" class="btn btn-secondary btn-sm">
                             <CodeBracketIcon class="w-4 h-4" /> Copy Embed
                         </button>
                     </div>
@@ -220,68 +219,68 @@ const deleteFile = async () => {
 
                 <!-- Actions -->
                 <div class="flex flex-wrap gap-2 mt-6">
-                    <button type="button" @click="openShare" class="inline-flex items-center gap-1.5 text-sm bg-surface border border-line hover:bg-surface-muted px-3 py-2 rounded-lg font-medium">
+                    <button type="button" @click="openShare" class="btn btn-secondary btn-sm">
                         <ShareIcon class="w-4 h-4" /> Share
                     </button>
-                    <button type="button" @click="showVersionModal = true" class="inline-flex items-center gap-1.5 text-sm bg-surface border border-line hover:bg-surface-muted px-3 py-2 rounded-lg font-medium">
+                    <button type="button" @click="showVersionModal = true" class="btn btn-secondary btn-sm">
                         <ArrowUpTrayIcon class="w-4 h-4" /> New Version
                     </button>
-                    <button type="button" @click="openSettings" class="inline-flex items-center gap-1.5 text-sm bg-surface border border-line hover:bg-surface-muted px-3 py-2 rounded-lg font-medium">
+                    <button type="button" @click="openSettings" class="btn btn-secondary btn-sm">
                         <Cog6ToothIcon class="w-4 h-4" /> Settings
                     </button>
-                    <button type="button" @click="deleteFile" class="inline-flex items-center gap-1.5 text-sm bg-danger-50 text-danger-600 border border-danger-200 hover:bg-danger-100 px-3 py-2 rounded-lg font-medium">
+                    <button type="button" @click="deleteFile" class="btn btn-danger btn-sm">
                         <TrashIcon class="w-4 h-4" /> Delete
                     </button>
                 </div>
             </div>
 
             <!-- Versions -->
-            <div class="bg-surface rounded-xl shadow p-5">
-                <h2 class="text-lg font-semibold text-ink mb-4">Versions</h2>
-                <div v-if="versions.length === 0" class="text-sm text-ink-faint">No versions yet.</div>
+            <div class="panel p-5">
+                <h2 class="section-title mb-4">Versions</h2>
+                <div v-if="versions.length === 0" class="text-sm text-faint">No versions yet.</div>
                 <ul v-else class="space-y-2">
                     <li v-for="v in versions" :key="v.id" class="flex items-center justify-between bg-surface-muted rounded-lg px-4 py-3 text-sm">
                         <div>
                             <span class="font-medium text-ink-strong">v{{ v.version }}</span>
-                            <span class="text-ink-soft ml-2">{{ v.name }} ({{ formatBytes(v.size) }})</span>
-                            <div class="text-xs text-ink-faint mt-0.5">{{ v.changelog || 'No changelog' }} — {{ new Date(v.created_at).toLocaleString() }}</div>
+                            <span class="text-soft ml-2">{{ v.name }} ({{ formatBytes(v.size) }})</span>
+                            <div class="text-xs text-faint mt-0.5">{{ v.changelog || 'No changelog' }} — {{ new Date(v.created_at).toLocaleString() }}</div>
                         </div>
                         <div class="flex gap-1">
-                            <button type="button" @click="restoreVersion(v)" title="Restore" class="p-1.5 hover:bg-brand-100 rounded text-brand-700"><ArrowPathIcon class="w-4 h-4" /></button>
-                            <button type="button" @click="deleteVersion(v)" title="Delete" class="p-1.5 hover:bg-danger-100 rounded text-danger-500"><TrashIcon class="w-4 h-4" /></button>
+                            <button type="button" @click="restoreVersion(v)" title="Restore" class="btn-icon hover:bg-brand-100 hover:text-brand-700"><ArrowPathIcon class="w-4 h-4" /></button>
+                            <button type="button" @click="deleteVersion(v)" title="Delete" class="btn-icon-danger"><TrashIcon class="w-4 h-4" /></button>
                         </div>
                     </li>
                 </ul>
             </div>
 
             <!-- Subtitles -->
-            <div v-if="isVideo" class="bg-surface rounded-xl shadow p-5">
-                <h2 class="text-lg font-semibold text-ink mb-4">Subtitles</h2>
+            <div v-if="isVideo" class="panel p-5">
+                <h2 class="section-title mb-4">Subtitles</h2>
 
                 <ul v-if="subtitles.length > 0" class="space-y-2 mb-4">
                     <li v-for="t in subtitles" :key="t.id" class="flex items-center justify-between bg-surface-muted rounded-lg px-4 py-3 text-sm">
                         <div class="flex items-center gap-2">
                             <span class="font-medium text-ink-strong">{{ t.label }}</span>
-                            <span class="text-xs uppercase text-ink-faint">{{ t.srclang }}</span>
-                            <span v-if="t.default" class="text-xs bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full">Default</span>
+                            <span class="text-xs uppercase text-faint">{{ t.srclang }}</span>
+                            <span v-if="t.default" class="badge badge-brand">Default</span>
                         </div>
-                        <button type="button" @click="deleteSubtitle(t)" title="Delete" class="p-1.5 hover:bg-danger-100 rounded text-danger-500">
+                        <button type="button" @click="deleteSubtitle(t)" title="Delete" class="btn-icon-danger">
                             <TrashIcon class="w-4 h-4" />
                         </button>
                     </li>
                 </ul>
-                <div v-else class="text-sm text-ink-faint mb-4">No subtitles yet.</div>
+                <div v-else class="text-sm text-faint mb-4">No subtitles yet.</div>
 
                 <form @submit.prevent="submitSubtitle" class="space-y-3 bg-surface-muted rounded-lg p-4">
                     <FileInput v-model="subtitleFile" accept=".vtt,.srt" hint="VTT or SRT files" />
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-medium text-ink-body mb-1">Language</label>
-                            <input v-model="subtitleForm.language" type="text" placeholder="en" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                            <label class="label">Language</label>
+                            <input v-model="subtitleForm.language" type="text" placeholder="en" class="input" />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-ink-body mb-1">Label</label>
-                            <input v-model="subtitleForm.label" type="text" placeholder="English" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                            <label class="label">Label</label>
+                            <input v-model="subtitleForm.label" type="text" placeholder="English" class="input" />
                         </div>
                     </div>
                     <label class="flex items-center text-sm text-ink-body">
@@ -289,7 +288,7 @@ const deleteFile = async () => {
                         Set as default
                     </label>
                     <div class="flex justify-end">
-                        <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Add Subtitle</button>
+                        <button type="submit" class="btn btn-primary btn-md">Add Subtitle</button>
                     </div>
                 </form>
             </div>
@@ -297,21 +296,21 @@ const deleteFile = async () => {
 
         <!-- Sidebar -->
         <div class="space-y-6">
-            <div class="bg-surface rounded-xl shadow p-5">
-                <h2 class="text-lg font-semibold text-ink mb-4">Statistics</h2>
+            <div class="panel p-5">
+                <h2 class="section-title mb-4">Statistics</h2>
                 <div class="space-y-2 text-sm">
-                    <div class="flex justify-between"><span class="text-ink-soft">Total views</span><span class="font-medium">{{ stats.views.toLocaleString() }}</span></div>
-                    <div class="flex justify-between"><span class="text-ink-soft">Total downloads</span><span class="font-medium">{{ stats.downloads.toLocaleString() }}</span></div>
-                    <div class="flex justify-between"><span class="text-ink-soft">Status</span><span :class="file.is_public ? 'text-success-600' : 'text-ink-muted'">{{ file.is_public ? 'Public' : 'Private' }}</span></div>
-                    <div v-if="file.expires_at" class="flex justify-between"><span class="text-ink-soft">Expires</span><span class="font-medium">{{ new Date(file.expires_at).toLocaleDateString() }}</span></div>
+                    <div class="flex justify-between"><span class="text-soft">Total views</span><span class="font-medium">{{ stats.views.toLocaleString() }}</span></div>
+                    <div class="flex justify-between"><span class="text-soft">Total downloads</span><span class="font-medium">{{ stats.downloads.toLocaleString() }}</span></div>
+                    <div class="flex justify-between"><span class="text-soft">Status</span><span :class="file.is_public ? 'text-success-600' : 'text-muted'">{{ file.is_public ? 'Public' : 'Private' }}</span></div>
+                    <div v-if="file.expires_at" class="flex justify-between"><span class="text-soft">Expires</span><span class="font-medium">{{ new Date(file.expires_at).toLocaleDateString() }}</span></div>
                     <div v-if="file.download_limit" class="flex justify-between">
-                        <span class="text-ink-soft">Download limit</span>
+                        <span class="text-soft">Download limit</span>
                         <span class="font-medium">{{ file.download_count }} / {{ file.download_limit }}</span>
                     </div>
                 </div>
 
                 <h3 class="text-sm font-semibold text-ink-body mt-6 mb-2">Recent views</h3>
-                <ul class="space-y-1 text-xs text-ink-soft">
+                <ul class="space-y-1 text-xs text-soft">
                     <li v-for="v in stats.recent_views" :key="v.id">{{ v.ip || '—' }} — {{ new Date(v.created_at).toLocaleString() }}</li>
                     <li v-if="stats.recent_views.length === 0">No views yet</li>
                 </ul>
@@ -322,33 +321,33 @@ const deleteFile = async () => {
         <Modal :show="showShareModal" title="Share File" @close="showShareModal = false">
             <form @submit.prevent="submitShare" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Share with (email)</label>
-                    <input v-model="shareForm.shared_with" type="email" placeholder="friend@example.com" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Share with (email)</label>
+                    <input v-model="shareForm.shared_with" type="email" placeholder="friend@example.com" required class="input" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Permission</label>
-                    <select v-model="shareForm.permission" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">Permission</label>
+                    <select v-model="shareForm.permission" class="input">
                         <option value="view">View</option>
                         <option value="download">View + Download</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Password (optional)</label>
-                    <input v-model="shareForm.password" type="text" placeholder="Optional password" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Password (optional)</label>
+                    <input v-model="shareForm.password" type="text" placeholder="Optional password" class="input" />
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Expires</label>
-                        <input v-model="shareForm.expires_at" type="datetime-local" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Expires</label>
+                        <input v-model="shareForm.expires_at" type="datetime-local" class="input" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Download limit</label>
-                        <input v-model="shareForm.download_limit" type="number" min="1" placeholder="No limit" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Download limit</label>
+                        <input v-model="shareForm.download_limit" type="number" min="1" placeholder="No limit" class="input" />
                     </div>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showShareModal = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Share</button>
+                    <button type="button" @click="showShareModal = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">Share</button>
                 </div>
             </form>
         </Modal>
@@ -357,30 +356,30 @@ const deleteFile = async () => {
         <Modal :show="showSettingsModal" title="File Settings" @close="showSettingsModal = false">
             <form @submit.prevent="submitSettings" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Name</label>
-                    <input v-model="settingsForm.name" type="text" placeholder="File name" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Name</label>
+                    <input v-model="settingsForm.name" type="text" placeholder="File name" required class="input" />
                 </div>
                 <label class="flex items-center text-sm text-ink-body">
                     <input v-model="settingsForm.is_public" type="checkbox" class="rounded mr-2" />
                     Public (accessible via link)
                 </label>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Expires at</label>
-                    <input v-model="settingsForm.expires_at" type="datetime-local" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Expires at</label>
+                    <input v-model="settingsForm.expires_at" type="datetime-local" class="input" />
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Password (new)</label>
-                        <input v-model="settingsForm.password" type="text" placeholder="Optional password" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Password (new)</label>
+                        <input v-model="settingsForm.password" type="text" placeholder="Optional password" class="input" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Download limit</label>
-                        <input v-model="settingsForm.download_limit" type="number" min="1" placeholder="No limit" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Download limit</label>
+                        <input v-model="settingsForm.download_limit" type="number" min="1" placeholder="No limit" class="input" />
                     </div>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showSettingsModal = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Save</button>
+                    <button type="button" @click="showSettingsModal = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">Save</button>
                 </div>
             </form>
         </Modal>
@@ -390,12 +389,12 @@ const deleteFile = async () => {
             <form @submit.prevent="submitVersion" class="space-y-4">
                 <FileInput v-model="versionFile" label="Replacement file" hint="Upload a file as a new version" />
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Changelog</label>
-                    <input v-model="versionForm.changelog" type="text" placeholder="What changed in this version?" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Changelog</label>
+                    <input v-model="versionForm.changelog" type="text" placeholder="What changed in this version?" class="input" />
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showVersionModal = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Upload</button>
+                    <button type="button" @click="showVersionModal = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">Upload</button>
                 </div>
             </form>
         </Modal>

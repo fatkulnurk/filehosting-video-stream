@@ -53,7 +53,7 @@ const filterOptions = [
             :filter-options="filterOptions"
         >
             <template #cell-file="{ row }">
-                <Link :href="route('files.show', row.file.id)" class="text-brand-700 hover:underline font-medium">{{ row.file.name }}</Link>
+                <Link :href="route('files.show', row.file.id)" class="link font-medium">{{ row.file.name }}</Link>
             </template>
             <template #cell-with="{ row }">{{ row.shared_with_user?.email || row.shared_with }}</template>
             <template #cell-permission="{ row }">
@@ -63,7 +63,7 @@ const filterOptions = [
             <template #cell-share="{ row }">{{ new Date(row.created_at).toLocaleDateString() }}</template>
             <template #cell-actions="{ row }">
                 <div class="flex justify-end gap-1">
-                    <button type="button" @click="removeShare(row)" class="p-1.5 hover:bg-danger-100 rounded text-ink-faint hover:text-danger-600"><TrashIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="removeShare(row)" class="btn-icon-danger"><TrashIcon class="w-4 h-4" /></button>
                 </div>
             </template>
             <template #empty>

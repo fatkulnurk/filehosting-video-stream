@@ -83,7 +83,7 @@ const headers = [
             <template #cell-created="{ row }">{{ new Date(row.created_at).toLocaleDateString() }}</template>
             <template #cell-actions="{ row }">
                 <div class="flex justify-end gap-1">
-                    <button type="button" @click="revoke(row)" class="p-1.5 hover:bg-danger-100 rounded text-ink-faint hover:text-danger-600"><TrashIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="revoke(row)" class="btn-icon-danger"><TrashIcon class="w-4 h-4" /></button>
                 </div>
             </template>
             <template #empty>No API keys yet. Create one to get started.</template>
@@ -93,12 +93,11 @@ const headers = [
         <Modal :show="showAdd" title="Create API Key" @close="showAdd = false">
             <form @submit.prevent="submit" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Name</label>
-                    <input v-model="form.name" type="text" required placeholder="My App"
-                        class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Name</label>
+                    <input v-model="form.name" type="text" required placeholder="My App" class="input" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-2">Permissions</label>
+                    <label class="label mb-2">Permissions</label>
                     <div class="space-y-1.5">
                         <label v-for="perm in allPermissions" :key="perm" class="flex items-center text-sm text-ink-body">
                             <input v-model="form.permissions" type="checkbox" :value="perm" class="rounded mr-2" />
@@ -107,13 +106,12 @@ const headers = [
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Rate limit (requests/min)</label>
-                    <input v-model="form.rate_limit" type="number" min="1" max="10000" placeholder="e.g. 60"
-                        class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Rate limit (requests/min)</label>
+                    <input v-model="form.rate_limit" type="number" min="1" max="10000" placeholder="e.g. 60" class="input" />
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showAdd = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Create</button>
+                    <button type="button" @click="showAdd = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">Create</button>
                 </div>
             </form>
         </Modal>
@@ -121,18 +119,18 @@ const headers = [
         <!-- Show key modal -->
         <Modal :show="showKey" title="API Key Created" @close="showKey = false">
             <div class="space-y-4">
-                <p class="text-sm text-ink-muted">Copy your API key now. It won't be shown again:</p>
+                <p class="text-sm text-muted">Copy your API key now. It won't be shown again:</p>
                 <div class="bg-surface-muted border rounded-lg p-3 flex items-center gap-2">
                     <KeyIcon class="w-5 h-5 text-brand-700 flex-shrink-0" />
                     <code class="text-sm break-all flex-1">{{ createdKey }}</code>
-                    <button type="button" @click="copyKey" class="text-sm text-brand-700 hover:underline">Copy</button>
+                    <button type="button" @click="copyKey" class="link text-sm">Copy</button>
                 </div>
-                <div class="bg-surface-muted rounded-lg p-3 text-xs text-ink-soft">
+                <div class="bg-surface-muted rounded-lg p-3 text-xs text-soft">
                     <p class="font-medium text-ink-body mb-1">Usage:</p>
                     <code class="block">curl -H "X-API-Key: {{ createdKey ? createdKey.slice(0, 8) + '...' : '' }}" {{ window?.location?.origin || '' }}/api/v1/files</code>
                 </div>
                 <div class="flex justify-end">
-                    <button type="button" @click="showKey = false" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Done</button>
+                    <button type="button" @click="showKey = false" class="btn btn-primary btn-md">Done</button>
                 </div>
             </div>
         </Modal>

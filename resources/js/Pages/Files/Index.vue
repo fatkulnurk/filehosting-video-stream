@@ -180,23 +180,20 @@ const submitSearch = () => {
             <div class="flex items-center gap-2 flex-wrap">
                 <form @submit.prevent="submitSearch" class="relative">
                     <input v-model="searchForm.search" type="text" placeholder="Search files..."
-                        class="pl-9 pr-3 py-2 text-sm rounded-lg border border-line focus:ring-2 focus:ring-brand-500 w-48" />
-                    <MagnifyingGlassIcon class="w-4 h-4 absolute left-3 top-2.5 text-ink-faint" />
+                        class="input pl-9 w-48" />
+                    <MagnifyingGlassIcon class="w-4 h-4 absolute left-3 top-2.5 text-faint" />
                 </form>
-                <button type="button" @click="showFolderModal = true"
-                    class="inline-flex items-center gap-1.5 bg-surface border border-line hover:bg-surface-muted text-sm font-medium px-3 py-2 rounded-lg">
+                <button type="button" @click="showFolderModal = true" class="btn btn-secondary btn-sm">
                     <FolderPlusIcon class="w-4 h-4" /> New Folder
                 </button>
-                <Link :href="route('cloud-downloads.index')"
-                    class="inline-flex items-center gap-1.5 bg-surface border border-line hover:bg-surface-muted text-sm font-medium px-3 py-2 rounded-lg">
+                <Link :href="route('cloud-downloads.index')" class="btn btn-secondary btn-sm">
                     <LinkIcon class="w-4 h-4" /> From URL
                 </Link>
-                <button type="button" @click="showUpload = true"
-                    class="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-3 py-2 rounded-lg">
+                <button type="button" @click="showUpload = true" class="btn btn-primary btn-sm">
                     <ArrowUpTrayIcon class="w-4 h-4" /> Upload
                 </button>
                 <button v-if="selected.length > 0" type="button" @click="downloadBatch"
-                    class="inline-flex items-center gap-1.5 bg-success-600 hover:bg-success-700 text-white text-sm font-medium px-3 py-2 rounded-lg">
+                    class="btn btn-sm bg-success-600 hover:bg-success-700 text-white">
                     <ArrowDownTrayIcon class="w-4 h-4" /> Download ({{ selected.length }})
                 </button>
             </div>
@@ -209,12 +206,12 @@ const submitSearch = () => {
                 <Link :href="route('files.index', { directory: dir.id })" class="block">
                     <FolderIcon class="w-10 h-10 text-warning-500" />
                     <div class="mt-2 font-medium text-sm text-ink-strong truncate">{{ dir.name }}</div>
-                    <div class="text-xs text-ink-faint">{{ dir.files_count }} file(s)</div>
+                    <div class="text-xs text-faint">{{ dir.files_count }} file(s)</div>
                 </Link>
                 <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex gap-1">
-                    <button type="button" @click.stop="startRename(dir)" title="Rename" class="p-1 bg-surface rounded shadow text-ink-soft hover:text-brand-800"><PencilIcon class="w-3.5 h-3.5" /></button>
-                    <button type="button" @click.stop="startMove(dir)" title="Move" class="p-1 bg-surface rounded shadow text-ink-soft hover:text-brand-800"><ArrowRightOnRectangleIcon class="w-3.5 h-3.5" /></button>
-                    <button type="button" @click.stop="removeFolder(dir)" title="Delete" class="p-1 bg-surface rounded shadow text-ink-soft hover:text-danger-600"><TrashIcon class="w-3.5 h-3.5" /></button>
+                    <button type="button" @click.stop="startRename(dir)" title="Rename" class="p-1 bg-surface rounded shadow text-soft hover:text-brand-800"><PencilIcon class="w-3.5 h-3.5" /></button>
+                    <button type="button" @click.stop="startMove(dir)" title="Move" class="p-1 bg-surface rounded shadow text-soft hover:text-brand-800"><ArrowRightOnRectangleIcon class="w-3.5 h-3.5" /></button>
+                    <button type="button" @click.stop="removeFolder(dir)" title="Delete" class="p-1 bg-surface rounded shadow text-soft hover:text-danger-600"><TrashIcon class="w-3.5 h-3.5" /></button>
                 </div>
             </div>
         </div>
@@ -248,12 +245,12 @@ const submitSearch = () => {
             <template #cell-created_at="{ row }">{{ new Date(row.created_at).toLocaleDateString() }}</template>
             <template #cell-actions="{ row }">
                 <div class="flex justify-end gap-1">
-                    <button type="button" @click="toggleFavorite(row)" title="Favorite" class="p-1.5 hover:bg-surface-soft rounded text-ink-faint hover:text-warning-500"><StarIcon class="w-4 h-4" /></button>
-                    <button type="button" @click="copyLink(row)" title="Copy link" class="p-1.5 hover:bg-surface-soft rounded text-ink-faint hover:text-brand-800"><LinkIcon class="w-4 h-4" /></button>
-                    <button type="button" @click="showEmbed(row)" title="Embed code" class="p-1.5 hover:bg-surface-soft rounded text-ink-faint hover:text-brand-800"><CodeBracketIcon class="w-4 h-4" /></button>
-                    <button type="button" @click="startRename(row)" title="Rename" class="p-1.5 hover:bg-surface-soft rounded text-ink-faint hover:text-brand-800"><PencilIcon class="w-4 h-4" /></button>
-                    <button type="button" @click="startMove(row)" title="Move" class="p-1.5 hover:bg-surface-soft rounded text-ink-faint hover:text-brand-800"><ArrowRightOnRectangleIcon class="w-4 h-4" /></button>
-                    <button type="button" @click="removeFile(row)" title="Delete" class="p-1.5 hover:bg-surface-soft rounded text-ink-faint hover:text-danger-600"><TrashIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="toggleFavorite(row)" title="Favorite" class="btn-icon hover:text-warning-500"><StarIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="copyLink(row)" title="Copy link" class="btn-icon"><LinkIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="showEmbed(row)" title="Embed code" class="btn-icon"><CodeBracketIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="startRename(row)" title="Rename" class="btn-icon"><PencilIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="startMove(row)" title="Move" class="btn-icon"><ArrowRightOnRectangleIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="removeFile(row)" title="Delete" class="btn-icon-danger"><TrashIcon class="w-4 h-4" /></button>
                 </div>
             </template>
             <template #empty>

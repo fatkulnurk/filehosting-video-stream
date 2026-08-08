@@ -56,22 +56,22 @@ const filterOptions = [
 
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div v-for="pkg in packages" :key="pkg.id"
-                :class="[currentPackage?.id === pkg.id ? 'border-brand-500 ring-2 ring-brand-200' : 'border-line-soft', 'bg-surface rounded-xl shadow p-6 border flex flex-col']">
+                :class="[currentPackage?.id === pkg.id ? 'border-brand-500 ring-2 ring-brand-200' : 'border-line-soft', 'panel p-6 border flex flex-col']">
                 <div class="flex items-center justify-between">
                     <span class="font-semibold text-ink">{{ pkg.name }}</span>
-                    <span v-if="currentPackage?.id === pkg.id" class="bg-brand-50 text-brand-700 text-xs px-2 py-0.5 rounded-full">Current</span>
+                    <span v-if="currentPackage?.id === pkg.id" class="badge badge-brand">Current</span>
                 </div>
                 <div class="mt-3 text-3xl font-bold text-brand-700">
-                    ${{ pkg.price_monthly }}<span class="text-sm text-ink-faint font-normal">/mo</span>
+                    ${{ pkg.price_monthly }}<span class="text-sm text-faint font-normal">/mo</span>
                 </div>
-                <div class="mt-4 space-y-1.5 text-sm text-ink-muted flex-1">
+                <div class="mt-4 space-y-1.5 text-sm text-muted flex-1">
                     <p>{{ formatBytes(pkg.storage_limit) }} storage</p>
                     <p>Max file {{ pkg.formatted_max_file_size }}</p>
                     <p v-for="f in pkg.features" :key="f" class="text-success-600">✓ {{ f.replace(/_/g, ' ') }}</p>
                 </div>
                 <button type="button" @click="subscribe(pkg)"
                     :disabled="currentPackage?.id === pkg.id"
-                    :class="currentPackage?.id === pkg.id ? 'bg-surface-soft text-ink-faint' : 'bg-brand-600 hover:bg-brand-700 text-white'"
+                    :class="currentPackage?.id === pkg.id ? 'bg-surface-soft text-ink-faint' : 'btn-primary'"
                     class="mt-5 rounded-lg py-2 font-medium text-sm">
                     {{ currentPackage?.id === pkg.id ? 'Current Plan' : pkg.price_monthly > 0 ? 'Upgrade' : 'Switch' }}
                 </button>
@@ -79,7 +79,7 @@ const filterOptions = [
         </div>
 
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-ink">Subscription History</h2>
+            <h2 class="section-title">Subscription History</h2>
             <button v-if="currentPackage?.price_monthly > 0" type="button" @click="cancel" class="text-sm text-danger-600 hover:underline">Cancel subscription</button>
         </div>
 

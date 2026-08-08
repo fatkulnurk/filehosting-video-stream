@@ -8,7 +8,7 @@ const props = defineProps({
     headers: { type: Array, required: true }, // [{ key, label, align, sortable, sortKey, sticky }]
     rows: { type: Array, required: true },
     paginator: { type: Object, default: null }, // { links, meta, ... }
-    filters: { type: Object, default: () => ({ search: '', sort: null, direction: 'asc', per_page: 10 }) },
+    filters: { type: Object, default: () => ({ search: '', sort: {}, per_page: 10 }) },
     routeName: { type: String, default: '' },
     routeParams: { type: Object, default: () => ({}) },
     showSearch: { type: Boolean, default: true },
@@ -17,13 +17,24 @@ const props = defineProps({
     clientSort: { type: Boolean, default: false },
 });
 
-const params = () => ({
-    ...props.routeParams,
-    search: props.filters?.search || '',
-    sort: props.filters?.sort || null,
-    direction: props.filters?.direction || 'asc',
-    per_page: props.filters?.per_page || 10,
-});
+const filterEntries = computed(() =>
+    Object.fromEntries(
+        Object.entries(props.filters || {}).filter(([k]) => !['search', 'sort', 'per_page', 'page'].includes(k)),
+    ),
+);
+
+const params = () => {
+    const p = {
+        ...props.routeParams,
+        search: props.filters?.search || '',
+        per_page: props.filters?.per_page || 10,
+    };
+    const sort = props.filters?.sort || {};
+    if (Object.keys(sort).length) p.sort = sort;
+    const filter = filterEntries.value;
+    if (Object.keys(filter).length) p.filter = filter;
+    return p;
+};
 
 const go = (overrides) => {
     if (props.clientSort) return;
@@ -79,11 +90,11 @@ const sortBy = (header) => {
         }
         return;
     }
-    if (props.filters?.sort === key) {
-        const next = props.filters.direction === 'asc' ? 'desc' : 'asc';
-        go({ sort: key, direction: next, page: 1 });
+    if (props.filters?.sort?.[key]) {
+        const next = props.filters.sort[key] === 'asc' ? 'desc' : 'asc';
+        go({ sort: { [key]: next }, page: 1 });
     } else {
-        go({ sort: key, direction: 'asc', page: 1 });
+        go({ sort: { [key]: 'asc' }, page: 1 });
     }
 };
 
@@ -92,7 +103,10 @@ const changePerPage = (event) => {
 };
 
 const changeFilter = (key, event) => {
-    go({ [key]: event.target.value || null, page: 1 });
+    const value = event.target.value || null;
+    const next = { ...filterEntries.value, [key]: value };
+    if (!value) delete next[key];
+    go({ filter: Object.keys(next).length ? next : null, page: 1 });
 };
 
 const columnIsSticky = (h, i) => h.sticky === true || (h.sticky !== false && i === props.headers.length - 1);
@@ -104,8 +118,8 @@ const sortIndicator = (header) => {
         if (localSortKey.value !== key) return '';
         return localDirection.value === 'asc' ? 'asc' : 'desc';
     }
-    if (props.filters?.sort !== key) return '';
-    return props.filters?.direction === 'asc' ? 'asc' : 'desc';
+    if (!props.filters?.sort?.[key]) return '';
+    return props.filters.sort[key] === 'asc' ? 'asc' : 'desc';
 };
 </script>
 

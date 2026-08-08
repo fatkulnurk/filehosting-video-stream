@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Services\Files\FileAccessServiceInterface;
+use App\Http\Requests\Files\FileAccessIndexRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class FileAccessController extends Controller
@@ -17,9 +17,10 @@ class FileAccessController extends Controller
         private FileAccessServiceInterface $accessService
     ) {}
 
-    public function recentlyAccessed(Request $request)
+    public function recentlyAccessed(FileAccessIndexRequest $request)
     {
         $params = $this->tableParams($request);
+        $params['sort'] = $request->getSorts();
 
         $files = $this->accessService->paginateForUser(auth()->id(), $params);
 

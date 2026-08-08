@@ -6,9 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Services\ActivityLogs\ActivityLogServiceInterface;
 use App\Contracts\Services\Webhooks\WebhookServiceInterface;
+use App\Http\Requests\Webhooks\WebhookLogIndexRequest;
 use App\Http\Requests\Webhooks\WebhookRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class WebhookController extends Controller
@@ -92,9 +92,10 @@ class WebhookController extends Controller
         return redirect()->route('webhooks.index')->with('webhookSecret', $secret)->with('success', 'Secret regenerated');
     }
 
-    public function logs(Request $request, string $id)
+    public function logs(WebhookLogIndexRequest $request, string $id)
     {
         $params = $this->tableParams($request);
+        $params['sort'] = $request->getSorts();
 
         $webhook = $this->webhookService->getOwnedWebhook(auth()->id(), $id);
 

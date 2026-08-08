@@ -8,10 +8,10 @@ use App\Contracts\Services\Admin\AdminServiceInterface;
 use App\Contracts\Services\Directories\DirectoryServiceInterface;
 use App\Contracts\Services\Files\FileServiceInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdminDirectoryIndexRequest;
 use App\Http\Requests\Admin\StoreDirectoryRequest;
 use App\Http\Requests\Admin\UpdateDirectoryRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
@@ -25,10 +25,11 @@ class AdminDirectoryController extends Controller
         private AdminServiceInterface $adminService
     ) {}
 
-    public function index(Request $request)
+    public function index(AdminDirectoryIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $params['filters'] = $request->only(['user_id', 'status']);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         [$directories, $users] = Concurrency::run([
             fn () => $this->directoryService->paginateAllForAdmin($params),

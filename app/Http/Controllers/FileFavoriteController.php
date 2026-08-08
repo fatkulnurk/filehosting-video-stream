@@ -6,8 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Services\Files\FileFavoriteServiceInterface;
 use App\Contracts\Services\Files\FileServiceInterface;
+use App\Http\Requests\Files\FileFavoriteIndexRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class FileFavoriteController extends Controller
@@ -19,9 +19,10 @@ class FileFavoriteController extends Controller
         private FileServiceInterface $fileService
     ) {}
 
-    public function index(Request $request)
+    public function index(FileFavoriteIndexRequest $request)
     {
         $params = $this->tableParams($request);
+        $params['sort'] = $request->getSorts();
 
         $favorites = $this->favoriteService->paginateForUser(auth()->id(), $params);
 

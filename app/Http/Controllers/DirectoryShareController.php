@@ -6,9 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Services\Directories\DirectoryServiceInterface;
 use App\Contracts\Services\Directories\DirectoryShareServiceInterface;
+use App\Http\Requests\Directories\DirectoryShareIndexRequest;
 use App\Http\Requests\Directories\ShareDirectoryRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class DirectoryShareController extends Controller
@@ -39,10 +39,11 @@ class DirectoryShareController extends Controller
         return redirect()->back()->with('success', "Folder shared with {$targetUser->email}");
     }
 
-    public function sharedWithMe(Request $request)
+    public function sharedWithMe(DirectoryShareIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $params['filters'] = $request->only(['permission']);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         $shares = $this->shareService->paginateSharedWithMe(auth()->id(), $params);
 

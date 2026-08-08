@@ -7,10 +7,10 @@ namespace App\Http\Controllers\Admin;
 use App\Contracts\Services\Admin\AdminServiceInterface;
 use App\Contracts\Services\Subscriptions\SubscriptionServiceInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdminSubscriptionIndexRequest;
 use App\Http\Requests\Admin\StoreSubscriptionRequest;
 use App\Http\Requests\Admin\UpdateSubscriptionRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
@@ -23,10 +23,11 @@ class AdminSubscriptionController extends Controller
         private AdminServiceInterface $adminService
     ) {}
 
-    public function index(Request $request)
+    public function index(AdminSubscriptionIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $params['filters'] = $request->only(['status', 'package_id']);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         [$subscriptions, $users, $packages] = Concurrency::run([
             fn () => $this->subscriptionService->paginateAllForAdmin($params),

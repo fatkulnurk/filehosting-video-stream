@@ -7,11 +7,11 @@ namespace App\Http\Controllers;
 use App\Contracts\Services\Directories\DirectoryServiceInterface;
 use App\Contracts\Services\Downloads\DownloaderServiceInterface;
 use App\Enums\DownloadTaskStatus;
+use App\Http\Requests\Downloads\DownloadIndexRequest;
 use App\Http\Requests\Files\StoreTorrentRequest;
 use App\Http\Requests\Files\StoreUrlRequest;
 use App\Services\Downloads\TorrentHashService;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -25,13 +25,15 @@ class DownloadController extends Controller
         private DirectoryServiceInterface $directoryService
     ) {}
 
-    public function index(Request $request)
+    public function index(DownloadIndexRequest $request)
     {
         $params = $this->tableParams($request);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         return Inertia::render('CloudDownloads/Index', [
             'tasks' => $this->downloaderService->paginateForUser(auth()->id(), $params),
-            'filters' => $this->tableFilters($params),
+            'filters' => $this->tableFiltersWith($params, $request, ['status', 'type']),
             'directoryTree' => $this->directoryService->getTree(auth()->id()),
         ]);
     }

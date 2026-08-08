@@ -11,11 +11,11 @@ use App\Contracts\Services\Files\StatsServiceInterface;
 use App\Contracts\Services\Files\SubtitleServiceInterface;
 use App\Contracts\Services\Files\VersioningServiceInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdminFileIndexRequest;
 use App\Http\Requests\Admin\StoreFileRequest;
 use App\Http\Requests\Admin\UpdateFileRequest;
 use App\Http\Requests\Admin\UserDirectoriesRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
@@ -32,10 +32,11 @@ class AdminFileController extends Controller
         private DirectoryServiceInterface $directoryService
     ) {}
 
-    public function index(Request $request)
+    public function index(AdminFileIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $params['filters'] = $request->only(['user_id', 'status', 'type']);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         [$files, $users] = Concurrency::run([
             fn () => $this->fileService->paginateAllForAdmin($params),

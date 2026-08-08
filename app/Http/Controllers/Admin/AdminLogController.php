@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Contracts\Services\ActivityLogs\ActivityLogServiceInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdminLogIndexRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class AdminLogController extends Controller
@@ -18,10 +18,11 @@ class AdminLogController extends Controller
         private ActivityLogServiceInterface $logService
     ) {}
 
-    public function index(Request $request)
+    public function index(AdminLogIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $params['filters'] = $request->only(['action']);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         $logs = $this->logService->paginateForAdmin($params);
 

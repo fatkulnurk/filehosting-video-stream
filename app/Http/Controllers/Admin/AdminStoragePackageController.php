@@ -7,9 +7,9 @@ namespace App\Http\Controllers\Admin;
 use App\Contracts\Services\Subscriptions\SubscriptionServiceInterface;
 use App\Enums\PackageFeature;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdminStoragePackageIndexRequest;
 use App\Http\Requests\Storage\StoragePackageRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class AdminStoragePackageController extends Controller
@@ -20,10 +20,11 @@ class AdminStoragePackageController extends Controller
         private SubscriptionServiceInterface $subscriptionService
     ) {}
 
-    public function index(Request $request)
+    public function index(AdminStoragePackageIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $params['filters'] = $request->only(['status']);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         $packages = $this->subscriptionService->paginatePackages($params);
 

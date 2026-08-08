@@ -7,8 +7,8 @@ namespace App\Http\Controllers;
 use App\Contracts\Services\ActivityLogs\ActivityLogServiceInterface;
 use App\Contracts\Services\Subscriptions\SubscriptionServiceInterface;
 use App\Http\Requests\Subscriptions\SubscribeRequest;
+use App\Http\Requests\Subscriptions\SubscriptionIndexRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
@@ -21,12 +21,13 @@ class SubscriptionController extends Controller
         private ActivityLogServiceInterface $activityLog
     ) {}
 
-    public function index(Request $request)
+    public function index(SubscriptionIndexRequest $request)
     {
         $userId = auth()->id();
 
         $params = $this->tableParams($request);
-        $params['filters'] = $request->only(['status']);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         [$currentPackage, $history, $packages] = Concurrency::run([
             fn () => $this->subscriptionService->getUserPackage($userId),

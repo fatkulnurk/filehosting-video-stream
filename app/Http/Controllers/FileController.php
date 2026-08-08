@@ -16,13 +16,13 @@ use App\Contracts\Services\Files\VersioningServiceInterface;
 use App\Contracts\Services\Storage\StorageServiceInterface;
 use App\Enums\DownloadTaskStatus;
 use App\Events\Files\FileDownloaded;
+use App\Http\Requests\Files\FileIndexRequest;
 use App\Http\Requests\Files\MoveRequest;
 use App\Http\Requests\Files\RenameFileRequest;
 use App\Http\Requests\Files\StoreFileRequest;
 use App\Http\Requests\Files\StoreUrlRequest;
 use App\Http\Requests\Files\UpdateFileSettingsRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -45,10 +45,11 @@ class FileController extends Controller
         private BatchOperationServiceInterface $batchService
     ) {}
 
-    public function index(Request $request)
+    public function index(FileIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $directoryId = $request->input('directory');
+        $params['sort'] = $request->getSorts();
+        $directoryId = $request->validated('directory');
         $userId = auth()->id();
 
         [$files, $directories, $breadcrumbs, $directoryTree] = Concurrency::run([

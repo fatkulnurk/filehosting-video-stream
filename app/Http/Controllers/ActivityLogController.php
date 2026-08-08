@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Services\ActivityLogs\ActivityLogServiceInterface;
+use App\Http\Requests\ActivityLogs\ActivityLogIndexRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ActivityLogController extends Controller
@@ -17,10 +17,12 @@ class ActivityLogController extends Controller
         private ActivityLogServiceInterface $logService
     ) {}
 
-    public function index(Request $request)
+    public function index(ActivityLogIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $action = $request->filled('action') ? $request->input('action') : null;
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
+        $action = $params['filters']['action'] ?? ($request->input('action') ?: null);
 
         return Inertia::render('ActivityLogs/Index', [
             'logs' => $this->logService->paginateForUser(auth()->id(), $params, $action),

@@ -38,9 +38,9 @@ class DirectoryController extends Controller
         [$files, $directories, $breadcrumbs, $directoryTree] = Concurrency::run([
             fn () => $this->fileService->paginateForDirectory($userId, $directory, [
                 'search' => $search ?? '',
-                'sort' => null,
-                'direction' => 'asc',
+                'sort' => [],
                 'per_page' => 20,
+                'filters' => [],
             ]),
             fn () => $this->directoryService->getChildDirectories($userId, $directory),
             fn () => $this->directoryService->getBreadcrumbs($directory),

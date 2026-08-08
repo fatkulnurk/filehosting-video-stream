@@ -6,8 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Services\Files\FileServiceInterface;
 use App\Contracts\Services\Files\TrashServiceInterface;
+use App\Http\Requests\Files\TrashIndexRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class TrashController extends Controller
@@ -19,9 +19,10 @@ class TrashController extends Controller
         private FileServiceInterface $fileService
     ) {}
 
-    public function index(Request $request)
+    public function index(TrashIndexRequest $request)
     {
         $params = $this->tableParams($request);
+        $params['sort'] = $request->getSorts();
 
         $files = $this->fileService->paginateTrashedForUser(auth()->id(), $params);
 

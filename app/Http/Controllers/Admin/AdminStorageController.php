@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Admin;
 use App\Contracts\Services\Storage\StorageServiceInterface;
 use App\Enums\StorageDriver;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdminStorageIndexRequest;
 use App\Http\Requests\Storage\StorageServerRequest;
 use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
@@ -21,10 +22,11 @@ class AdminStorageController extends Controller
         private StorageServiceInterface $storageService
     ) {}
 
-    public function index(Request $request)
+    public function index(AdminStorageIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $params['filters'] = $request->only(['driver', 'status']);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         [$servers, $backupOptions] = Concurrency::run([
             fn () => $this->storageService->paginateServers($params),

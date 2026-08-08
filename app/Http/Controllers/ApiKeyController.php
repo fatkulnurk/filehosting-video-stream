@@ -6,9 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Services\ActivityLogs\ActivityLogServiceInterface;
 use App\Contracts\Services\ApiKeys\ApiKeyServiceInterface;
+use App\Http\Requests\ApiKeys\ApiKeyIndexRequest;
 use App\Http\Requests\ApiKeys\ApiKeyRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ApiKeyController extends Controller
@@ -20,9 +20,10 @@ class ApiKeyController extends Controller
         private ActivityLogServiceInterface $activityLog
     ) {}
 
-    public function index(Request $request)
+    public function index(ApiKeyIndexRequest $request)
     {
         $params = $this->tableParams($request);
+        $params['sort'] = $request->getSorts();
 
         return Inertia::render('ApiKeys/Index', [
             'apiKeys' => $this->apiKeyService->paginateForUser(auth()->id(), $params),

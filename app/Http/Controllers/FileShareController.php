@@ -6,9 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Services\Files\FileServiceInterface;
 use App\Contracts\Services\Files\FileShareServiceInterface;
+use App\Http\Requests\Files\FileShareIndexRequest;
 use App\Http\Requests\Files\ShareFileRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class FileShareController extends Controller
@@ -41,10 +41,11 @@ class FileShareController extends Controller
         return redirect()->back()->with('success', "File shared with {$targetUser->email}");
     }
 
-    public function sharedWithMe(Request $request)
+    public function sharedWithMe(FileShareIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $params['filters'] = $request->only(['permission']);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         $shares = $this->shareService->paginateSharedWithMe(auth()->id(), $params);
 
@@ -54,10 +55,11 @@ class FileShareController extends Controller
         ]);
     }
 
-    public function sharedByMe(Request $request)
+    public function sharedByMe(FileShareIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $params['filters'] = $request->only(['permission']);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         $shares = $this->shareService->paginateSharedByMe(auth()->id(), $params);
 

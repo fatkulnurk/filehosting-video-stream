@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Repositories\Interfaces;
+declare(strict_types=1);
 
-use App\Models\UserSubscription;
+namespace App\Contracts\Repositories\Subscriptions;
+
+use App\Models\Subscriptions\UserSubscription;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface UserSubscriptionRepositoryInterface
 {
@@ -16,4 +19,10 @@ interface UserSubscriptionRepositoryInterface
     public function cancelActive(string $userId): void;
 
     public function getAllForUser(string $userId): Collection;
+
+    public function update(string $id, array $data): UserSubscription;
+
+    public function paginateForUser(string $userId, array $params): LengthAwarePaginator;
+
+    public function paginateForAdmin(array $params): LengthAwarePaginator;
 }

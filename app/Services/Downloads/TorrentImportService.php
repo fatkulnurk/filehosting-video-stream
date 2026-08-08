@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Models\Directory;
-use App\Models\DownloadTask;
-use App\Models\File;
-use App\Models\Torrent;
-use App\Services\Interfaces\DirectoryServiceInterface;
-use App\Services\Interfaces\FileServiceInterface;
-use App\Services\Interfaces\TorrentImportServiceInterface;
+namespace App\Services\Downloads;
+
+use App\Contracts\Services\Directories\DirectoryServiceInterface;
+use App\Contracts\Services\Downloads\TorrentImportServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Models\Downloads\DownloadTask;
+use App\Models\Downloads\Torrent;
+use App\Models\Files\Directory;
+use App\Models\Files\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 

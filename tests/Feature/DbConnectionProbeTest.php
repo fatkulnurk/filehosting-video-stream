@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,7 +14,7 @@ class DbConnectionProbeTest extends TestCase
     public function test_probe_db_connection(): void
     {
         fwrite(STDERR, "\n[DB-DRIVER] ".\DB::connection()->getDriverName()."\n");
-        fwrite(STDERR, "[DB-NAME] ".\DB::connection()->getDatabaseName()."\n");
+        fwrite(STDERR, '[DB-NAME] '.\DB::connection()->getDatabaseName()."\n");
         $this->assertTrue(true);
     }
 }

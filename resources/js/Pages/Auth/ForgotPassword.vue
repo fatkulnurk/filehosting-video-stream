@@ -1,19 +1,21 @@
 <script setup>
-import { reactive, ref } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { computed, reactive, ref } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 
 defineOptions({ layout: GuestLayout });
 
+const page = usePage();
 const form = reactive({ email: '' });
 const processing = ref(false);
-const sent = ref(false);
+
+const serverStatus = computed(() => page.props.flash?.status || '');
+const sent = computed(() => !!serverStatus.value);
 
 const submit = () => {
     processing.value = true;
     router.post(route('password.email'), form, {
         preserveScroll: true,
-        onSuccess: () => (sent.value = true),
         onFinish: () => (processing.value = false),
     });
 };
@@ -25,10 +27,10 @@ const submit = () => {
         <p class="text-sm text-soft mb-6">Enter your email and we'll send you a reset link</p>
 
         <div v-if="sent" class="alert alert-success-soft mb-4">
-            Reset link sent! Check your email.
+            {{ serverStatus }}
         </div>
 
-        <form @submit.prevent="submit" class="space-y-4">
+        <form v-if="!sent" @submit.prevent="submit" class="space-y-4">
             <div>
                 <label class="label">Email</label>
                 <input v-model="form.email" type="email" placeholder="you@example.com" required autofocus class="input" />

@@ -1,10 +1,11 @@
 <script setup>
 import { reactive, ref } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 
 defineOptions({ layout: GuestLayout });
 
+const page = usePage();
 const form = reactive({ name: '', email: '', password: '', password_confirmation: '' });
 const processing = ref(false);
 
@@ -24,15 +25,21 @@ const submit = () => {
         <form @submit.prevent="submit" class="space-y-4">
             <div>
                 <label class="label">Name</label>
-                <input v-model="form.name" type="text" placeholder="Your name" required autofocus class="input" />
+                <input v-model="form.name" type="text" placeholder="Your name" required autofocus class="input"
+                    :class="{ 'border-danger-500': page.props.errors?.name }" />
+                <p v-if="page.props.errors?.name" class="form-error mt-1">{{ page.props.errors.name }}</p>
             </div>
             <div>
                 <label class="label">Email</label>
-                <input v-model="form.email" type="email" placeholder="you@example.com" required class="input" />
+                <input v-model="form.email" type="email" placeholder="you@example.com" required class="input"
+                    :class="{ 'border-danger-500': page.props.errors?.email }" />
+                <p v-if="page.props.errors?.email" class="form-error mt-1">{{ page.props.errors.email }}</p>
             </div>
             <div>
                 <label class="label">Password</label>
-                <input v-model="form.password" type="password" placeholder="Create a password" required class="input" />
+                <input v-model="form.password" type="password" placeholder="Create a password" required class="input"
+                    :class="{ 'border-danger-500': page.props.errors?.password }" />
+                <p v-if="page.props.errors?.password" class="form-error mt-1">{{ page.props.errors.password }}</p>
             </div>
             <div>
                 <label class="label">Confirm Password</label>

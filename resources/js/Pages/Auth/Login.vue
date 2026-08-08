@@ -1,10 +1,11 @@
 <script setup>
 import { reactive, ref } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 
 defineOptions({ layout: GuestLayout });
 
+const page = usePage();
 const form = reactive({ email: '', password: '', remember: false });
 const processing = ref(false);
 
@@ -21,6 +22,10 @@ const submit = () => {
     <div class="bg-surface rounded-2xl shadow-xl p-8">
         <h2 class="page-title mb-1">Welcome back</h2>
         <p class="text-sm text-soft mb-6">Login to your account</p>
+
+        <div v-if="page.props.errors?.email || page.props.errors?.password" class="alert alert-danger-soft mb-4">
+            These credentials do not match our records.
+        </div>
 
         <form @submit.prevent="submit" class="space-y-4">
             <div>

@@ -19,7 +19,7 @@ class UpdateFileSettingsRequest extends FormRequest
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'is_public' => ['sometimes', 'boolean'],
             'expires_at' => ['nullable', 'date', 'after:now'],
-            'password' => ['nullable', 'string', 'min:4', 'max:255'],
+            'password' => ['nullable', 'string', 'min:8', 'max:255'],
             'download_limit' => ['nullable', 'integer', 'min:1'],
         ];
     }

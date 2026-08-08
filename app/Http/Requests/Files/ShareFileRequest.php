@@ -20,7 +20,7 @@ class ShareFileRequest extends FormRequest
         return [
             'shared_with' => ['required', 'email', 'exists:users,email'],
             'permission' => ['required', 'string', Rule::enum(SharePermission::class), Rule::in(SharePermission::fileOnly())],
-            'password' => ['nullable', 'string', 'min:4'],
+            'password' => ['nullable', 'string', 'min:8'],
             'expires_at' => ['nullable', 'date', 'after:now'],
             'download_limit' => ['nullable', 'integer', 'min:1'],
         ];

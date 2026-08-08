@@ -42,7 +42,7 @@ Route::get('/privacy', [LegalController::class, 'privacy'])->name('privacy');
 
 // Public access
 Route::get('/f/{id}', [PublicController::class, 'show'])->name('public.show');
-Route::post('/f/{id}/unlock', [PublicController::class, 'unlock'])->name('public.unlock');
+Route::post('/f/{id}/unlock', [PublicController::class, 'unlock'])->name('public.unlock')->middleware('throttle:10,1');
 Route::get('/f/{id}/download', [PublicController::class, 'download'])->name('public.download');
 Route::get('/embed/{id}', [EmbedController::class, 'show'])->name('embed.show');
 Route::get('/stream/{id}', [StreamController::class, 'show'])->name('stream.show');

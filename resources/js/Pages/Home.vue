@@ -1,6 +1,7 @@
 <script setup>
 import { Link, router, usePage } from '@inertiajs/vue3';
 import Card from '@/Components/ui/Card.vue';
+import Footer from '@/Components/Footer.vue';
 import {
     DocumentIcon,
     FolderIcon,
@@ -164,8 +165,6 @@ const steps = [
             </div>
         </section>
 
-        <footer class="bg-ink text-ink-faint text-center py-8 text-sm">
-            FHV Stream — Open Source File Hosting
-        </footer>
+        <Footer dark />
     </div>
 </template>

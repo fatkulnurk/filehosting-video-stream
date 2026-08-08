@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Events;
+declare(strict_types=1);
 
-use App\Models\Directory;
+namespace App\Events\Directories;
+
+use App\Models\Files\Directory;
 use Illuminate\Foundation\Events\Dispatchable;
 
 class DirectoryDeleted

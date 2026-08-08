@@ -1,11 +1,15 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Models\ApiKey;
-use App\Models\User;
-use App\Repositories\Interfaces\ApiKeyRepositoryInterface;
-use App\Services\Interfaces\ApiKeyServiceInterface;
+namespace App\Services\ApiKeys;
+
+use App\Contracts\Repositories\ApiKeys\ApiKeyRepositoryInterface;
+use App\Contracts\Services\ApiKeys\ApiKeyServiceInterface;
+use App\Models\Integrations\ApiKey;
+use App\Models\Users\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApiKeyService implements ApiKeyServiceInterface
 {
@@ -53,8 +57,13 @@ class ApiKeyService implements ApiKeyServiceInterface
         return $this->apiKeyRepo->delete($apiKeyId);
     }
 
-    public function getForUser(string $userId): \Illuminate\Database\Eloquent\Collection
+    public function getForUser(string $userId): Collection
     {
         return $this->apiKeyRepo->getForUser($userId);
+    }
+
+    public function paginateForUser(string $userId, array $params): LengthAwarePaginator
+    {
+        return $this->apiKeyRepo->paginateForUser($userId, $params);
     }
 }

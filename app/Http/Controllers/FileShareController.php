@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Http\Concerns\AppliesTableParams;
-use App\Http\Requests\ShareFileRequest;
-use App\Models\File;
-use App\Models\FileShare;
-use App\Models\User;
-use App\Services\Interfaces\FileShareServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Contracts\Services\Files\FileShareServiceInterface;
+use App\Http\Requests\Files\ShareFileRequest;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,14 +16,17 @@ class FileShareController extends Controller
     use AppliesTableParams;
 
     public function __construct(
-        private FileShareServiceInterface $shareService
+        private FileShareServiceInterface $shareService,
+        private FileServiceInterface $fileService
     ) {}
 
     public function store(ShareFileRequest $request, string $id)
     {
-        $file = File::where('user_id', auth()->id())->findOrFail($id);
+        $file = $this->fileService->getOwnedFile(auth()->id(), $id);
 
-        $targetUser = User::where('email', $request->shared_with)->first();
+        $targetUser = $this->shareService->findUserByEmail($request->shared_with);
+
+        abort_if(! $targetUser, 404, 'User not found');
 
         $share = $this->shareService->share(
             $file,
@@ -41,28 +44,9 @@ class FileShareController extends Controller
     public function sharedWithMe(Request $request)
     {
         $params = $this->tableParams($request);
+        $params['filters'] = $request->only(['permission']);
 
-        $shares = $this->applyFilters(
-            $this->applyTableQuery(
-                FileShare::query()
-                    ->where('shared_with', auth()->id())
-                    ->with('file.media', 'sharedWithUser', 'sharedByUser'),
-                $params,
-                searchable: [],
-                sortable: [
-                    'file' => \DB::raw('(SELECT f.name FROM files f WHERE f.id = file_shares.file_id)'),
-                    'shared_by' => \DB::raw('(SELECT u.name FROM users u WHERE u.id = file_shares.shared_by)'),
-                    'permission' => 'permission',
-                    'expires' => 'expires_at',
-                    'size' => \DB::raw("(SELECT COALESCE(SUM(size),0) FROM media WHERE media.model_id = file_shares.file_id AND media.model_type = '" . addslashes(\App\Models\File::class) . "')"),
-                    'created_at' => 'created_at',
-                ],
-                defaultSort: 'created_at',
-                defaultDirection: 'desc',
-            ),
-            $request,
-            ['permission' => 'permission'],
-        )->paginate($params['per_page'])->withQueryString();
+        $shares = $this->shareService->paginateSharedWithMe(auth()->id(), $params);
 
         return Inertia::render('Files/SharedWithMe', [
             'shares' => $shares,
@@ -73,28 +57,9 @@ class FileShareController extends Controller
     public function sharedByMe(Request $request)
     {
         $params = $this->tableParams($request);
+        $params['filters'] = $request->only(['permission']);
 
-$shares = $this->applyFilters(
-            $this->applyTableQuery(
-                FileShare::query()
-                    ->where('shared_by', auth()->id())
-                    ->with('file.media', 'sharedWithUser', 'sharedByUser'),
-                $params,
-                searchable: [],
-                sortable: [
-                    'file' => \DB::raw('(SELECT f.name FROM files f WHERE f.id = file_shares.file_id)'),
-                    'shared_with' => \DB::raw('(SELECT u.name FROM users u WHERE u.id = file_shares.shared_with)'),
-                    'permission' => 'permission',
-                    'expires' => 'expires_at',
-                    'size' => \DB::raw("(SELECT COALESCE(SUM(size),0) FROM media WHERE media.model_id = file_shares.file_id AND media.model_type = '" . addslashes(\App\Models\File::class) . "')"),
-                    'created_at' => 'created_at',
-                ],
-                defaultSort: 'created_at',
-                defaultDirection: 'desc',
-            ),
-            $request,
-            ['permission' => 'permission'],
-        )->paginate($params['per_page'])->withQueryString();
+        $shares = $this->shareService->paginateSharedByMe(auth()->id(), $params);
 
         return Inertia::render('Files/SharedByMe', [
             'shares' => $shares,
@@ -104,11 +69,7 @@ $shares = $this->applyFilters(
 
     public function destroy(string $id)
     {
-        $share = \App\Models\FileShare::findOrFail($id);
-
-        if ($share->shared_by !== auth()->id() && $share->file->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->shareService->getShareForOwner($id, auth()->id());
 
         $this->shareService->removeShare($id);
 

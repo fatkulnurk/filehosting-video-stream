@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Requests;
+declare(strict_types=1);
+
+namespace App\Http\Requests\Storage;
 
 use App\Enums\StorageDriver;
 use Illuminate\Foundation\Http\FormRequest;

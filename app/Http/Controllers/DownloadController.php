@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Http\Concerns\AppliesTableParams;
-use App\Http\Requests\StoreTorrentRequest;
-use App\Http\Requests\StoreUrlRequest;
-use App\Models\DownloadTask;
-use App\Repositories\Interfaces\DownloadTaskRepositoryInterface;
-use App\Services\Interfaces\DirectoryServiceInterface;
-use App\Services\Interfaces\DownloaderServiceInterface;
-use App\Services\TorrentHashService;
+use App\Contracts\Services\Directories\DirectoryServiceInterface;
+use App\Contracts\Services\Downloads\DownloaderServiceInterface;
+use App\Enums\DownloadTaskStatus;
+use App\Http\Requests\Files\StoreTorrentRequest;
+use App\Http\Requests\Files\StoreUrlRequest;
+use App\Services\Downloads\TorrentHashService;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -19,7 +20,6 @@ class DownloadController extends Controller
     use AppliesTableParams;
 
     public function __construct(
-        private DownloadTaskRepositoryInterface $taskRepository,
         private DownloaderServiceInterface $downloaderService,
         private TorrentHashService $hashService,
         private DirectoryServiceInterface $directoryService
@@ -29,25 +29,8 @@ class DownloadController extends Controller
     {
         $params = $this->tableParams($request);
 
-        $tasks = $this->applyTableQuery(
-            DownloadTask::query()->where('user_id', auth()->id()),
-            $params,
-            searchable: ['source'],
-            sortable: [
-                'type' => 'type',
-                'status' => 'status',
-                'progress' => 'progress',
-                'created_at' => 'created_at',
-            ],
-            defaultSort: 'created_at',
-            defaultDirection: 'desc',
-        )
-            ->with(['file', 'torrent', 'directory'])
-            ->paginate($params['per_page'])
-            ->withQueryString();
-
         return Inertia::render('CloudDownloads/Index', [
-            'tasks' => $tasks,
+            'tasks' => $this->downloaderService->paginateForUser(auth()->id(), $params),
             'filters' => $this->tableFilters($params),
             'directoryTree' => $this->directoryService->getTree(auth()->id()),
         ]);
@@ -56,13 +39,13 @@ class DownloadController extends Controller
     public function storeUrl(StoreUrlRequest $request)
     {
         // One task per URL; each gets its own background job.
-        $task = $this->taskRepository->create([
+        $task = $this->downloaderService->createTask([
             'user_id' => auth()->id(),
             'type' => 'url',
             'source' => $request->url,
             'directory_id' => $request->directory_id,
             'disk' => $request->disk,
-            'status' => 'queued',
+            'status' => DownloadTaskStatus::Queued,
             'progress' => 0,
         ]);
 
@@ -98,13 +81,13 @@ class DownloadController extends Controller
             return redirect()->back()->with('error', 'Could not read the torrent info hash from the provided source.');
         }
 
-        $task = $this->taskRepository->create([
+        $task = $this->downloaderService->createTask([
             'user_id' => $userId,
             'type' => 'torrent',
             'source' => $source,
             'directory_id' => $request->directory_id,
             'disk' => $request->disk,
-            'status' => 'queued',
+            'status' => DownloadTaskStatus::Queued,
             'progress' => 0,
             'info_hash' => $infoHash,
         ]);
@@ -116,9 +99,9 @@ class DownloadController extends Controller
 
     public function retry(string $id)
     {
-        $task = $this->taskRepository->findById($id);
+        $task = $this->downloaderService->findOwnedTask(auth()->id(), $id);
 
-        if (! $task || $task->user_id !== auth()->id() || ! in_array($task->status->value, ['failed', 'cancelled'], true)) {
+        if (! $task || ! in_array($task->status->value, ['failed', 'cancelled'], true)) {
             abort(404);
         }
 
@@ -129,9 +112,9 @@ class DownloadController extends Controller
 
     public function cancel(string $id)
     {
-        $task = $this->taskRepository->findById($id);
+        $task = $this->downloaderService->findOwnedTask(auth()->id(), $id);
 
-        if (! $task || $task->user_id !== auth()->id()) {
+        if (! $task) {
             abort(404);
         }
 

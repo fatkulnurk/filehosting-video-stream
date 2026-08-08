@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Services\Interfaces;
+declare(strict_types=1);
 
-use App\Models\File;
-use App\Models\FileShare;
+namespace App\Contracts\Services\Files;
+
+use App\Models\Files\File;
+use App\Models\Files\FileShare;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface FileShareServiceInterface
 {
@@ -19,4 +23,12 @@ interface FileShareServiceInterface
     public function canDownload(File $file, string $userId): bool;
 
     public function removeShare(string $shareId): bool;
+
+    public function findUserByEmail(string $email): ?User;
+
+    public function paginateSharedWithMe(string $userId, array $params): LengthAwarePaginator;
+
+    public function paginateSharedByMe(string $userId, array $params): LengthAwarePaginator;
+
+    public function getShareForOwner(string $shareId, string $userId): FileShare;
 }

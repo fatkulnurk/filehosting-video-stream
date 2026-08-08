@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Events;
+declare(strict_types=1);
 
-use App\Models\File;
+namespace App\Events\Files;
+
+use App\Models\Files\File;
 use Illuminate\Foundation\Events\Dispatchable;
 
 class FileUploaded

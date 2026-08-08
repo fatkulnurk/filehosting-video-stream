@@ -35,6 +35,9 @@ jobs:
                   key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                   restore-keys: ${{ runner.os }}-composer-
 
+            - name: Create SQLite database
+              run: touch database/database.sqlite
+
             - name: Install dependencies
               run: composer install --no-interaction --prefer-dist --no-progress
 

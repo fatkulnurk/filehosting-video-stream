@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Services\Interfaces;
+declare(strict_types=1);
 
-use App\Models\File;
+namespace App\Contracts\Services\Files;
+
+use App\Models\Files\File;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 interface FileMigrationServiceInterface

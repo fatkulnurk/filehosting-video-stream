@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Events\FileDeleted;
-use App\Events\FileRestored;
-use App\Models\File;
-use App\Repositories\Interfaces\FileRepositoryInterface;
-use App\Services\Interfaces\FileDeduplicationServiceInterface;
-use App\Services\Interfaces\StorageQuotaServiceInterface;
-use App\Services\Interfaces\TrashServiceInterface;
+namespace App\Services\Files;
+
+use App\Contracts\Repositories\Files\FileRepositoryInterface;
+use App\Contracts\Services\Files\FileDeduplicationServiceInterface;
+use App\Contracts\Services\Files\TrashServiceInterface;
+use App\Contracts\Services\Storage\StorageQuotaServiceInterface;
+use App\Events\Files\FileDeleted;
+use App\Events\Files\FileRestored;
+use App\Models\Files\File;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 
@@ -84,9 +86,23 @@ class TrashService implements TrashServiceInterface
     {
         $count = 0;
 
-        $files = \App\Models\File::onlyTrashed()
+        $files = File::onlyTrashed()
             ->where('deleted_at', '<', now()->subDays($days))
             ->get();
+
+        foreach ($files as $file) {
+            $this->forceDeleteFile($file);
+            $count++;
+        }
+
+        return $count;
+    }
+
+    public function purgeTrashed(string $userId): int
+    {
+        $files = $this->fileRepository->getTrashedForUser($userId);
+
+        $count = 0;
 
         foreach ($files as $file) {
             $this->forceDeleteFile($file);

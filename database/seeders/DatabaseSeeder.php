@@ -84,7 +84,7 @@ class DatabaseSeeder extends Seeder
         $this->call(StoragePackageSeeder::class);
 
         $admin = $this->seedUser('admin@dibumi.com', 'Admin FHV', 'admin');
-        $member = $this->seedUser('rudi@dibumi.com', 'Rudi Santoso', 'member');
+        $member = $this->seedUser('member@dibumi.com', 'Member FHV', 'member');
 
         foreach ([$admin, $member] as $user) {
             $this->seedUserProfile($user);

@@ -15,14 +15,17 @@ A file hosting & streaming platform built with **Laravel 13** + **Inertia.js** +
 
 FSH Stream lets users upload, organize, share, and stream files (including video). It includes:
 
-- File & directory management (create, rename, move, delete, trash, versions, favorites)
-- Public links, embeds, and streaming endpoints
-- Sharing files & directories with other users (view / download permissions)
+- File & directory management (create, rename, move, delete, trash, restore, versions, favorites)
+- **File versioning** with per-file history, restore, and rollback
+- **Subtitles** (SRT/VTT) per video, with default-track management
+- **Batch operations** — upload many files at once and download a ZIP of selected files
+- Public links, password-protected links, embeds, and streaming endpoints
+- Sharing files & directories with other users (view / download / upload / manage permissions)
 - Storage packages & subscriptions/quota per user
-- API keys, webhooks, and activity logs
+- API keys, webhooks (signed), and activity logs
 - **Cloud Downloads** — add files from a URL or a torrent (magnet / `.torrent`) directly into
-  storage, with live status/progress tracking and **hash-based dedup** (the same torrent is reused
-  instantly instead of re-downloading when the bytes already exist)
+  storage, with live status/progress tracking and **hash-based dedup** (the same bytes are reused
+  instantly instead of re-uploading when the checksum already exists)
 - Admin panel (users, storage servers, storage packages, downloader clients, logs) under `/admin`
 - **System-managed storage pool**: storage servers are selected automatically by the system
   (least-utilized active server), not owned by individual users.
@@ -33,12 +36,13 @@ FSH Stream lets users upload, organize, share, and stream files (including video
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Laravel 13 (PHP 8.3+) |
-| Frontend | Vue 3, Inertia.js v3, Tailwind CSS, Heroicons |
-| Media | Spatie Laravel MediaLibrary |
-| Storage drivers | Local, S3, Wasabi, B2, Azure Blob, GCS, Dropbox, FTP, SFTP |
+| Backend | Laravel 13 (PHP 8.5+) |
+| Frontend | Vue 3, Inertia.js v3, Tailwind CSS, Heroicons, Headless UI |
+| Media | Spatie Laravel MediaLibrary (local + remote disks) |
+| Storage drivers | Local, S3, Wasabi, B2, Azure Blob, GCS, Dropbox, FTP, SFTP, Rackspace |
 | Queue | Database driver (`QUEUE_CONNECTION=database`) |
-| Auth | Laravel Fortify (2FA, sessions) |
+| Auth | Laravel Fortify (sessions, 2FA) |
+| Video players | Video.js, Plyr, DPlayer (selectable) |
 | Torrent client | Transmission (via `fatkulnurk/torrent` SDK), `.torrent` parsing via `arokettu/bencode` |
 
 ### Supported storage drivers
@@ -70,7 +74,7 @@ FSH Stream lets users upload, organize, share, and stream files (including video
 
 ## Requirements
 
-- PHP 8.3+
+- PHP 8.5+
 - Composer
 - Node.js & npm
 - A MySQL-compatible database (default config points to MySQL `fhv_stream`);
@@ -115,6 +119,22 @@ Herd users can simply open the site through their local domain
 php artisan queue:work   # or queue:listen
 ```
 
+### Scheduler (required for torrents, trash purge, link expiry, log cleanup)
+
+```bash
+php artisan schedule:work
+```
+
+Scheduled jobs:
+
+- `SyncStorageStatsJob` — refresh storage usage per server
+- `MonitorTorrentDownloadsJob` — poll torrent progress & import finished downloads
+- `ImportTorrentFileJob` — import a queued `.torrent` file
+- `PurgeTrashJob` — permanently delete trashed files past retention (default 30 days)
+- `CleanupExpiredLinksJob` — expire public links / password-protected links
+- `CleanupDownloadsJob` / `CleanupOldLogsJob` — prune old tasks & activity logs (default 90 days)
+- `ExpireSubscriptionsJob` — mark expired subscriptions
+
 ### Torrent server & Cloud Downloads (optional)
 
 Cloud Downloads supports both plain URLs (no external service needed) and **torrents**, which
@@ -152,7 +172,7 @@ are still present, they are reused instantly without re-downloading.
 | Role | Email | Password |
 |------|-------|----------|
 | Admin | `admin@dibumi.com` | `password` |
-| Member | `rudi@dibumi.com` | `password` |
+| Member | `member@dibumi.com` | `password` |
 
 The seeder also creates:
 
@@ -172,13 +192,31 @@ Uploads do not belong to a per-user storage server. Instead, the app picks an **
 server with the lowest utilization ratio (`storage_used / storage_limit`) at upload time. Manage
 storage servers in the admin panel (`/admin/storage`).
 
+### File deduplication
+Files are fingerprinted with multiple checksums (CRC32, MD5, SHA-1, SHA-256, SHA-512). When an
+upload matches an existing checksum + size, the physical bytes are **reused** (reference-counted)
+instead of re-storing them — so uploading the same content again costs nothing. Dedup entries are
+cleaned up when the last reference is deleted.
+
 ### Storage packages & quota
 Each user has a subscription to a storage package, giving them a storage limit and per-file size
 limits. Quota is enforced per user; the physical storage is shared globally.
 
+### Sorting & filtering
+All index pages (file manager, admin tables, shares, downloads, subscriptions, logs) use a uniform
+query format: `sort[field]=asc|desc` (multi-column supported) and `filter[key]=value`. Each page
+has a dedicated `{Page}IndexRequest` form request that whitelists sortable fields and strictly
+validates filters (enum fields are validated with `Rule::enum`).
+
+### Enums & strict validation
+Domain statuses are modeled as backed enums (`Role`, `SubscriptionStatus`, `SharePermission`,
+`DownloadTaskStatus`, `DownloadTaskType`, `StorageDriver`, `DownloaderDriver`, `PackageFeature`,
+plus admin filter enums). All status/permission/driver form inputs are validated against these
+enums — no magic strings.
+
 ### Migrations
-Migrations are consolidated **by domain** into six files under `database/migrations`:
-`core`, `profile`, `storage`, `file`, `billing`, and `integration`.
+Migrations are consolidated **by domain** into seven files under `database/migrations`:
+`core`, `profile`, `storage`, `file`, `billing`, `integration`, and `download`.
 
 ---
 
@@ -186,22 +224,60 @@ Migrations are consolidated **by domain** into six files under `database/migrati
 
 ### Guest / public
 - `GET /` — landing page
-- `GET /f/{id}` — public file page
+- `GET /f/{id}` — public file page (password-protected files require a password)
+- `POST /f/{id}/unlock` — unlock a password-protected file (rate-limited)
 - `GET /embed/{id}` — embeddable player
-- `GET /stream/{id}` — stream endpoint
+- `GET /stream/{id}` — stream endpoint (signed URLs for private files)
+- `GET /subtitles/{id}/{media}` — subtitle track (VTT)
+- `GET /terms`, `GET /privacy` — legal pages
 
 ### Authenticated
-- `GET /dashboard` — user dashboard
-- `GET /files` — file manager (upload, folders, favorites, shares, trash)
+- `GET /dashboard` — user dashboard (stats, recent files)
+- `GET /files` — file manager (upload, folders, favorites, shares, trash, versions, subtitles)
 - `GET /cloud-downloads` — Cloud Downloads (status/progress of URL & torrent downloads)
-- Profile, API keys, webhooks, activity logs, subscriptions
+- `GET /trash` — trashed files (restore / purge)
+- `GET /shared-with-me`, `GET /shared-by-me` — file & directory shares
+- `GET /recently-accessed`, `GET /favorites`, `GET /activity-logs`
+- `GET /api-keys`, `GET /webhooks` (+ webhook logs), `GET /subscriptions`
+- `POST /batch/download` — download selected files as a ZIP
+
+### API (`/api/v1/*`, key-authenticated)
+- `GET /api/v1/files` — list files
+- `POST /api/v1/files` — upload a file
+- `GET /api/v1/files/{file}` — file details
+- `DELETE /api/v1/files/{file}` — delete a file
+- `GET /api/v1/files/{file}/download` — download a file
+
+API keys are sent via the `X-API-Key` header, carry explicit permissions (`file.read`,
+`file.write`, `file.delete`) and a per-key rate limit.
 
 ### Admin (`/admin/*`)
 - `GET /admin/dashboard` — admin dashboard
-- `GET /admin/users` — manage users
+- `GET /admin/users` — manage users (create, edit, change role, set quota, delete)
+- `GET /admin/files` — manage all files (filter by owner/status/type)
+- `GET /admin/directories` — manage all directories
 - `GET /admin/packages` — manage storage packages
-- `GET /admin/storage` — manage storage servers
+- `GET /admin/storage` — manage storage servers (drivers, config, deactivate/migrate)
 - `GET /admin/downloaders` — manage downloader clients (URL / torrent / Transmission)
+- `GET /admin/subscriptions` — manage subscriptions
+- `GET /admin/logs` — global activity logs
+
+---
+
+## Security notes
+
+- **Ownership checks**: file/directory/share/task access is scoped to the owner (or an active share)
+  in the service layer; admin routes are guarded by an `admin` middleware.
+- **Streaming**: private files require a signed, expiring URL; public files are streamable directly.
+  Password-protected public files require the unlock session before streaming/subtitles are served.
+- **SSRF guards**: the "download from URL" feature rejects private/loopback/reserved hosts and
+  re-checks the final host after redirects at execution time; webhook URLs are validated against
+  the same private-host blocklist and re-checked when the job runs.
+- **Input validation**: all inputs go through dedicated Form Requests; enum columns use `Rule::enum`.
+- **Brute-force hardening**: public file unlock is rate-limited; file/share passwords require a
+  minimum of 8 characters.
+- **Header injection**: user-supplied file names are sanitized before being placed in
+  `Content-Disposition` headers.
 
 ---
 
@@ -211,7 +287,15 @@ Migrations are consolidated **by domain** into six files under `database/migrati
 php artisan test
 ```
 
-Small but working: includes default unit + feature examples, migration success, basic page loads.
+74 tests / 159 assertions currently passing. Covers:
+
+- Auth/admin access control (`AdminAccessTest`)
+- Cloud downloads & torrent jobs (`DownloadTest`, `DownloadJobTest`, `AdminDownloaderTest`)
+- Streaming & signed URLs (`StreamAccessTest`), subtitles (`SubtitleTest`)
+- Exception rendering (`ExceptionRenderingTest`)
+- Strict enum validation & sorting/filtering (`StrictEnumValidationTest`)
+- Security hardening (`SecurityFixTest`): password-protected streams, webhook SSRF, password
+  minimums, unlock throttling, signed stream URLs, header sanitization
 
 ---
 
@@ -223,7 +307,9 @@ Small but working: includes default unit + feature examples, migration success, 
   private/blocked hosts) and downloads torrents via a Transmission client. Both should be reviewed
   carefully for abuse (queue load, SSRF edge cases, redirects, quota, legal use of torrents) before
   enabling widely.
-- API/webhook signing and 2FA use standard Laravel mechanisms but have not been audited.
+- Webhook delivery performs an outbound HTTP request to user-supplied URLs. Hosts are validated
+  against a private/blocked blocklist at create time and again when the job runs, but allowlisting
+  delivery targets is recommended for stricter environments.
 
 ---
 

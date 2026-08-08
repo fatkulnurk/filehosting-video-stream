@@ -1,23 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
+use App\Contracts\Services\Downloads\DownloaderServiceInterface;
 use App\Enums\DownloaderDriver;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\DownloadServerRequest;
-use App\Models\DownloadServer;
-use App\Services\TorrentService;
+use App\Http\Requests\Downloads\DownloadServerRequest;
 use Inertia\Inertia;
 
 class AdminDownloaderController extends Controller
 {
     public function __construct(
-        private TorrentService $torrentService
+        private DownloaderServiceInterface $downloaderService
     ) {}
 
     public function index()
     {
-        $servers = DownloadServer::orderBy('driver')->orderBy('name')->get();
+        $servers = $this->downloaderService->getServers();
 
         return Inertia::render('Admin/Downloaders/Index', [
             'servers' => $servers,
@@ -30,7 +31,7 @@ class AdminDownloaderController extends Controller
     {
         $data = $request->validated();
 
-        $server = DownloadServer::create([
+        $server = $this->downloaderService->createServer([
             'name' => $data['name'],
             'driver' => $data['driver'],
             'config' => $data['config'] ?? [],
@@ -42,10 +43,9 @@ class AdminDownloaderController extends Controller
 
     public function update(DownloadServerRequest $request, string $id)
     {
-        $server = DownloadServer::findOrFail($id);
         $data = $request->validated();
 
-        $server->update([
+        $server = $this->downloaderService->updateServer($id, [
             'name' => $data['name'],
             'driver' => $data['driver'],
             'config' => $data['config'] ?? [],
@@ -57,13 +57,13 @@ class AdminDownloaderController extends Controller
 
     public function test(string $id)
     {
-        $server = DownloadServer::findOrFail($id);
+        $server = $this->downloaderService->getServerById($id);
 
         if (! $server->driver()->isTorrent()) {
             return back()->with('error', 'Connection test is only supported for torrent drivers.');
         }
 
-        $ok = $this->torrentService->serverReachable($server);
+        $ok = $this->downloaderService->testServerConnection($id);
 
         return back()->with($ok ? 'success' : 'error', $ok
             ? 'Connected to torrent client successfully.'
@@ -73,7 +73,7 @@ class AdminDownloaderController extends Controller
 
     public function destroy(string $id)
     {
-        DownloadServer::findOrFail($id)->delete();
+        $this->downloaderService->deleteServer($id);
 
         return redirect()->route('admin.downloaders.index')->with('success', 'Downloader deleted');
     }

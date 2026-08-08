@@ -7,6 +7,7 @@ namespace App\Services\Admin;
 use App\Contracts\Repositories\ActivityLogs\ActivityLogRepositoryInterface;
 use App\Contracts\Services\Admin\AdminServiceInterface;
 use App\Contracts\Services\Files\StatsServiceInterface;
+use App\Enums\Role;
 use App\Models\Storage\StorageServer;
 use App\Models\Users\User;
 use Illuminate\Contracts\Database\Query\Expression;
@@ -39,20 +40,16 @@ class AdminService implements AdminServiceInterface
 
     public function deleteUser(User $user): bool
     {
-        if ($user->isAdmin() && User::where('role', 'admin')->count() <= 1) {
+        if ($user->isAdmin() && User::where('role', Role::Admin)->count() <= 1) {
             throw new \InvalidArgumentException('Cannot delete the last admin');
         }
 
         return $user->delete() !== false;
     }
 
-    public function changeRole(User $user, string $role): User
+    public function changeRole(User $user, Role $role): User
     {
-        if (! in_array($role, ['member', 'admin'])) {
-            throw new \InvalidArgumentException('Invalid role');
-        }
-
-        if ($user->isAdmin() && $role === 'member' && User::where('role', 'admin')->count() <= 1) {
+        if ($user->isAdmin() && $role === Role::Member && User::where('role', Role::Admin)->count() <= 1) {
             throw new \InvalidArgumentException('Cannot demote the last admin');
         }
 
@@ -86,8 +83,7 @@ class AdminService implements AdminServiceInterface
             'created_at' => 'created_at',
         ];
 
-        $sort = $params['sort'] ?? null;
-        $direction = in_array($params['direction'] ?? 'asc', ['asc', 'desc'], true) ? $params['direction'] : 'asc';
+        $sorts = $params['sort'] ?? [];
         $role = $params['filters']['role'] ?? null;
 
         $query = User::query()->with('profile')->withCount('files');
@@ -103,12 +99,20 @@ class AdminService implements AdminServiceInterface
             });
         }
 
-        if ($sort && isset($sortable[$sort])) {
-            $target = $sortable[$sort];
-            if ($target instanceof Expression) {
-                $query->orderByRaw($target->getValue($query->getQuery()->getGrammar()).' '.$direction);
-            } else {
-                $query->orderBy($target, $direction);
+        if ($sorts) {
+            foreach ($sorts as $field => $direction) {
+                if (! isset($sortable[$field])) {
+                    continue;
+                }
+
+                $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
+                $target = $sortable[$field];
+
+                if ($target instanceof Expression) {
+                    $query->orderByRaw($target->getValue($query->getQuery()->getGrammar()).' '.$direction);
+                } else {
+                    $query->orderBy($target, $direction);
+                }
             }
         } else {
             $query->orderByDesc('created_at');
@@ -138,7 +142,7 @@ class AdminService implements AdminServiceInterface
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'role' => $data['role'] ?? 'member',
+            'role' => Role::tryFrom($data['role'] ?? '') ?? Role::Member,
             'email_verified_at' => now(),
         ]);
 

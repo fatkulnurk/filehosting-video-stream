@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Services\Admin;
 
+use App\Enums\Role;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -16,7 +17,7 @@ interface AdminServiceInterface
 
     public function deleteUser(User $user): bool;
 
-    public function changeRole(User $user, string $role): User;
+    public function changeRole(User $user, Role $role): User;
 
     public function setQuota(User $user, ?int $storageLimit): void;
 

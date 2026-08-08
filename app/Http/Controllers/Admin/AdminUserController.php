@@ -8,13 +8,14 @@ use App\Contracts\Services\Admin\AdminServiceInterface;
 use App\Contracts\Services\Directories\DirectoryServiceInterface;
 use App\Contracts\Services\Files\FileServiceInterface;
 use App\Contracts\Services\Subscriptions\SubscriptionServiceInterface;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdminUserIndexRequest;
 use App\Http\Requests\Admin\ChangeRoleRequest;
 use App\Http\Requests\Admin\SetQuotaRequest;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Traits\AppliesTableParams;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 
@@ -29,10 +30,11 @@ class AdminUserController extends Controller
         private DirectoryServiceInterface $directoryService
     ) {}
 
-    public function index(Request $request)
+    public function index(AdminUserIndexRequest $request)
     {
         $params = $this->tableParams($request);
-        $params['filters'] = $request->only(['role']);
+        $params['sort'] = $request->getSorts();
+        $params['filters'] = $request->getFilters();
 
         $users = $this->adminService->paginateUsersWithParams($params);
 
@@ -94,7 +96,7 @@ class AdminUserController extends Controller
     {
         $user = $this->adminService->findUserById($id);
 
-        $this->adminService->changeRole($user, $request->role);
+        $this->adminService->changeRole($user, Role::from($request->validated('role')));
 
         return redirect()->back()->with('success', 'Role changed');
     }

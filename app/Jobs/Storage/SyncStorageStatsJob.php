@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Jobs;
+declare(strict_types=1);
 
-use App\Models\StorageServer;
-use App\Services\Interfaces\StorageServiceInterface;
+namespace App\Jobs\Storage;
+
+use App\Contracts\Services\Storage\StorageServiceInterface;
+use App\Models\Storage\StorageServer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

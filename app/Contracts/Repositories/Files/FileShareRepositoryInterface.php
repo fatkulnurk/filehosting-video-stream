@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Repositories\Interfaces;
+declare(strict_types=1);
 
-use App\Models\FileShare;
+namespace App\Contracts\Repositories\Files;
+
+use App\Models\Files\FileShare;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface FileShareRepositoryInterface
 {
@@ -18,4 +21,8 @@ interface FileShareRepositoryInterface
     public function getSharedByMe(string $userId): Collection;
 
     public function findActiveShare(string $fileId, string $userId): ?FileShare;
+
+    public function paginateSharedWithMe(string $userId, array $params): LengthAwarePaginator;
+
+    public function paginateSharedByMe(string $userId, array $params): LengthAwarePaginator;
 }

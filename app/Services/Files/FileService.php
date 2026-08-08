@@ -1,20 +1,24 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Events\FileUploaded;
-use App\Exceptions\StorageQuotaExceededException;
-use App\Models\File;
-use App\Models\FileChecksum;
-use App\Models\StorageServer;
-use App\Repositories\Interfaces\FileRepositoryInterface;
-use App\Repositories\Interfaces\StorageServerRepositoryInterface;
-use App\Services\Interfaces\FileDeduplicationServiceInterface;
-use App\Services\Interfaces\FileServiceInterface;
-use App\Services\Interfaces\StorageQuotaServiceInterface;
-use App\Services\Interfaces\StorageServiceInterface;
-use App\Services\Interfaces\SubscriptionServiceInterface;
+namespace App\Services\Files;
+
+use App\Contracts\Repositories\Files\FileRepositoryInterface;
+use App\Contracts\Repositories\Storage\StorageServerRepositoryInterface;
+use App\Contracts\Services\Files\FileDeduplicationServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Contracts\Services\Storage\StorageQuotaServiceInterface;
+use App\Contracts\Services\Storage\StorageServiceInterface;
+use App\Contracts\Services\Subscriptions\SubscriptionServiceInterface;
+use App\Events\Files\FileUploaded;
+use App\Exceptions\Files\StorageQuotaExceededException;
+use App\Models\Files\File;
+use App\Models\Files\FileChecksum;
+use App\Models\Storage\StorageServer;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
@@ -28,6 +32,16 @@ class FileService implements FileServiceInterface
         private FileDeduplicationServiceInterface $dedupService,
         private SubscriptionServiceInterface $subscriptionService
     ) {}
+
+    public function getPaginated(string $userId, ?string $directoryId = null, ?string $search = null, int $perPage = 20): LengthAwarePaginator
+    {
+        return $this->fileRepository->getUserFilesPaginated($userId, $directoryId, $search, $perPage);
+    }
+
+    public function getRecentFiles(string $userId, int $limit = 5): Collection
+    {
+        return $this->fileRepository->recentFiles($userId, $limit);
+    }
 
     public function store(UploadedFile $file, ?string $directoryId, string $userId, ?string $diskName = null): File
     {
@@ -180,6 +194,69 @@ class FileService implements FileServiceInterface
         }
 
         return $file;
+    }
+
+    public function getOwnedFile(string $userId, string $id): File
+    {
+        $file = $this->fileRepository->findById($id);
+
+        if (! $file || $file->user_id !== $userId) {
+            abort(404);
+        }
+
+        return $file;
+    }
+
+    public function getTrashedFile(string $userId, string $id): File
+    {
+        $file = $this->fileRepository->findTrashedForUser($userId, $id);
+
+        if (! $file) {
+            abort(404);
+        }
+
+        return $file;
+    }
+
+    public function getFileForAdmin(string $id): File
+    {
+        $file = $this->fileRepository->findForAdmin($id);
+
+        if (! $file) {
+            abort(404);
+        }
+
+        return $file;
+    }
+
+    public function paginateForDirectory(string $userId, ?string $directoryId, array $params): LengthAwarePaginator
+    {
+        return $this->fileRepository->paginateForDirectory($userId, $directoryId, $params);
+    }
+
+    public function paginateTrashedForUser(string $userId, array $params): LengthAwarePaginator
+    {
+        return $this->fileRepository->paginateTrashedForUser($userId, $params);
+    }
+
+    public function paginateAllForAdmin(array $params): LengthAwarePaginator
+    {
+        return $this->fileRepository->paginateAdmin($params);
+    }
+
+    public function getLatestForUser(string $userId, int $limit = 10): Collection
+    {
+        return $this->fileRepository->getLatestForUser($userId, $limit);
+    }
+
+    public function countAllWithTrashed(string $userId): int
+    {
+        return $this->fileRepository->countAllWithTrashed($userId);
+    }
+
+    public function getFilesInDirectoryWithTrashed(string $directoryId): Collection
+    {
+        return $this->fileRepository->getByDirectoryWithTrashed($directoryId);
     }
 
     public function incrementViews(File $file): void

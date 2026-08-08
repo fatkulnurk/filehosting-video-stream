@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Fortify;
 
-use App\Models\User;
+use App\Models\Users\User;
+use App\Traits\PasswordValidationRules;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;

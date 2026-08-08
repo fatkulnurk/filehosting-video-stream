@@ -1,7 +1,10 @@
 <?php
 
-namespace App\Models;
+declare(strict_types=1);
 
+namespace App\Models\Subscriptions;
+
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;

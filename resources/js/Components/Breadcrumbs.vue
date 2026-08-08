@@ -7,7 +7,7 @@ defineProps({
 </script>
 
 <template>
-    <nav class="flex items-center flex-wrap gap-1 text-sm text-ink-soft">
+    <nav class="flex items-center flex-wrap gap-1 text-sm text-soft">
         <Link :href="route('files.index')" class="hover:text-brand-800">Home</Link>
         <template v-for="(item, i) in items" :key="item.id">
             <span class="text-ink-fainter">/</span>

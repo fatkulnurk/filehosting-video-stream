@@ -12,8 +12,8 @@ defineProps({
 <template>
     <div
         :class="[
-            'rounded-xl shadow',
-            gradient ? 'bg-gradient-to-br from-surface to-brand-50' : 'bg-surface',
+            'panel',
+            gradient ? 'bg-gradient-to-br from-surface to-brand-50' : '',
             fluid ? '' : padding,
         ]"
     >

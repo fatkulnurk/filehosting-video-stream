@@ -7,23 +7,23 @@ const props = defineProps({
 });
 
 const variants = computed(() => ({
-    neutral: 'bg-surface-soft text-ink-soft',
-    success: 'bg-success-50 text-success-600',
-    danger: 'bg-danger-50 text-danger-600',
-    warning: 'bg-warning-50 text-warning-600',
-    info: 'bg-info-50 text-info-600',
-    accent: 'bg-accent-50 text-accent-600',
-    brand: 'bg-brand-50 text-brand-700',
+    neutral: 'badge-neutral',
+    success: 'badge-success',
+    danger: 'badge-danger',
+    warning: 'badge-warning',
+    info: 'badge-info',
+    accent: 'badge-accent',
+    brand: 'badge-brand',
 }));
 
 const sizes = computed(() => ({
-    sm: 'px-2 py-0.5 text-xs',
-    md: 'px-2.5 py-1 text-xs',
+    sm: 'badge-sm',
+    md: 'badge-md',
 }));
 </script>
 
 <template>
-    <span :class="['inline-flex items-center rounded-full font-medium', variants[variant], sizes[size]]">
+    <span :class="['badge', variants[variant], sizes[size]]">
         <slot />
     </span>
 </template>

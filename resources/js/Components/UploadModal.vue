@@ -58,17 +58,16 @@ const submit = () => {
             <div class="w-full bg-surface-soft rounded-full h-2">
                 <div class="bg-brand-600 h-2 rounded-full transition-all" :style="{ width: progress + '%' }"></div>
             </div>
-            <p class="text-xs text-ink-soft text-center">{{ progress }}% uploading...</p>
+            <p class="text-xs text-soft text-center">{{ progress }}% uploading...</p>
         </div>
 
-        <div v-if="results && results.success === false" class="bg-danger-50 border border-danger-200 text-danger-600 px-4 py-3 rounded-lg text-sm">
+        <div v-if="results && results.success === false" class="alert alert-danger-soft">
             {{ results.message || 'Upload failed. Check file size and quota.' }}
         </div>
 
         <div class="flex justify-end gap-2">
-            <button type="button" @click="$emit('close')" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-            <button type="button" @click="submit" :disabled="files.length === 0 || uploading"
-                class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg disabled:opacity-50 font-medium">
+            <button type="button" @click="$emit('close')" class="btn btn-ghost">Cancel</button>
+            <button type="button" @click="submit" :disabled="files.length === 0 || uploading" class="btn btn-primary btn-md">
                 Upload {{ files.length }} file(s)
             </button>
         </div>

@@ -63,13 +63,13 @@ const removeFile = (index) => {
 
 <template>
     <div class="space-y-3">
-        <label v-if="label" class="block text-sm font-medium text-ink-body">{{ label }}</label>
+        <label v-if="label" class="label">{{ label }}</label>
 
         <div
-            class="border-2 border-dashed rounded-xl text-center cursor-pointer transition flex flex-col items-center justify-center"
+            class="dropzone"
             :class="[
                 compact ? 'p-4' : 'p-6',
-                dragging ? 'border-brand-500 bg-brand-50' : 'border-line hover:border-brand-400 hover:bg-surface-muted',
+                dragging ? 'dropzone-active' : 'dropzone-idle',
                 disabled ? 'opacity-50 cursor-not-allowed' : '',
             ]"
             @dragover.prevent="onDragOver"
@@ -86,11 +86,11 @@ const removeFile = (index) => {
                 :disabled="disabled"
                 @change="selectFiles"
             />
-            <ArrowUpTrayIcon class="w-8 h-8 mx-auto text-ink-faint" />
-            <p class="mt-2 text-sm text-ink-muted">
-                <span class="text-brand-700 font-medium">Browse</span> or drag &amp; drop
+            <ArrowUpTrayIcon class="w-8 h-8 mx-auto text-faint" />
+            <p class="mt-2 text-sm text-muted">
+                <span class="link font-medium">Browse</span> or drag &amp; drop
             </p>
-            <p v-if="hint" class="text-xs text-ink-faint mt-1">{{ hint }}</p>
+            <p v-if="hint" class="hint mt-1">{{ hint }}</p>
         </div>
 
         <ul v-if="fileList.length > 0" class="space-y-2">
@@ -98,7 +98,7 @@ const removeFile = (index) => {
                 <div class="flex items-center justify-between bg-surface-muted rounded-lg px-3 py-2 text-sm">
                     <span class="truncate text-ink-body">{{ file.name }}</span>
                     <div class="flex items-center gap-2 shrink-0 ml-2">
-                        <span class="text-xs text-ink-faint">{{ formatBytes(file.size) }}</span>
+                        <span class="hint">{{ formatBytes(file.size) }}</span>
                         <button type="button" @click="removeFile(i)" class="text-ink-faint hover:text-danger-500" :disabled="disabled">
                             <XMarkIcon class="w-4 h-4" />
                         </button>
@@ -107,6 +107,6 @@ const removeFile = (index) => {
             </li>
         </ul>
 
-        <p v-if="error" class="text-sm text-danger-600">{{ error }}</p>
+        <p v-if="error" class="form-error">{{ error }}</p>
     </div>
 </template>

@@ -124,7 +124,7 @@ const sortIndicator = (header) => {
 </script>
 
 <template>
-    <div class="bg-surface rounded-xl shadow">
+    <div class="panel">
         <!-- Toolbar: filters + search -->
         <div v-if="showSearch || filterOptions.length" class="p-3 border-b border-line-soft flex flex-wrap items-center justify-end gap-2">
             <select
@@ -132,7 +132,7 @@ const sortIndicator = (header) => {
                 :key="f.key"
                 :value="filters?.[f.key] || ''"
                 @change="changeFilter(f.key, $event)"
-                class="text-sm rounded-lg border border-line px-3 py-2"
+                class="select"
             >
                 <option value="">{{ f.label }}</option>
                 <option v-for="o in f.options" :key="o.value" :value="o.value">{{ o.label }}</option>
@@ -142,7 +142,7 @@ const sortIndicator = (header) => {
                     v-model="searchInput"
                     type="text"
                     placeholder="Search..."
-                    class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-line focus:ring-2 focus:ring-brand-500"
+                    class="input"
                 />
                 <MagnifyingGlassIcon class="w-4 h-4 absolute left-3 top-2.5 text-ink-faint" />
             </div>
@@ -214,7 +214,7 @@ const sortIndicator = (header) => {
                     v-if="showCount"
                     :value="filters?.per_page || 10"
                     @change="changePerPage"
-                    class="rounded-lg border border-line px-2 py-1 text-sm"
+                    class="select px-2 py-1"
                 >
                     <option :value="10">10</option>
                     <option :value="25">25</option>

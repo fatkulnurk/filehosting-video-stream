@@ -8,8 +8,8 @@ defineProps({
 <template>
     <div class="flex items-start justify-between mb-6 gap-3 flex-wrap">
         <div>
-            <h1 class="text-2xl font-bold text-ink">{{ title }}</h1>
-            <p v-if="subtitle" class="text-ink-soft mt-1 text-sm">{{ subtitle }}</p>
+            <h1 class="page-title">{{ title }}</h1>
+            <p v-if="subtitle" class="text-soft mt-1 text-sm">{{ subtitle }}</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
             <slot name="actions" />

@@ -76,33 +76,31 @@ const disable = async () => {
 </script>
 
 <template>
-    <div class="bg-surface rounded-xl shadow p-6">
-        <h2 class="text-lg font-semibold text-ink mb-2">Two-Factor Authentication</h2>
-        <p class="text-sm text-ink-soft mb-4">
+    <div class="panel p-6">
+        <h2 class="section-title mb-2">Two-Factor Authentication</h2>
+        <p class="text-sm text-soft mb-4">
             Add an extra layer of security to your account using a TOTP authenticator app (Google Authenticator, Authy, etc).
         </p>
 
-        <div v-if="message" :class="isError ? 'bg-danger-50 text-danger-600 border-danger-200' : 'bg-success-50 text-success-600 border-success-200'" class="border px-4 py-3 rounded-lg text-sm mb-4">
+        <div v-if="message" :class="isError ? 'alert alert-danger-soft' : 'alert alert-success-soft'" class="mb-4">
             {{ message }}
         </div>
 
         <div v-if="!props.enabled">
-            <button type="button" @click="enable" :disabled="processing"
-                class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium disabled:opacity-50">
+            <button type="button" @click="enable" :disabled="processing" class="btn btn-primary btn-md">
                 {{ processing ? 'Enabling...' : 'Enable 2FA' }}
             </button>
         </div>
 
         <div v-else>
             <div class="flex items-center gap-2 mb-4">
-                <span class="bg-success-50 text-success-600 text-sm px-3 py-1 rounded-full">2FA is enabled</span>
+                <span class="badge badge-success">2FA is enabled</span>
                 <button type="button" @click="disable" class="text-sm text-danger-600 hover:underline">Disable</button>
             </div>
-            <button type="button" @click="showCodes ? (showCodes = false) : getRecoveryCodes()"
-                class="text-sm text-brand-700 hover:underline">
+            <button type="button" @click="showCodes ? (showCodes = false) : getRecoveryCodes()" class="text-sm text-brand-700 hover:underline">
                 {{ showCodes ? 'Hide recovery codes' : 'Show recovery codes' }}
             </button>
-            <button v-if="showCodes" type="button" @click="regenerate" class="text-sm text-ink-soft hover:underline ml-3">
+            <button v-if="showCodes" type="button" @click="regenerate" class="text-sm text-soft hover:underline ml-3">
                 Regenerate
             </button>
         </div>
@@ -111,18 +109,17 @@ const disable = async () => {
         <div v-if="showConfirm" class="mt-6">
             <h3 class="font-semibold text-ink-strong mb-3">Scan the QR code with your authenticator app</h3>
             <div class="bg-surface-muted rounded-lg p-4 inline-block" v-html="qrCode"></div>
-            <p class="text-xs text-ink-soft mt-2">Secret key: <code class="bg-surface-soft px-1 rounded">{{ secretKey }}</code></p>
+            <p class="hint mt-2">Secret key: <code class="bg-surface-soft px-1 rounded">{{ secretKey }}</code></p>
             <div class="mt-4 flex gap-2">
                 <input v-model="confirmCode" type="text" inputmode="numeric" placeholder="6-digit code"
                     class="w-32 rounded-lg border-line border px-3 py-2 text-sm tracking-widest" />
-                <button type="button" @click="confirm" :disabled="processing"
-                    class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50">Confirm</button>
+                <button type="button" @click="confirm" :disabled="processing" class="btn btn-primary btn-md">Confirm</button>
             </div>
         </div>
 
         <div v-if="showCodes" class="mt-6">
             <h3 class="font-semibold text-ink-strong mb-2">Recovery Codes</h3>
-            <p class="text-xs text-ink-soft mb-2">Store these codes somewhere safe. Each code can be used once.</p>
+            <p class="hint mb-2">Store these codes somewhere safe. Each code can be used once.</p>
             <div class="grid grid-cols-1 gap-1 bg-surface-muted rounded-lg p-4">
                 <code v-for="code in recoveryCodes" :key="code" class="text-sm text-ink-body">{{ code }}</code>
             </div>

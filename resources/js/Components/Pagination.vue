@@ -28,9 +28,9 @@ const firstNum = computed(() => (firstPage.value && isNumeric(firstPage.value.la
 const lastNum = computed(() => (lastPage.value && isNumeric(lastPage.value.label) ? Number(lastPage.value.label) : null));
 
 const btnBase = 'inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-sm';
-const btnEnabled = 'bg-surface border hover:bg-brand-50 text-ink-body';
+const btnEnabled = 'btn btn-secondary btn-sm';
 const btnDisabled = 'bg-surface-soft text-ink-faint pointer-events-none';
-const btnActive = 'bg-brand-600 border-brand-600 text-white';
+const btnActive = 'bg-brand-600 text-white border-brand-600';
 </script>
 
 <template>

@@ -13,19 +13,15 @@ const props = defineProps({
 const emit = defineEmits(['click']);
 
 const variants = computed(() => ({
-    primary:
-        'inline-flex items-center justify-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-lg disabled:opacity-50',
-    secondary:
-        'inline-flex items-center justify-center gap-1.5 bg-surface border border-line hover:bg-surface-muted text-ink-body font-medium rounded-lg disabled:opacity-50',
-    danger:
-        'inline-flex items-center justify-center gap-1.5 bg-danger-50 text-danger-600 border border-danger-200 hover:bg-danger-100 font-medium rounded-lg disabled:opacity-50',
-    ghost:
-        'inline-flex items-center justify-center gap-1.5 text-ink-muted hover:bg-surface-soft hover:text-ink-strong font-medium rounded-lg disabled:opacity-50',
+    primary: 'btn btn-primary',
+    secondary: 'btn btn-secondary',
+    danger: 'btn btn-danger',
+    ghost: 'btn btn-ghost',
 }));
 
 const sizes = computed(() => ({
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
+    sm: 'btn-sm',
+    md: 'btn-md',
 }));
 </script>
 
@@ -35,7 +31,7 @@ const sizes = computed(() => ({
         :type="href ? undefined : type"
         :href="href"
         :disabled="disabled"
-        :class="[variants[variant], sizes[size]]"
+        :class="['btn', variants[variant], sizes[size]]"
         @click="emit('click')"
     >
         <slot />

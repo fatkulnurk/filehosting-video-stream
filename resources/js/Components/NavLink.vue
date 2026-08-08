@@ -10,9 +10,10 @@ defineProps({
 <template>
     <Link
         :href="href"
-        :class="active
-            ? 'flex items-center gap-3 px-3 py-2 rounded-lg bg-brand-800 text-white text-sm font-medium'
-            : 'flex items-center gap-3 px-3 py-2 rounded-lg text-brand-200 hover:bg-brand-800 hover:text-white text-sm font-medium'"
+        :class="[
+            'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium',
+            active ? 'bg-brand-800 text-white' : 'text-brand-200 hover:bg-brand-800 hover:text-white',
+        ]"
     >
         <slot />
     </Link>

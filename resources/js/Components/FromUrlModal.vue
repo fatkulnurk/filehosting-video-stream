@@ -65,35 +65,35 @@ const submit = async () => {
 <template>
     <div class="space-y-4">
         <div>
-            <label class="block text-sm font-medium text-ink-body mb-1">File URL(s)</label>
+            <label class="label">File URL(s)</label>
             <textarea
                 v-model="urlsText"
                 rows="5"
                 placeholder="https://example.com/video.mp4&#10;https://example.com/photo.jpg"
-                class="w-full rounded-lg border-line border px-3 py-2 text-sm font-mono"
+                class="input font-mono"
             ></textarea>
-            <p class="text-xs text-ink-faint mt-1">Paste one URL per line. Each will be downloaded to your storage.</p>
+            <p class="hint mt-1">Paste one URL per line. Each will be downloaded to your storage.</p>
         </div>
 
         <div v-if="flattenedTree.length > 0">
-            <label class="block text-sm font-medium text-ink-body mb-1">Upload to directory</label>
-            <select v-model="directoryId" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+            <label class="label">Upload to directory</label>
+            <select v-model="directoryId" class="input">
                 <option value="">Root</option>
                 <option v-for="dir in flattenedTree" :key="dir.id" :value="dir.id">{{ dir.label }}</option>
             </select>
         </div>
 
-        <div v-if="error" class="bg-danger-50 border border-danger-200 text-danger-600 px-4 py-3 rounded-lg text-sm">
+        <div v-if="error" class="alert alert-danger-soft">
             {{ error }}
         </div>
 
         <div class="flex justify-end gap-2">
-            <button type="button" @click="$emit('close')" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
+            <button type="button" @click="$emit('close')" class="btn btn-ghost">Cancel</button>
             <button
                 type="button"
                 @click="submit"
                 :disabled="urls.length === 0 || submitting"
-                class="inline-flex items-center gap-1.5 px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium disabled:opacity-50"
+                class="btn btn-primary btn-md"
             >
                 <LinkIcon class="w-4 h-4" /> {{ submitting ? 'Queueing...' : `Queue ${urls.length} URL(s)` }}
             </button>

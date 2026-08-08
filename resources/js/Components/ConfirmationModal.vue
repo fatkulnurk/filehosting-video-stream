@@ -14,18 +14,15 @@ const { state, resolve } = useConfirm();
                     <ExclamationTriangleIcon class="w-6 h-6 text-warning-500" />
                 </div>
                 <div>
-                    <p class="mt-1 text-sm text-ink-soft">{{ state.message }}</p>
+                    <p class="mt-1 text-sm text-soft">{{ state.message }}</p>
                 </div>
             </div>
 
             <div class="flex justify-end gap-2">
-                <button type="button" @click="resolve(false)"
-                    class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">
+                <button type="button" @click="resolve(false)" class="btn btn-ghost">
                     {{ state.cancelLabel }}
                 </button>
-                <button type="button" @click="resolve(true)"
-                    :class="state.danger ? 'bg-danger-600 hover:bg-danger-700' : 'bg-brand-600 hover:bg-brand-700'"
-                    class="px-4 py-2 text-sm text-white rounded-lg font-medium">
+                <button type="button" @click="resolve(true)" :class="state.danger ? 'btn btn-danger' : 'btn btn-primary'">
                     {{ state.confirmLabel }}
                 </button>
             </div>

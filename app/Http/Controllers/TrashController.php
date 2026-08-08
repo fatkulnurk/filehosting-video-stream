@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Http\Concerns\AppliesTableParams;
-use App\Models\File;
-use App\Services\Interfaces\TrashServiceInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Contracts\Services\Files\TrashServiceInterface;
+use App\Traits\AppliesTableParams;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,28 +15,15 @@ class TrashController extends Controller
     use AppliesTableParams;
 
     public function __construct(
-        private TrashServiceInterface $trashService
+        private TrashServiceInterface $trashService,
+        private FileServiceInterface $fileService
     ) {}
 
     public function index(Request $request)
     {
         $params = $this->tableParams($request);
 
-        $files = $this->applyTableQuery(
-            File::query()
-                ->where('user_id', auth()->id())
-                ->onlyTrashed()
-                ->with('media'),
-            $params,
-            searchable: ['name'],
-            sortable: [
-                'name' => 'name',
-                'size' => \DB::raw("(SELECT COALESCE(SUM(size),0) FROM media WHERE media.model_id = files.id AND media.model_type = '" . addslashes(File::class) . "')"),
-                'deleted_at' => 'deleted_at',
-            ],
-            defaultSort: 'deleted_at',
-            defaultDirection: 'desc',
-        )->paginate($params['per_page'])->withQueryString();
+        $files = $this->fileService->paginateTrashedForUser(auth()->id(), $params);
 
         return Inertia::render('Files/Trash', [
             'files' => $files,
@@ -45,7 +34,7 @@ class TrashController extends Controller
 
     public function restore(string $id)
     {
-        $file = File::where('user_id', auth()->id())->withTrashed()->findOrFail($id);
+        $file = $this->fileService->getTrashedFile(auth()->id(), $id);
 
         $this->trashService->restoreFile($file);
 
@@ -54,7 +43,7 @@ class TrashController extends Controller
 
     public function destroy(string $id)
     {
-        $file = File::where('user_id', auth()->id())->withTrashed()->findOrFail($id);
+        $file = $this->fileService->getTrashedFile(auth()->id(), $id);
 
         $this->trashService->forceDeleteFile($file);
 
@@ -63,7 +52,7 @@ class TrashController extends Controller
 
     public function purge()
     {
-        $count = $this->trashService->purgeOlderThan(0);
+        $count = $this->trashService->purgeTrashed(auth()->id());
 
         return redirect()->route('trash.index')->with('success', "{$count} file(s) permanently deleted");
     }

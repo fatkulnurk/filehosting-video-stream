@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Repositories\Interfaces;
+declare(strict_types=1);
 
-use App\Models\DirectoryShare;
+namespace App\Contracts\Repositories\Directories;
+
+use App\Models\Files\DirectoryShare;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface DirectoryShareRepositoryInterface
 {
@@ -16,4 +19,6 @@ interface DirectoryShareRepositoryInterface
     public function getSharedWithMe(string $userId): Collection;
 
     public function findActiveShare(string $directoryId, string $userId): ?DirectoryShare;
+
+    public function paginateSharedWithMe(string $userId, array $params): LengthAwarePaginator;
 }

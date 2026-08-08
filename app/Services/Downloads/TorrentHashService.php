@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
+
+namespace App\Services\Downloads;
 
 use Arokettu\Bencode\Bencode;
 use Arokettu\Bencode\Bencode\Collection;

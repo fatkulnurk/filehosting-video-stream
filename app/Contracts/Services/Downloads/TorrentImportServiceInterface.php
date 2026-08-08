@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Services\Interfaces;
+declare(strict_types=1);
 
-use App\Models\DownloadTask;
-use App\Models\File;
-use App\Models\Torrent;
+namespace App\Contracts\Services\Downloads;
+
+use App\Models\Downloads\DownloadTask;
+use App\Models\Downloads\Torrent;
+use App\Models\Files\File;
 
 interface TorrentImportServiceInterface
 {

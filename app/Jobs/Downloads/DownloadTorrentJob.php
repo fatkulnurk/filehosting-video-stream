@@ -1,14 +1,17 @@
 <?php
 
-namespace App\Jobs;
+declare(strict_types=1);
 
-use App\Models\DownloadServer;
-use App\Models\DownloadTask;
-use App\Models\Torrent;
-use App\Repositories\Interfaces\DownloadTaskRepositoryInterface;
-use App\Services\Interfaces\TorrentCatalogServiceInterface;
-use App\Services\Interfaces\TorrentImportServiceInterface;
-use App\Services\TorrentService;
+namespace App\Jobs\Downloads;
+
+use App\Contracts\Repositories\Downloads\DownloadTaskRepositoryInterface;
+use App\Contracts\Services\Downloads\TorrentCatalogServiceInterface;
+use App\Contracts\Services\Downloads\TorrentImportServiceInterface;
+use App\Enums\DownloadTaskStatus;
+use App\Models\Downloads\DownloadServer;
+use App\Models\Downloads\DownloadTask;
+use App\Models\Downloads\Torrent;
+use App\Services\Downloads\TorrentService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -44,7 +47,7 @@ class DownloadTorrentJob implements ShouldQueue
         $infoHash = $task->info_hash;
 
         if (! $infoHash) {
-            $taskRepository->update($task->id, ['status' => 'failed', 'error' => 'Could not determine torrent info hash.']);
+            $taskRepository->update($task->id, ['status' => DownloadTaskStatus::Failed, 'error' => 'Could not determine torrent info hash.']);
 
             return;
         }
@@ -74,14 +77,14 @@ class DownloadTorrentJob implements ShouldQueue
     ): void {
         try {
             $taskRepository->update($task->id, [
-                'status' => 'processing',
+                'status' => DownloadTaskStatus::Processing,
                 'torrent_id' => $torrent->id,
             ]);
 
             $files = $importService->importFromCatalog($torrent, $task->fresh());
 
             $taskRepository->update($task->id, [
-                'status' => 'completed',
+                'status' => DownloadTaskStatus::Completed,
                 'progress' => 1.0,
                 'file_id' => $files[0]->id ?? null,
             ]);
@@ -117,7 +120,7 @@ class DownloadTorrentJob implements ShouldQueue
             }
 
             $taskRepository->update($task->id, [
-                'status' => 'downloading',
+                'status' => DownloadTaskStatus::Downloading,
                 'progress' => 0,
             ]);
         } catch (\Throwable $e) {
@@ -127,7 +130,7 @@ class DownloadTorrentJob implements ShouldQueue
             ]);
 
             $taskRepository->update($task->id, [
-                'status' => 'failed',
+                'status' => DownloadTaskStatus::Failed,
                 'error' => $e->getMessage(),
             ]);
         }

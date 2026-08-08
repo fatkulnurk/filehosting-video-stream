@@ -133,7 +133,7 @@ const filterOptions = [
             </template>
             <template #cell-user="{ row }">{{ row.user?.name || '—' }}</template>
             <template #cell-type="{ row }">
-                <span class="inline-flex items-center gap-1.5 text-ink-soft">
+                <span class="inline-flex items-center gap-1.5 text-soft">
                     <DocumentIcon class="w-4 h-4" /> {{ typeLabel(row) }}
                 </span>
             </template>
@@ -146,10 +146,10 @@ const filterOptions = [
             </template>
             <template #cell-actions="{ row }">
                 <div class="flex justify-end gap-1">
-                    <Link :href="route('admin.files.show', row.id)" title="View" class="p-1.5 hover:bg-surface-soft rounded text-ink-soft hover:text-brand-700">
+                    <Link :href="route('admin.files.show', row.id)" title="View" class="btn-icon">
                         <EyeIcon class="w-4 h-4" />
                     </Link>
-                    <button type="button" @click="trash(row)" title="Trash" class="p-1.5 hover:bg-danger-100 rounded text-ink-soft hover:text-danger-600">
+                    <button type="button" @click="trash(row)" title="Trash" class="btn-icon-danger">
                         <TrashIcon class="w-4 h-4" />
                     </button>
                 </div>
@@ -161,22 +161,22 @@ const filterOptions = [
         <Modal :show="showUpload" title="Upload Files on Behalf of User" @close="showUpload = false">
             <form @submit.prevent="submitUpload" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">User</label>
-                    <select v-model="uploadForm.user_id" required @change="loadUserDirs(uploadForm.user_id)" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">User</label>
+                    <select v-model="uploadForm.user_id" required @change="loadUserDirs(uploadForm.user_id)" class="input">
                         <option v-for="u in users" :key="u.id" :value="u.id">{{ u.name }} ({{ u.email }})</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Directory</label>
-                    <select v-model="uploadForm.directory_id" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">Directory</label>
+                    <select v-model="uploadForm.directory_id" class="input">
                         <option value="">Root</option>
                         <option v-for="d in uploadDirs" :key="d.id" :value="d.id">{{ d.label.join(' / ') }}</option>
                     </select>
                 </div>
                 <FileInput v-model="uploadForm.files" multiple hint="Files will be stored under the selected user's account" />
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showUpload = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" :disabled="uploadForm.files.length === 0" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium disabled:opacity-50">
+                    <button type="button" @click="showUpload = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" :disabled="uploadForm.files.length === 0" class="btn btn-primary btn-md">
                         Upload {{ uploadForm.files.length }} file(s)
                     </button>
                 </div>

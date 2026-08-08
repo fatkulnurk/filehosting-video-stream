@@ -89,40 +89,40 @@ const remove = async () => {
 <template>
     <div>
         <div class="mb-4">
-            <Link :href="route('admin.users.index')" class="text-sm text-brand-700 hover:underline">← Back to Users</Link>
+            <Link :href="route('admin.users.index')" class="link text-sm">← Back to Users</Link>
         </div>
 
         <div class="grid lg:grid-cols-3 gap-6">
             <div class="space-y-6">
-                <div class="bg-surface rounded-xl shadow p-5">
+                <div class="panel p-5">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-14 h-14 rounded-full bg-brand-600 text-white flex items-center justify-center text-xl font-bold">
                             {{ user.name.charAt(0).toUpperCase() }}
                         </div>
                         <div>
                             <h1 class="text-lg font-bold text-ink">{{ user.name }}</h1>
-                            <p class="text-sm text-ink-soft">{{ user.email }}</p>
+                            <p class="text-sm text-soft">{{ user.email }}</p>
                             <Badge :variant="user.role === 'admin' ? 'accent' : 'neutral'">{{ user.role }}</Badge>
                         </div>
                     </div>
 
                     <div class="space-y-2 text-sm">
-                        <div class="flex justify-between"><span class="text-ink-soft">Storage used</span><span class="font-medium">{{ formatBytes(stats.storage_used) }}</span></div>
-                        <div class="flex justify-between"><span class="text-ink-soft">Quota</span><span class="font-medium">{{ stats.storage_limit ? formatBytes(stats.storage_limit) : 'Unlimited' }}</span></div>
-                        <div class="flex justify-between"><span class="text-ink-soft">Files</span><span class="font-medium">{{ stats.files }}</span></div>
-                        <div class="flex justify-between"><span class="text-ink-soft">Directories</span><span class="font-medium">{{ stats.directories }}</span></div>
+                        <div class="flex justify-between"><span class="text-soft">Storage used</span><span class="font-medium">{{ formatBytes(stats.storage_used) }}</span></div>
+                        <div class="flex justify-between"><span class="text-soft">Quota</span><span class="font-medium">{{ stats.storage_limit ? formatBytes(stats.storage_limit) : 'Unlimited' }}</span></div>
+                        <div class="flex justify-between"><span class="text-soft">Files</span><span class="font-medium">{{ stats.files }}</span></div>
+                        <div class="flex justify-between"><span class="text-soft">Directories</span><span class="font-medium">{{ stats.directories }}</span></div>
                     </div>
 
                     <div class="flex flex-wrap gap-2 mt-5">
-                        <button type="button" @click="openEdit" class="text-xs bg-surface-soft hover:bg-line-soft text-ink-body px-3 py-1.5 rounded">Edit</button>
-                        <button type="button" @click="openRole" class="text-xs bg-surface-soft hover:bg-line-soft text-ink-body px-3 py-1.5 rounded">Role</button>
-                        <button type="button" @click="openQuota" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-700 px-3 py-1.5 rounded">Quota</button>
-                        <button type="button" @click="remove" class="text-xs bg-danger-50 hover:bg-danger-100 text-danger-600 px-3 py-1.5 rounded">Delete</button>
+                        <button type="button" @click="openEdit" class="btn btn-secondary btn-sm">Edit</button>
+                        <button type="button" @click="openRole" class="btn btn-secondary btn-sm">Role</button>
+                        <button type="button" @click="openQuota" class="btn btn-secondary btn-sm">Quota</button>
+                        <button type="button" @click="remove" class="btn btn-danger btn-sm">Delete</button>
                     </div>
                 </div>
 
-                <div class="bg-surface rounded-xl shadow p-5">
-                    <h2 class="text-lg font-semibold text-ink mb-3">Subscription</h2>
+                <div class="panel p-5">
+                    <h2 class="section-title mb-3">Subscription</h2>
                     <div v-if="user.subscriptions.length > 0" class="space-y-2">
                         <div v-for="sub in user.subscriptions" :key="sub.id" class="bg-surface-muted rounded-lg px-3 py-2 text-sm">
                             <div class="flex items-center justify-between">
@@ -131,26 +131,26 @@ const remove = async () => {
                                     {{ sub.status }}
                                 </span>
                             </div>
-                            <div class="text-xs text-ink-faint mt-1">
+                            <div class="text-xs text-faint mt-1">
                                 {{ new Date(sub.start_date).toLocaleDateString() }} — {{ sub.end_date ? new Date(sub.end_date).toLocaleDateString() : 'No end' }}
                             </div>
                         </div>
                     </div>
-                    <p v-else class="text-sm text-ink-faint mb-3">No subscription.</p>
-                    <button type="button" @click="openAssign" class="mt-2 text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded">
+                    <p v-else class="text-sm text-faint mb-3">No subscription.</p>
+                    <button type="button" @click="openAssign" class="btn btn-primary btn-sm mt-2">
                         Assign Package
                     </button>
                 </div>
             </div>
 
             <div class="lg:col-span-2 space-y-6">
-                <div class="bg-surface rounded-xl shadow overflow-hidden">
+                <div class="panel overflow-hidden">
                     <div class="px-5 py-4 flex items-center justify-between border-b">
-                        <h2 class="text-lg font-semibold text-ink">Recent Files</h2>
-                        <Link :href="route('admin.files.index', { user_id: user.id })" class="text-sm text-brand-700 hover:underline">View all</Link>
+                        <h2 class="section-title">Recent Files</h2>
+                        <Link :href="route('admin.files.index', { user_id: user.id })" class="link text-sm">View all</Link>
                     </div>
                     <table class="w-full text-sm">
-                        <thead class="bg-surface-muted text-left text-xs uppercase text-ink-soft">
+                        <thead class="bg-surface-muted text-left text-xs uppercase text-soft">
                             <tr>
                                 <th class="px-4 py-3">Name</th>
                                 <th class="px-4 py-3">Size</th>
@@ -161,30 +161,30 @@ const remove = async () => {
                         <tbody>
                             <tr v-for="file in files" :key="file.id" class="border-t hover:bg-surface-muted">
                                 <td class="px-4 py-3 font-medium text-ink-strong truncate max-w-[280px]">{{ file.name }}</td>
-                                <td class="px-4 py-3 text-ink-soft">{{ formatBytes(mediaOf(file)?.size || 0) }}</td>
+                                <td class="px-4 py-3 text-soft">{{ formatBytes(mediaOf(file)?.size || 0) }}</td>
                                 <td class="px-4 py-3">
                                     <span :class="file.deleted_at ? 'bg-surface-soft text-ink-soft' : 'bg-success-50 text-success-600'" class="px-2 py-0.5 rounded-full text-xs">
                                         {{ file.deleted_at ? 'Trashed' : file.is_public ? 'Public' : 'Private' }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    <Link :href="route('admin.files.show', file.id)" class="text-xs text-brand-700 hover:underline">View</Link>
+                                    <Link :href="route('admin.files.show', file.id)" class="link text-xs">View</Link>
                                 </td>
                             </tr>
                             <tr v-if="files.length === 0">
-                                <td colspan="4" class="px-4 py-6 text-center text-sm text-ink-faint">No files.</td>
+                                <td colspan="4" class="px-4 py-6 text-center text-sm text-faint">No files.</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="bg-surface rounded-xl shadow overflow-hidden">
+                <div class="panel overflow-hidden">
                     <div class="px-5 py-4 flex items-center justify-between border-b">
-                        <h2 class="text-lg font-semibold text-ink">Recent Directories</h2>
-                        <Link :href="route('admin.directories.index', { user_id: user.id })" class="text-sm text-brand-700 hover:underline">View all</Link>
+                        <h2 class="section-title">Recent Directories</h2>
+                        <Link :href="route('admin.directories.index', { user_id: user.id })" class="link text-sm">View all</Link>
                     </div>
                     <table class="w-full text-sm">
-                        <thead class="bg-surface-muted text-left text-xs uppercase text-ink-soft">
+                        <thead class="bg-surface-muted text-left text-xs uppercase text-soft">
                             <tr>
                                 <th class="px-4 py-3">Name</th>
                                 <th class="px-4 py-3">Path</th>
@@ -198,11 +198,11 @@ const remove = async () => {
                                         <FolderIcon class="w-4 h-4 text-warning-500" /> {{ dir.name }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-ink-soft text-xs font-mono">{{ dir.path }}</td>
-                                <td class="px-4 py-3 text-ink-soft">{{ dir.files_count }}</td>
+                                <td class="px-4 py-3 text-soft text-xs font-mono">{{ dir.path }}</td>
+                                <td class="px-4 py-3 text-soft">{{ dir.files_count }}</td>
                             </tr>
                             <tr v-if="directories.length === 0">
-                                <td colspan="3" class="px-4 py-6 text-center text-sm text-ink-faint">No directories.</td>
+                                <td colspan="3" class="px-4 py-6 text-center text-sm text-faint">No directories.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -213,11 +213,11 @@ const remove = async () => {
         <!-- Edit modal -->
         <Modal :show="showEdit" title="Edit User" @close="showEdit = false">
             <form @submit.prevent="submitEdit" class="space-y-4">
-                <input v-model="editForm.name" type="text" placeholder="Full name" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
-                <input v-model="editForm.email" type="email" placeholder="user@example.com" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                <input v-model="editForm.name" type="text" placeholder="Full name" required class="input" />
+                <input v-model="editForm.email" type="email" placeholder="user@example.com" required class="input" />
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showEdit = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Save</button>
+                    <button type="button" @click="showEdit = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">Save</button>
                 </div>
             </form>
         </Modal>
@@ -225,13 +225,13 @@ const remove = async () => {
         <!-- Role modal -->
         <Modal :show="showRole" title="Change Role" @close="showRole = false">
             <div class="space-y-4">
-                <select v-model="roleForm.role" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                <select v-model="roleForm.role" class="input">
                     <option value="member">Member</option>
                     <option value="admin">Admin</option>
                 </select>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showRole = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="button" @click="submitRole" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Save</button>
+                    <button type="button" @click="showRole = false" class="btn btn-ghost">Cancel</button>
+                    <button type="button" @click="submitRole" class="btn btn-primary btn-md">Save</button>
                 </div>
             </div>
         </Modal>
@@ -239,11 +239,10 @@ const remove = async () => {
         <!-- Quota modal -->
         <Modal :show="showQuota" title="Set Storage Quota" @close="showQuota = false">
             <div class="space-y-4">
-                <input v-model="quotaForm.storage_limit" type="number" min="0" placeholder="Bytes (empty = unlimited)"
-                    class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                <input v-model="quotaForm.storage_limit" type="number" min="0" placeholder="Bytes (empty = unlimited)" class="input" />
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showQuota = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="button" @click="submitQuota" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Save</button>
+                    <button type="button" @click="showQuota = false" class="btn btn-ghost">Cancel</button>
+                    <button type="button" @click="submitQuota" class="btn btn-primary btn-md">Save</button>
                 </div>
             </div>
         </Modal>
@@ -251,12 +250,12 @@ const remove = async () => {
         <!-- Assign modal -->
         <Modal :show="showAssign" title="Assign Package" @close="showAssign = false">
             <div class="space-y-4">
-                <select v-model="assignForm.package_id" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                <select v-model="assignForm.package_id" class="input">
                     <option v-for="pkg in packages" :key="pkg.id" :value="pkg.id">{{ pkg.name }}</option>
                 </select>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showAssign = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="button" @click="submitAssign" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Assign</button>
+                    <button type="button" @click="showAssign = false" class="btn btn-ghost">Cancel</button>
+                    <button type="button" @click="submitAssign" class="btn btn-primary btn-md">Assign</button>
                 </div>
             </div>
         </Modal>

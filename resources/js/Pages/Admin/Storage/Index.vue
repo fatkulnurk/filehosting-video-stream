@@ -149,10 +149,10 @@ const filterOptions = [
             </template>
             <template #cell-actions="{ row }">
                 <div class="flex items-center justify-end gap-1">
-                    <Link :href="route('admin.storage.show', row.id)" class="p-1.5 hover:bg-surface-soft rounded text-ink-soft hover:text-brand-800 text-xs">View</Link>
-                    <button type="button" @click="openEdit(row)" class="p-1.5 hover:bg-surface-soft rounded text-ink-soft hover:text-brand-800"><PencilIcon class="w-4 h-4" /></button>
-                    <button v-if="row.is_active" type="button" @click="confirmDeactivate(row)" class="p-1.5 hover:bg-warning-100 rounded text-ink-soft hover:text-warning-600"><PowerIcon class="w-4 h-4" /></button>
-                    <button type="button" @click="removeServer(row)" class="p-1.5 hover:bg-danger-100 rounded text-ink-soft hover:text-danger-600"><TrashIcon class="w-4 h-4" /></button>
+                    <Link :href="route('admin.storage.show', row.id)" class="btn-icon text-xs">View</Link>
+                    <button type="button" @click="openEdit(row)" class="btn-icon"><PencilIcon class="w-4 h-4" /></button>
+                    <button v-if="row.is_active" type="button" @click="confirmDeactivate(row)" class="btn-icon hover:bg-warning-100 hover:text-warning-600"><PowerIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="removeServer(row)" class="btn-icon-danger"><TrashIcon class="w-4 h-4" /></button>
                 </div>
             </template>
             <template #empty>No storage servers found.</template>
@@ -162,22 +162,20 @@ const filterOptions = [
         <Modal :show="showAdd" :title="editing ? 'Edit Storage' : 'Add Storage Server'" @close="showAdd = false">
             <form @submit.prevent="submit" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Disk Name</label>
-                    <input v-model="form.name" type="text" required placeholder="my-storage"
-                        class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Disk Name</label>
+                    <input v-model="form.name" type="text" required placeholder="my-storage" class="input" />
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Driver</label>
-                    <select v-model="form.driver" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">Driver</label>
+                    <select v-model="form.driver" class="input">
                         <option v-for="(label, value) in drivers" :key="value" :value="value">{{ label }}</option>
                     </select>
                 </div>
 
                 <div v-for="field in requiredFields" :key="field" class="grid grid-cols-1">
-                    <label class="block text-sm font-medium text-ink-body mb-1 capitalize">{{ field.replace(/_/g, ' ') }}</label>
-                    <input v-model="config[field]" :type="field.includes('password') || field === 'secret' || field === 'api_key' ? 'password' : 'text'" placeholder="Enter value"
-                        class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label capitalize">{{ field.replace(/_/g, ' ') }}</label>
+                    <input v-model="config[field]" :type="field.includes('password') || field === 'secret' || field === 'api_key' ? 'password' : 'text'" placeholder="Enter value" class="input" />
                 </div>
 
                 <div class="flex gap-4">
@@ -190,22 +188,21 @@ const filterOptions = [
                 </div>
 
                 <div v-if="backupOptions.length > 0">
-                    <label class="block text-sm font-medium text-ink-body mb-1">Backup target</label>
-                    <select v-model="form.backup_storage_server_id" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">Backup target</label>
+                    <select v-model="form.backup_storage_server_id" class="input">
                         <option value="">None</option>
                         <option v-for="s in backupOptions" :key="s.id" :value="s.id">{{ s.name }}</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Storage limit (bytes)</label>
-                    <input v-model="form.storage_limit" type="number" min="0" placeholder="Leave empty for unlimited"
-                        class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Storage limit (bytes)</label>
+                    <input v-model="form.storage_limit" type="number" min="0" placeholder="Leave empty for unlimited" class="input" />
                 </div>
 
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showAdd = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">
+                    <button type="button" @click="showAdd = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">
                         {{ editing ? 'Save' : 'Add Storage' }}
                     </button>
                 </div>
@@ -215,16 +212,16 @@ const filterOptions = [
         <!-- Deactivate modal -->
         <Modal :show="!!showDeactivate" title="Deactivate Storage" @close="showDeactivate = null">
             <div class="space-y-4">
-                <p class="text-sm text-ink-muted">
+                <p class="text-sm text-muted">
                     Files on <strong>{{ showDeactivate?.name }}</strong> must be migrated to another storage first. Choose a target:
                 </p>
-                <select v-model="targetStorage" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                <select v-model="targetStorage" class="input">
                     <option value="">No files (just deactivate)</option>
                     <option v-for="s in servers.data.filter((x) => x.is_active && x.id !== showDeactivate?.id)" :key="s.id" :value="s.id">{{ s.name }}</option>
                 </select>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showDeactivate = null" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="button" @click="deactivate" class="px-4 py-2 text-sm bg-warning-600 hover:bg-warning-700 text-white rounded-lg font-medium">Deactivate</button>
+                    <button type="button" @click="showDeactivate = null" class="btn btn-ghost">Cancel</button>
+                    <button type="button" @click="deactivate" class="btn btn-md bg-warning-600 hover:bg-warning-700 text-white">Deactivate</button>
                 </div>
             </div>
         </Modal>

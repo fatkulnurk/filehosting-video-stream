@@ -84,16 +84,16 @@ const remove = async (server) => {
             </template>
         </PageHeader>
 
-        <div v-if="servers.length === 0" class="bg-surface rounded-xl shadow p-10 text-center">
-            <p class="text-sm text-ink-soft">No downloader clients configured yet.</p>
+        <div v-if="servers.length === 0" class="panel p-10 text-center">
+            <p class="text-sm text-soft">No downloader clients configured yet.</p>
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <div v-for="server in servers" :key="server.id" class="bg-surface rounded-xl shadow p-5">
+            <div v-for="server in servers" :key="server.id" class="panel p-5">
                 <div class="flex items-start justify-between gap-2">
                     <div>
                         <div class="font-semibold text-ink-strong">{{ server.name }}</div>
-                        <div class="text-xs text-ink-soft mt-0.5">{{ server.driver_label }}</div>
+                        <div class="text-xs text-soft mt-0.5">{{ server.driver_label }}</div>
                     </div>
                     <Badge :variant="server.is_active ? 'success' : 'neutral'">
                         {{ server.is_active ? 'Active' : 'Inactive' }}
@@ -103,7 +103,7 @@ const remove = async (server) => {
                 <dl class="mt-4 space-y-1 text-xs">
                     <template v-for="field in requiredFields(server.driver)" :key="field">
                         <div v-if="server.config[field]" class="flex justify-between gap-2">
-                            <dt class="text-ink-faint capitalize">{{ field.replace(/_/g, ' ') }}</dt>
+                            <dt class="text-faint capitalize">{{ field.replace(/_/g, ' ') }}</dt>
                             <dd class="text-ink-body font-mono truncate max-w-[60%]">{{ server.config[field] }}</dd>
                         </div>
                     </template>
@@ -114,15 +114,15 @@ const remove = async (server) => {
                         v-if="server.driver === 'torrent'"
                         type="button"
                         @click="test(server)"
-                        class="p-1.5 hover:bg-surface-soft rounded text-ink-soft hover:text-brand-800"
+                        class="btn-icon"
                         title="Test connection"
                     >
                         <BoltIcon class="w-4 h-4" />
                     </button>
-                    <button type="button" @click="openEdit(server)" class="p-1.5 hover:bg-surface-soft rounded text-ink-soft hover:text-brand-800" title="Edit">
+                    <button type="button" @click="openEdit(server)" class="btn-icon" title="Edit">
                         <PencilIcon class="w-4 h-4" />
                     </button>
-                    <button type="button" @click="remove(server)" class="p-1.5 hover:bg-danger-100 rounded text-ink-soft hover:text-danger-600" title="Delete">
+                    <button type="button" @click="remove(server)" class="btn-icon-danger" title="Delete">
                         <TrashIcon class="w-4 h-4" />
                     </button>
                 </div>
@@ -133,25 +133,24 @@ const remove = async (server) => {
         <Modal :show="showAdd" :title="editing ? 'Edit Downloader' : 'Add Downloader'" @close="showAdd = false">
             <form @submit.prevent="submit" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Name</label>
-                    <input v-model="form.name" type="text" placeholder="e.g. Transmission 1" required
-                        class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Name</label>
+                    <input v-model="form.name" type="text" placeholder="e.g. Transmission 1" required class="input" />
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Driver</label>
-                    <select v-model="form.driver" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">Driver</label>
+                    <select v-model="form.driver" class="input">
                         <option v-for="(label, value) in drivers" :key="value" :value="value">{{ label }}</option>
                     </select>
                 </div>
 
                 <div v-for="field in requiredFields(form.driver)" :key="field" class="grid grid-cols-1">
-                    <label class="block text-sm font-medium text-ink-body mb-1 capitalize">{{ field.replace(/_/g, ' ') }}</label>
+                    <label class="label capitalize">{{ field.replace(/_/g, ' ') }}</label>
                     <input
                         v-model="form.config[field]"
                         :type="field.includes('password') ? 'password' : 'text'"
                         placeholder="Enter value"
-                        class="w-full rounded-lg border-line border px-3 py-2 text-sm"
+                        class="input"
                     />
                 </div>
 
@@ -160,8 +159,8 @@ const remove = async (server) => {
                 </label>
 
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showAdd = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">
+                    <button type="button" @click="showAdd = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">
                         {{ editing ? 'Save' : 'Add Downloader' }}
                     </button>
                 </div>

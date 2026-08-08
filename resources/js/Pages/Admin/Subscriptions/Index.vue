@@ -117,7 +117,7 @@ const filterOptions = [
         >
             <template #cell-user="{ row }">
                 <span class="font-medium text-ink-strong">{{ row.user?.name || '—' }}</span>
-                <div class="text-xs text-ink-faint">{{ row.user?.email }}</div>
+                <div class="text-xs text-faint">{{ row.user?.email }}</div>
             </template>
             <template #cell-package="{ row }">{{ row.storage_package?.name || '—' }}</template>
             <template #cell-status="{ row }">
@@ -127,12 +127,8 @@ const filterOptions = [
             <template #cell-end="{ row }">{{ row.end_date ? new Date(row.end_date).toLocaleDateString() : '—' }}</template>
             <template #cell-actions="{ row }">
                 <div class="flex justify-end gap-1">
-                    <button type="button" @click="openEdit(row)" title="Edit" class="p-1.5 hover:bg-surface-soft rounded text-ink-soft hover:text-brand-700">
-                        <PencilIcon class="w-4 h-4" />
-                    </button>
-                    <button type="button" @click="cancel(row)" title="Cancel" class="p-1.5 hover:bg-danger-100 rounded text-ink-soft hover:text-danger-600">
-                        <XMarkIcon class="w-4 h-4" />
-                    </button>
+                    <button type="button" @click="openEdit(row)" title="Edit" class="btn-icon"><PencilIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="cancel(row)" title="Cancel" class="btn-icon-danger"><XMarkIcon class="w-4 h-4" /></button>
                 </div>
             </template>
             <template #empty>No subscriptions found.</template>
@@ -142,21 +138,21 @@ const filterOptions = [
         <Modal :show="showAssign" title="Assign Subscription" @close="showAssign = false">
             <form @submit.prevent="submitAssign" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">User</label>
-                    <select v-model="assignForm.user_id" required class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">User</label>
+                    <select v-model="assignForm.user_id" required class="input">
                         <option value="" disabled>Select user...</option>
                         <option v-for="u in users" :key="u.id" :value="u.id">{{ u.name }} ({{ u.email }})</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Package</label>
-                    <select v-model="assignForm.package_id" required class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">Package</label>
+                    <select v-model="assignForm.package_id" required class="input">
                         <option v-for="pkg in packages" :key="pkg.id" :value="pkg.id">{{ pkg.name }}</option>
                     </select>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showAssign = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Assign</button>
+                    <button type="button" @click="showAssign = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">Assign</button>
                 </div>
             </form>
         </Modal>
@@ -165,26 +161,26 @@ const filterOptions = [
         <Modal :show="!!editing" title="Edit Subscription" @close="editing = null">
             <form v-if="editing" @submit.prevent="submitEdit" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Package</label>
-                    <select v-model="editForm.package_id" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">Package</label>
+                    <select v-model="editForm.package_id" class="input">
                         <option v-for="pkg in packages" :key="pkg.id" :value="pkg.id">{{ pkg.name }}</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Status</label>
-                    <select v-model="editForm.status" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">Status</label>
+                    <select v-model="editForm.status" class="input">
                         <option value="active">Active</option>
                         <option value="cancelled">Cancelled</option>
                         <option value="expired">Expired</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">End date</label>
-                    <input v-model="editForm.end_date" type="date" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">End date</label>
+                    <input v-model="editForm.end_date" type="date" class="input" />
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="editing = null" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Save</button>
+                    <button type="button" @click="editing = null" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">Save</button>
                 </div>
             </form>
         </Modal>

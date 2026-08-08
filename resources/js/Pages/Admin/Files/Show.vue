@@ -58,12 +58,12 @@ const forceDelete = async () => {
 <template>
     <div>
         <div class="mb-4">
-            <Link :href="route('admin.files.index')" class="text-sm text-brand-700 hover:underline">← Back to Files</Link>
+            <Link :href="route('admin.files.index')" class="link text-sm">← Back to Files</Link>
         </div>
 
         <div class="grid lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-6">
-                <div class="bg-surface rounded-xl shadow p-5">
+                <div class="panel p-5">
                     <div v-if="isVideo" class="mb-4">
                         <VideoPlayer :src="streamUrl" :type="media.mime_type" :subtitles="subtitles || []" />
                     </div>
@@ -73,17 +73,16 @@ const forceDelete = async () => {
 
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <DocumentIcon v-if="!isVideo && !isImage" class="w-8 h-8 text-ink-faint" />
+                            <DocumentIcon v-if="!isVideo && !isImage" class="w-8 h-8 text-faint" />
                             <div>
                                 <h1 class="text-xl font-bold text-ink">{{ file.name }}</h1>
-                                <p class="text-sm text-ink-soft">
+                                <p class="text-sm text-soft">
                                     {{ file.user?.name || 'Unknown' }} — {{ file.user?.email || '' }}
                                 </p>
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <Link :href="route('files.download', file.id)" title="Download"
-                                class="bg-brand-600 hover:bg-brand-700 text-white p-2 rounded-lg">
+                            <Link :href="route('files.download', file.id)" title="Download" class="btn-primary p-2">
                                 <ArrowDownTrayIcon class="w-5 h-5" />
                             </Link>
                         </div>
@@ -91,44 +90,38 @@ const forceDelete = async () => {
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-center">
                         <div class="bg-surface-muted rounded-lg p-3">
-                            <div class="text-sm text-ink-soft">Size</div>
+                            <div class="text-sm text-soft">Size</div>
                             <div class="font-semibold text-ink-strong">{{ formatBytes(media?.size || 0) }}</div>
                         </div>
                         <div class="bg-surface-muted rounded-lg p-3">
-                            <div class="text-sm text-ink-soft">Type</div>
+                            <div class="text-sm text-soft">Type</div>
                             <div class="font-semibold text-ink-strong truncate">{{ media?.mime_type || '—' }}</div>
                         </div>
                         <div class="bg-surface-muted rounded-lg p-3">
-                            <div class="text-sm text-ink-soft">Views</div>
+                            <div class="text-sm text-soft">Views</div>
                             <div class="font-semibold text-ink-strong">{{ (file.views || 0).toLocaleString() }}</div>
                         </div>
                         <div class="bg-surface-muted rounded-lg p-3">
-                            <div class="text-sm text-ink-soft">Downloads</div>
+                            <div class="text-sm text-soft">Downloads</div>
                             <div class="font-semibold text-ink-strong">{{ (file.downloads || 0).toLocaleString() }}</div>
                         </div>
                     </div>
 
                     <div class="flex flex-wrap gap-2 mt-6">
-                        <button type="button" @click="openEdit" class="inline-flex items-center gap-1.5 text-sm bg-surface border border-line hover:bg-surface-muted px-3 py-2 rounded-lg font-medium">
-                            <PencilIcon class="w-4 h-4" /> Edit
-                        </button>
-                        <button type="button" @click="trash" class="inline-flex items-center gap-1.5 text-sm bg-warning-50 text-warning-700 border border-warning-200 hover:bg-warning-100 px-3 py-2 rounded-lg font-medium">
-                            <TrashIcon class="w-4 h-4" /> Move to Trash
-                        </button>
-                        <button type="button" @click="forceDelete" class="inline-flex items-center gap-1.5 text-sm bg-danger-50 text-danger-600 border border-danger-200 hover:bg-danger-100 px-3 py-2 rounded-lg font-medium">
-                            <TrashIcon class="w-4 h-4" /> Delete Permanently
-                        </button>
+                        <button type="button" @click="openEdit" class="btn btn-secondary btn-sm"><PencilIcon class="w-4 h-4" /> Edit</button>
+                        <button type="button" @click="trash" class="btn btn-sm bg-warning-50 text-warning-700 border border-warning-200 hover:bg-warning-100"><TrashIcon class="w-4 h-4" /> Move to Trash</button>
+                        <button type="button" @click="forceDelete" class="btn btn-danger btn-sm"><TrashIcon class="w-4 h-4" /> Delete Permanently</button>
                     </div>
                 </div>
 
-                <div v-if="versions.length > 0" class="bg-surface rounded-xl shadow p-5">
-                    <h2 class="text-lg font-semibold text-ink mb-4">Versions</h2>
+                <div v-if="versions.length > 0" class="panel p-5">
+                    <h2 class="section-title mb-4">Versions</h2>
                     <ul class="space-y-2">
                         <li v-for="v in versions" :key="v.id" class="flex items-center justify-between bg-surface-muted rounded-lg px-4 py-3 text-sm">
                             <div>
                                 <span class="font-medium text-ink-strong">v{{ v.version }}</span>
-                                <span class="text-ink-soft ml-2">{{ v.name }} ({{ formatBytes(v.size) }})</span>
-                                <div class="text-xs text-ink-faint mt-0.5">{{ v.changelog || 'No changelog' }}</div>
+                                <span class="text-soft ml-2">{{ v.name }} ({{ formatBytes(v.size) }})</span>
+                                <div class="text-xs text-faint mt-0.5">{{ v.changelog || 'No changelog' }}</div>
                             </div>
                         </li>
                     </ul>
@@ -136,37 +129,37 @@ const forceDelete = async () => {
             </div>
 
             <div class="space-y-6">
-                <div class="bg-surface rounded-xl shadow p-5">
-                    <h2 class="text-lg font-semibold text-ink mb-4">Details</h2>
+                <div class="panel p-5">
+                    <h2 class="section-title mb-4">Details</h2>
                     <dl class="space-y-3 text-sm">
-                        <div class="flex justify-between"><span class="text-ink-soft">Status</span>
-                            <span :class="file.is_public ? 'text-success-600' : 'text-ink-muted'">{{ file.is_public ? 'Public' : 'Private' }}</span>
+                        <div class="flex justify-between"><span class="text-soft">Status</span>
+                            <span :class="file.is_public ? 'text-success-600' : 'text-muted'">{{ file.is_public ? 'Public' : 'Private' }}</span>
                         </div>
-                        <div class="flex justify-between"><span class="text-ink-soft">Trashed</span>
+                        <div class="flex justify-between"><span class="text-soft">Trashed</span>
                             <span class="font-medium">{{ file.deleted_at ? 'Yes' : 'No' }}</span>
                         </div>
-                        <div v-if="file.directory" class="flex justify-between"><span class="text-ink-soft">Directory</span>
+                        <div v-if="file.directory" class="flex justify-between"><span class="text-soft">Directory</span>
                             <span class="font-medium text-right">{{ file.directory.path }}</span>
                         </div>
-                        <div v-if="file.expires_at" class="flex justify-between"><span class="text-ink-soft">Expires</span>
+                        <div v-if="file.expires_at" class="flex justify-between"><span class="text-soft">Expires</span>
                             <span class="font-medium">{{ new Date(file.expires_at).toLocaleDateString() }}</span>
                         </div>
                         <div v-if="file.download_limit" class="flex justify-between">
-                            <span class="text-ink-soft">Download limit</span>
+                            <span class="text-soft">Download limit</span>
                             <span class="font-medium">{{ file.download_count }} / {{ file.download_limit }}</span>
                         </div>
-                        <div class="flex justify-between"><span class="text-ink-soft">Uploaded</span>
+                        <div class="flex justify-between"><span class="text-soft">Uploaded</span>
                             <span class="font-medium">{{ new Date(file.created_at).toLocaleString() }}</span>
                         </div>
                     </dl>
                 </div>
 
-                <div class="bg-surface rounded-xl shadow p-5">
-                    <h2 class="text-lg font-semibold text-ink mb-4">Subtitles</h2>
-                    <ul v-if="subtitles.length > 0" class="space-y-1 text-sm text-ink-muted">
-                        <li v-for="t in subtitles" :key="t.id">{{ t.label }} <span class="text-xs text-ink-faint">({{ t.srclang }})</span></li>
+                <div class="panel p-5">
+                    <h2 class="section-title mb-4">Subtitles</h2>
+                    <ul v-if="subtitles.length > 0" class="space-y-1 text-sm text-muted">
+                        <li v-for="t in subtitles" :key="t.id">{{ t.label }} <span class="text-xs text-faint">({{ t.srclang }})</span></li>
                     </ul>
-                    <p v-else class="text-sm text-ink-faint">No subtitles.</p>
+                    <p v-else class="text-sm text-faint">No subtitles.</p>
                 </div>
             </div>
         </div>
@@ -175,16 +168,16 @@ const forceDelete = async () => {
         <Modal :show="showEdit" title="Edit File" @close="showEdit = false">
             <form @submit.prevent="submitEdit" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Name</label>
-                    <input v-model="editForm.name" type="text" placeholder="File name" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Name</label>
+                    <input v-model="editForm.name" type="text" placeholder="File name" required class="input" />
                 </div>
                 <label class="flex items-center text-sm text-ink-body">
                     <input v-model="editForm.is_public" type="checkbox" class="rounded mr-2" />
                     Public (accessible via link)
                 </label>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showEdit = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Save</button>
+                    <button type="button" @click="showEdit = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">Save</button>
                 </div>
             </form>
         </Modal>

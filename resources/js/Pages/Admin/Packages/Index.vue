@@ -128,8 +128,8 @@ const filterOptions = [
             </template>
             <template #cell-actions="{ row }">
                 <div class="flex justify-end gap-1">
-                    <button type="button" @click="openEdit(row)" class="p-1.5 hover:bg-surface-soft rounded text-ink-soft hover:text-brand-800"><PencilIcon class="w-4 h-4" /></button>
-                    <button type="button" @click="remove(row)" class="p-1.5 hover:bg-danger-100 rounded text-ink-soft hover:text-danger-600"><TrashIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="openEdit(row)" class="btn-icon"><PencilIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="remove(row)" class="btn-icon-danger"><TrashIcon class="w-4 h-4" /></button>
                 </div>
             </template>
             <template #empty>No packages found.</template>
@@ -140,38 +140,38 @@ const filterOptions = [
             <form @submit.prevent="submit" class="space-y-4">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Name</label>
-                        <input v-model="form.name" type="text" placeholder="e.g. Pro" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Name</label>
+                        <input v-model="form.name" type="text" placeholder="e.g. Pro" required class="input" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Slug</label>
-                        <input v-model="form.slug" type="text" placeholder="e.g. pro" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Slug</label>
+                        <input v-model="form.slug" type="text" placeholder="e.g. pro" required class="input" />
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Description</label>
-                    <textarea v-model="form.description" rows="2" placeholder="Short description of this package" class="w-full rounded-lg border-line border px-3 py-2 text-sm"></textarea>
+                    <label class="label">Description</label>
+                    <textarea v-model="form.description" rows="2" placeholder="Short description of this package" class="input"></textarea>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Storage limit (bytes)</label>
-                        <input v-model="form.storage_limit" type="number" min="0" placeholder="e.g. 107374182400" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Storage limit (bytes)</label>
+                        <input v-model="form.storage_limit" type="number" min="0" placeholder="e.g. 107374182400" required class="input" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Max file size (bytes)</label>
-                        <input v-model="form.max_file_size" type="number" min="1" placeholder="Empty = unlimited" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Max file size (bytes)</label>
+                        <input v-model="form.max_file_size" type="number" min="1" placeholder="Empty = unlimited" class="input" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Price monthly</label>
-                        <input v-model="form.price_monthly" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Price monthly</label>
+                        <input v-model="form.price_monthly" type="number" min="0" step="0.01" placeholder="0.00" class="input" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Price yearly</label>
-                        <input v-model="form.price_yearly" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Price yearly</label>
+                        <input v-model="form.price_yearly" type="number" min="0" step="0.01" placeholder="0.00" class="input" />
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-2">Features</label>
+                    <label class="label mb-2">Features</label>
                     <div class="grid grid-cols-2 gap-1.5 max-h-32 overflow-y-auto">
                         <label v-for="(label, value) in features" :key="value" class="flex items-center text-sm text-ink-body">
                             <input v-model="form.features" type="checkbox" :value="value" class="rounded mr-2" />
@@ -188,12 +188,12 @@ const filterOptions = [
                     </label>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Sort order</label>
-                    <input v-model="form.sort_order" type="number" placeholder="0" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Sort order</label>
+                    <input v-model="form.sort_order" type="number" placeholder="0" class="input" />
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showModal = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">{{ editing ? 'Save' : 'Create' }}</button>
+                    <button type="button" @click="showModal = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">{{ editing ? 'Save' : 'Create' }}</button>
                 </div>
             </form>
         </Modal>

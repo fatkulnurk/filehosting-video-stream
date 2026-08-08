@@ -143,15 +143,9 @@ const filterOptions = [
             </template>
             <template #cell-actions="{ row }">
                 <div class="flex justify-end gap-1">
-                    <button type="button" @click="openRename(row)" title="Rename" class="p-1.5 hover:bg-surface-soft rounded text-ink-soft hover:text-brand-700">
-                        <PencilIcon class="w-4 h-4" />
-                    </button>
-                    <button type="button" @click="trash(row)" title="Trash" class="p-1.5 hover:bg-warning-100 rounded text-ink-soft hover:text-warning-700">
-                        <TrashIcon class="w-4 h-4" />
-                    </button>
-                    <button type="button" @click="forceDelete(row)" title="Delete permanently" class="p-1.5 hover:bg-danger-100 rounded text-ink-soft hover:text-danger-600">
-                        <TrashIcon class="w-4 h-4" />
-                    </button>
+                    <button type="button" @click="openRename(row)" title="Rename" class="btn-icon"><PencilIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="trash(row)" title="Trash" class="btn-icon hover:bg-warning-100 hover:text-warning-700"><TrashIcon class="w-4 h-4" /></button>
+                    <button type="button" @click="forceDelete(row)" title="Delete permanently" class="btn-icon-danger"><TrashIcon class="w-4 h-4" /></button>
                 </div>
             </template>
             <template #empty>No directories found.</template>
@@ -161,25 +155,25 @@ const filterOptions = [
         <Modal :show="showCreate" title="Create Directory" @close="showCreate = false">
             <form @submit.prevent="submitCreate" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">User</label>
-                    <select v-model="createForm.user_id" required @change="loadUserDirs(createForm.user_id)" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">User</label>
+                    <select v-model="createForm.user_id" required @change="loadUserDirs(createForm.user_id)" class="input">
                         <option v-for="u in users" :key="u.id" :value="u.id">{{ u.name }} ({{ u.email }})</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Name</label>
-                    <input v-model="createForm.name" type="text" placeholder="Folder name" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Name</label>
+                    <input v-model="createForm.name" type="text" placeholder="Folder name" required class="input" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Parent directory</label>
-                    <select v-model="createForm.parent_id" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                    <label class="label">Parent directory</label>
+                    <select v-model="createForm.parent_id" class="input">
                         <option value="">Root</option>
                         <option v-for="d in createDirs" :key="d.id" :value="d.id">{{ d.label.join(' / ') }}</option>
                     </select>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showCreate = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Create</button>
+                    <button type="button" @click="showCreate = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">Create</button>
                 </div>
             </form>
         </Modal>
@@ -187,10 +181,10 @@ const filterOptions = [
         <!-- Rename modal -->
         <Modal :show="!!renaming" title="Rename Directory" @close="renaming = null">
             <form @submit.prevent="submitRename" class="space-y-4">
-                <input v-model="renameForm.name" type="text" placeholder="Folder name" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                <input v-model="renameForm.name" type="text" placeholder="Folder name" required class="input" />
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="renaming = null" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Save</button>
+                    <button type="button" @click="renaming = null" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">Save</button>
                 </div>
             </form>
         </Modal>

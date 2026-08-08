@@ -47,13 +47,13 @@ const statCards = [
                 <div class="text-2xl font-bold text-brand-700">
                     {{ stat.key === 'storage' ? formatBytes(stats.storage_used) : stats[stat.key].toLocaleString() }}
                 </div>
-                <div class="text-sm text-ink-soft mt-0.5">{{ stat.label }}</div>
+                <div class="text-sm text-soft mt-0.5">{{ stat.label }}</div>
             </Card>
         </div>
 
         <div class="grid lg:grid-cols-2 gap-8">
             <div>
-                <h2 class="text-lg font-semibold text-ink mb-4">Latest Users</h2>
+                <h2 class="section-title mb-4">Latest Users</h2>
                 <DataTable :headers="userHeaders" :rows="latestUsers" :show-search="false" client-sort>
                     <template #cell-name="{ row }">{{ row.name }}</template>
                     <template #cell-email="{ row }">{{ row.email }}</template>
@@ -62,11 +62,11 @@ const statCards = [
                     </template>
                     <template #empty>No users.</template>
                 </DataTable>
-                <Link :href="route('admin.users.index')" class="block text-center text-sm text-brand-700 hover:underline mt-3">View all users</Link>
+                <Link :href="route('admin.users.index')" class="block text-center link text-sm mt-3">View all users</Link>
             </div>
 
             <div>
-                <h2 class="text-lg font-semibold text-ink mb-4">Latest Storage Servers</h2>
+                <h2 class="section-title mb-4">Latest Storage Servers</h2>
                 <DataTable :headers="serverHeaders" :rows="storageServers" :show-search="false" client-sort>
                     <template #cell-name="{ row }">{{ row.name }}</template>
                     <template #cell-driver="{ row }">{{ row.driver }}</template>
@@ -75,7 +75,7 @@ const statCards = [
                     </template>
                     <template #empty>No servers.</template>
                 </DataTable>
-                <Link :href="route('admin.storage.index')" class="block text-center text-sm text-brand-700 hover:underline mt-3">View all storage</Link>
+                <Link :href="route('admin.storage.index')" class="block text-center text-sm link mt-3">View all storage</Link>
             </div>
         </div>
     </div>

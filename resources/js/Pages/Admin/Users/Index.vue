@@ -118,10 +118,10 @@ const filterOptions = [
             <template #cell-files="{ row }">{{ row.files_count ?? '—' }}</template>
             <template #cell-actions="{ row }">
                 <div class="flex justify-end gap-1">
-                    <Link :href="route('admin.users.show', row.id)" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-700 px-2 py-1 rounded">View</Link>
-                    <button type="button" @click="openRole(row)" class="text-xs bg-surface-soft hover:bg-line-soft text-ink-body px-2 py-1 rounded">Role</button>
-                    <button type="button" @click="openQuota(row)" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-700 px-2 py-1 rounded">Quota</button>
-                    <button type="button" @click="remove(row)" class="text-xs bg-danger-50 hover:bg-danger-100 text-danger-600 px-2 py-1 rounded">Delete</button>
+                    <Link :href="route('admin.users.show', row.id)" class="btn btn-secondary btn-sm px-2 py-1">View</Link>
+                    <button type="button" @click="openRole(row)" class="btn btn-ghost btn-sm px-2 py-1">Role</button>
+                    <button type="button" @click="openQuota(row)" class="btn btn-secondary btn-sm px-2 py-1">Quota</button>
+                    <button type="button" @click="remove(row)" class="btn btn-danger btn-sm px-2 py-1">Delete</button>
                 </div>
             </template>
             <template #empty>No users found.</template>
@@ -130,12 +130,11 @@ const filterOptions = [
         <!-- Quota modal -->
         <Modal :show="!!showQuota" title="Set Storage Quota" @close="showQuota = null">
             <div v-if="showQuota" class="space-y-4">
-                <p class="text-sm text-ink-muted">Set quota for <strong>{{ showQuota.name }}</strong></p>
-                <input v-model="quotaForm.storage_limit" type="number" min="0" placeholder="Bytes (empty = unlimited)"
-                    class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                <p class="text-sm text-muted">Set quota for <strong>{{ showQuota.name }}</strong></p>
+                <input v-model="quotaForm.storage_limit" type="number" min="0" placeholder="Bytes (empty = unlimited)" class="input" />
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showQuota = null" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="button" @click="submitQuota" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Save</button>
+                    <button type="button" @click="showQuota = null" class="btn btn-ghost">Cancel</button>
+                    <button type="button" @click="submitQuota" class="btn btn-primary btn-md">Save</button>
                 </div>
             </div>
         </Modal>
@@ -143,14 +142,14 @@ const filterOptions = [
         <!-- Role modal -->
         <Modal :show="!!showRole" title="Change Role" @close="showRole = null">
             <div v-if="showRole" class="space-y-4">
-                <p class="text-sm text-ink-muted">Change role for <strong>{{ showRole.name }}</strong></p>
-                <select v-model="roleForm.role" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                <p class="text-sm text-muted">Change role for <strong>{{ showRole.name }}</strong></p>
+                <select v-model="roleForm.role" class="input">
                     <option value="member">Member</option>
                     <option value="admin">Admin</option>
                 </select>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showRole = null" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="button" @click="submitRole" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Save</button>
+                    <button type="button" @click="showRole = null" class="btn btn-ghost">Cancel</button>
+                    <button type="button" @click="submitRole" class="btn btn-primary btn-md">Save</button>
                 </div>
             </div>
         </Modal>
@@ -159,33 +158,33 @@ const filterOptions = [
         <Modal :show="showCreate" title="New User" @close="showCreate = false">
             <form @submit.prevent="submitCreate" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Name</label>
-                    <input v-model="createForm.name" type="text" placeholder="Full name" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Name</label>
+                    <input v-model="createForm.name" type="text" placeholder="Full name" required class="input" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Email</label>
-                    <input v-model="createForm.email" type="email" placeholder="user@example.com" required class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Email</label>
+                    <input v-model="createForm.email" type="email" placeholder="user@example.com" required class="input" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-ink-body mb-1">Password</label>
-                    <input v-model="createForm.password" type="password" placeholder="Min. 8 characters" required minlength="8" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                    <label class="label">Password</label>
+                    <input v-model="createForm.password" type="password" placeholder="Min. 8 characters" required minlength="8" class="input" />
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Role</label>
-                        <select v-model="createForm.role" class="w-full rounded-lg border-line border px-3 py-2 text-sm">
+                        <label class="label">Role</label>
+                        <select v-model="createForm.role" class="input">
                             <option value="member">Member</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-ink-body mb-1">Storage limit (bytes)</label>
-                        <input v-model="createForm.storage_limit" type="number" min="0" placeholder="Empty = unlimited" class="w-full rounded-lg border-line border px-3 py-2 text-sm" />
+                        <label class="label">Storage limit (bytes)</label>
+                        <input v-model="createForm.storage_limit" type="number" min="0" placeholder="Empty = unlimited" class="input" />
                     </div>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="showCreate = false" class="px-4 py-2 text-sm text-ink-muted hover:bg-surface-soft rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium">Create</button>
+                    <button type="button" @click="showCreate = false" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-md">Create</button>
                 </div>
             </form>
         </Modal>

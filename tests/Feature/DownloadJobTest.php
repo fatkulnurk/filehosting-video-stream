@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
-use App\Jobs\DownloadFromUrlJob;
-use App\Jobs\DownloadTorrentJob;
-use App\Models\DownloadTask;
-use App\Models\FileChecksum;
-use App\Models\Torrent;
-use App\Models\User;
-use App\Repositories\Interfaces\DownloadTaskRepositoryInterface;
-use App\Services\Interfaces\FileServiceInterface;
-use App\Services\Interfaces\StorageQuotaServiceInterface;
-use App\Services\Interfaces\TorrentCatalogServiceInterface;
-use App\Services\Interfaces\TorrentImportServiceInterface;
-use App\Services\Interfaces\UrlDownloaderInterface;
-use App\Services\TorrentService;
+use App\Contracts\Repositories\Downloads\DownloadTaskRepositoryInterface;
+use App\Contracts\Services\Downloads\TorrentCatalogServiceInterface;
+use App\Contracts\Services\Downloads\TorrentImportServiceInterface;
+use App\Contracts\Services\Downloads\UrlDownloaderInterface;
+use App\Contracts\Services\Files\FileServiceInterface;
+use App\Contracts\Services\Storage\StorageQuotaServiceInterface;
+use App\Jobs\Downloads\DownloadFromUrlJob;
+use App\Jobs\Downloads\DownloadTorrentJob;
+use App\Models\Downloads\DownloadTask;
+use App\Models\Downloads\Torrent;
+use App\Models\Files\FileChecksum;
+use App\Models\Users\User;
+use App\Services\Downloads\TorrentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Models\Directories\Directory;
+use App\Models\Files\Directory;
 use App\Models\Files\File;
 use App\Models\Storage\StorageServer;
 use App\Policies\Directories\DirectoryPolicy;

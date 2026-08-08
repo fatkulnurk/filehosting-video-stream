@@ -141,6 +141,6 @@ class PublicController extends Controller
         $this->accessService->logAccess($id, 'download');
         event(new FileDownloaded($file));
 
-        return Storage::disk($media->disk)->download($media->getPathRelativeToRoot(), $media->file_name);
+        return Storage::disk($media->disk)->download($media->getPathRelativeToRoot(), safe_disposition_name($media->file_name));
     }
 }

@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
+import Modal from '@/Components/Modal.vue';
 import { useConfirm } from '@/composables/useConfirm';
 
 const { confirm: confirmAction } = useConfirm();
@@ -18,7 +19,47 @@ const message = ref('');
 const isError = ref(false);
 const processing = ref(false);
 
+const showPassword = ref(false);
+const passwordInput = ref('');
+const passwordError = ref('');
+const passwordProcessing = ref(false);
+let pendingAction = null;
+
+const requirePasswordConfirmed = (action) => {
+    pendingAction = action;
+    passwordInput.value = '';
+    passwordError.value = '';
+    showPassword.value = true;
+};
+
+const submitPassword = async () => {
+    if (passwordProcessing.value) return;
+
+    passwordProcessing.value = true;
+    passwordError.value = '';
+    try {
+        await axios.post(route('password.confirm.store'), { password: passwordInput.value });
+        showPassword.value = false;
+        if (pendingAction) {
+            const action = pendingAction;
+            pendingAction = null;
+            await action();
+        }
+    } catch (e) {
+        passwordError.value = e.response?.data?.errors?.password?.[0] || 'The provided password was incorrect.';
+    } finally {
+        passwordProcessing.value = false;
+    }
+};
+
+const closePassword = () => {
+    showPassword.value = false;
+    pendingAction = null;
+    passwordError.value = '';
+};
+
 const enable = async () => {
+    if (processing.value) return;
     processing.value = true;
     message.value = '';
     try {
@@ -29,15 +70,21 @@ const enable = async () => {
         secretKey.value = secret.data.secretKey;
         showConfirm.value = true;
     } catch (e) {
-        isError.value = true;
-        message.value = e.response?.data?.message || 'Failed to enable 2FA';
+        if (e.response?.status === 423) {
+            requirePasswordConfirmed(enable);
+        } else {
+            isError.value = true;
+            message.value = e.response?.data?.message || 'Failed to enable 2FA';
+        }
     } finally {
         processing.value = false;
     }
 };
 
 const confirm = async () => {
+    if (processing.value) return;
     processing.value = true;
+    message.value = '';
     try {
         await axios.post(route('two-factor.confirm'), { code: confirmCode.value });
         showConfirm.value = false;
@@ -45,33 +92,55 @@ const confirm = async () => {
         isError.value = false;
         router.reload();
     } catch (e) {
-        isError.value = true;
-        message.value = e.response?.data?.errors?.code?.[0] || 'Invalid code';
+        if (e.response?.status === 423) {
+            requirePasswordConfirmed(confirm);
+        } else {
+            isError.value = true;
+            message.value = e.response?.data?.errors?.code?.[0] || 'Invalid code';
+        }
     } finally {
         processing.value = false;
     }
 };
 
 const getRecoveryCodes = async () => {
-    const res = await axios.get(route('two-factor.recovery-codes'));
-    recoveryCodes.value = res.data;
-    showCodes.value = true;
+    try {
+        const res = await axios.get(route('two-factor.recovery-codes'));
+        recoveryCodes.value = res.data;
+        showCodes.value = true;
+    } catch (e) {
+        if (e.response?.status === 423) {
+            requirePasswordConfirmed(getRecoveryCodes);
+        }
+    }
 };
 
 const regenerate = async () => {
-    await axios.post(route('two-factor.regenerate-recovery-codes'));
-    getRecoveryCodes();
+    try {
+        await axios.post(route('two-factor.regenerate-recovery-codes'));
+        await getRecoveryCodes();
+    } catch (e) {
+        if (e.response?.status === 423) {
+            requirePasswordConfirmed(regenerate);
+        }
+    }
 };
 
 const disable = async () => {
     const ok = await confirmAction({ message: 'Disable two-factor authentication?' });
     if (!ok) return;
-    await axios.delete(route('two-factor.disable'));
-    message.value = 'Two-factor authentication disabled';
-    isError.value = false;
-    qrCode.value = '';
-    showCodes.value = false;
-    router.reload();
+    try {
+        await axios.delete(route('two-factor.disable'));
+        message.value = 'Two-factor authentication disabled';
+        isError.value = false;
+        qrCode.value = '';
+        showCodes.value = false;
+        router.reload();
+    } catch (e) {
+        if (e.response?.status === 423) {
+            requirePasswordConfirmed(disable);
+        }
+    }
 };
 </script>
 
@@ -95,12 +164,23 @@ const disable = async () => {
         <div v-else>
             <div class="flex items-center gap-2 mb-4">
                 <span class="badge badge-success">2FA is enabled</span>
-                <button type="button" @click="disable" class="text-sm text-danger-600 hover:underline">Disable</button>
+                <button
+                    type="button"
+                    @click="disable"
+                    class="btn btn-danger btn-sm"
+                    :disabled="processing"
+                >
+                    Disable
+                </button>
             </div>
-            <button type="button" @click="showCodes ? (showCodes = false) : getRecoveryCodes()" class="text-sm text-brand-700 hover:underline">
+            <button
+                type="button"
+                @click="showCodes ? (showCodes = false) : getRecoveryCodes()"
+                class="btn btn-secondary btn-sm"
+            >
                 {{ showCodes ? 'Hide recovery codes' : 'Show recovery codes' }}
             </button>
-            <button v-if="showCodes" type="button" @click="regenerate" class="text-sm text-soft hover:underline ml-3">
+            <button v-if="showCodes" type="button" @click="regenerate" class="btn btn-ghost btn-sm ml-3">
                 Regenerate
             </button>
         </div>
@@ -124,5 +204,30 @@ const disable = async () => {
                 <code v-for="code in recoveryCodes" :key="code" class="text-sm text-ink-body">{{ code }}</code>
             </div>
         </div>
+
+        <!-- Password confirmation required -->
+        <Modal :show="showPassword" title="Confirm Password" @close="closePassword">
+            <form @submit.prevent="submitPassword" class="space-y-4">
+                <p class="text-sm text-soft">Please confirm your password to continue.</p>
+                <div>
+                    <label class="label">Password</label>
+                    <input
+                        v-model="passwordInput"
+                        type="password"
+                        placeholder="Your current password"
+                        required
+                        autofocus
+                        class="input"
+                    />
+                    <p v-if="passwordError" class="form-error mt-1">{{ passwordError }}</p>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" @click="closePassword" class="btn btn-ghost">Cancel</button>
+                    <button type="submit" :disabled="passwordProcessing" class="btn btn-primary btn-md">
+                        {{ passwordProcessing ? 'Confirming...' : 'Confirm' }}
+                    </button>
+                </div>
+            </form>
+        </Modal>
     </div>
 </template>

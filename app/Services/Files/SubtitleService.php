@@ -1,17 +1,20 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\Models\File;
-use App\Services\Interfaces\SubtitleServiceInterface;
+namespace App\Services\Files;
+
+use App\Contracts\Services\Files\SubtitleServiceInterface;
+use App\Models\Files\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\Response;
 
 class SubtitleService implements SubtitleServiceInterface
 {
-    public function store(File $file, UploadedFile $uploadedFile, string $userId, string $language, string $label, bool $isDefault): \Spatie\MediaLibrary\MediaCollections\Models\Media
+    public function store(File $file, UploadedFile $uploadedFile, string $userId, string $language, string $label, bool $isDefault): Media
     {
         if ($isDefault) {
             $this->clearDefaults($file);

@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Enums\DownloaderDriver;
-use App\Models\DownloadServer;
-use App\Models\User;
+use App\Models\Downloads\DownloadServer;
+use App\Models\Users\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

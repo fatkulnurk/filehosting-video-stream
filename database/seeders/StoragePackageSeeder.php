@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use App\Models\StoragePackage;
+use App\Models\Subscriptions\StoragePackage;
 use Illuminate\Database\Seeder;
 
 class StoragePackageSeeder extends Seeder

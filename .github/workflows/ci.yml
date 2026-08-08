@@ -46,6 +46,11 @@ jobs:
                   cp .env.example .env
                   php artisan key:generate
 
+            - name: Create minimal Vite manifest for tests
+              run: |
+                  mkdir -p public/build/assets
+                  printf '%s' '{"resources/js/app.js":{"file":"assets/app.js","isEntry":true,"src":"resources/js/app.js"},"resources/css/app.css":{"file":"assets/app.css"}}' > public/build/manifest.json
+
             - name: Run Laravel Pint
               run: vendor/bin/pint --test
 

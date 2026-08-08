@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Services\Interfaces;
+declare(strict_types=1);
 
-use App\Models\File;
-use App\Models\FileVersion;
+namespace App\Contracts\Services\Files;
+
+use App\Models\Files\File;
+use App\Models\Files\FileVersion;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 

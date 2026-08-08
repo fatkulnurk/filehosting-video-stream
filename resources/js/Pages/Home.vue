@@ -81,14 +81,14 @@ const steps = [
                     :icon="stat.icon"
                 >
                     <div class="text-2xl font-bold text-brand-700">{{ stat.value }}</div>
-                    <div class="text-sm text-ink-soft mt-0.5">{{ stat.label }}</div>
+                    <div class="text-sm text-soft mt-0.5">{{ stat.label }}</div>
                 </Card>
             </div>
         </section>
 
         <section class="max-w-6xl mx-auto px-4 py-16">
             <h2 class="text-3xl font-bold text-center mb-10">Cloud Downloads</h2>
-            <p class="text-center text-ink-soft text-lg max-w-2xl mx-auto mb-10">
+            <p class="text-center text-soft text-lg max-w-2xl mx-auto mb-10">
                 Fetch files straight from the internet into your storage — with built-in
                 status tracking and torrent support.
             </p>
@@ -120,7 +120,7 @@ const steps = [
                         <p class="mt-2 text-sm text-ink-muted max-w-xs mx-auto">{{ step.description }}</p>
                     </div>
                 </div>
-                <div class="mt-10 flex items-center justify-center gap-2 text-sm text-ink-soft">
+                <div class="mt-10 flex items-center justify-center gap-2 text-sm text-soft">
                     <CheckIcon class="w-4 h-4 text-success-600" /> No re-upload needed — the server does the downloading.
                 </div>
             </div>

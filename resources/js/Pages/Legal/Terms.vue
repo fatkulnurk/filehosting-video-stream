@@ -50,7 +50,7 @@ const sections = [
 
         <main class="max-w-6xl mx-auto px-4 py-12">
             <h1 class="text-3xl font-bold text-ink mb-1">Terms of Service</h1>
-            <p v-if="updatedAt" class="text-sm text-ink-soft mb-8">Last updated: {{ updatedAt }}</p>
+            <p v-if="updatedAt" class="text-sm text-soft mb-8">Last updated: {{ updatedAt }}</p>
 
             <div class="bg-surface rounded-2xl shadow border p-8 space-y-6">
                 <section v-for="section in sections" :key="section.title">
@@ -59,7 +59,7 @@ const sections = [
                 </section>
             </div>
 
-            <p class="mt-8 text-sm text-ink-soft">
+            <p class="mt-8 text-sm text-soft">
                 Questions? Contact us or review our
                 <Link :href="route('privacy')" class="text-brand-700 hover:underline">Privacy Policy</Link>.
             </p>

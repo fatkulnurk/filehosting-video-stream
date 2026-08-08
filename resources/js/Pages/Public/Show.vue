@@ -38,31 +38,28 @@ const copyText = (text, msg) => {
 
                 <div class="p-6">
                     <h1 class="text-xl font-bold text-ink">{{ file.name }}</h1>
-                    <p class="text-sm text-ink-soft mt-1">
+                    <p class="text-sm text-soft mt-1">
                         {{ file.formatted_size }} · {{ file.extension.toUpperCase() }} · Uploaded {{ file.created_at }} by {{ file.uploaded_by }}
                     </p>
-                    <p class="text-sm text-ink-soft mt-1">
+                    <p class="text-sm text-soft mt-1">
                         {{ file.views.toLocaleString() }} views · {{ file.downloads.toLocaleString() }} downloads
                     </p>
 
                     <div class="flex flex-wrap gap-3 mt-6">
-                        <a :href="file.download_url" download
-                            class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg font-medium text-sm">
+                        <a :href="file.download_url" download class="btn btn-primary btn-lg">
                             <ArrowDownTrayIcon class="w-4 h-4" /> Download
                         </a>
-                        <button type="button" @click="copyText(file.download_url, 'Link copied!')"
-                            class="inline-flex items-center gap-2 bg-surface-soft hover:bg-line-soft px-5 py-2.5 rounded-lg font-medium text-sm">
+                        <button type="button" @click="copyText(file.download_url, 'Link copied!')" class="btn btn-secondary btn-lg">
                             <LinkIcon class="w-4 h-4" /> Copy Link
                         </button>
-                        <button type="button" @click="copyText(file.embed_code, 'Embed code copied!')"
-                            class="inline-flex items-center gap-2 bg-surface-soft hover:bg-line-soft px-5 py-2.5 rounded-lg font-medium text-sm">
+                        <button type="button" @click="copyText(file.embed_code, 'Embed code copied!')" class="btn btn-secondary btn-lg">
                             <CodeBracketIcon class="w-4 h-4" /> Copy Embed
                         </button>
                     </div>
 
                     <div v-if="file.is_video" class="mt-6">
-                        <p class="text-xs uppercase tracking-wider text-ink-faint font-medium mb-2">Embed Code</p>
-                        <textarea readonly rows="2" class="w-full text-xs bg-surface-muted border rounded-lg px-3 py-2 font-mono">{{ file.embed_code }}</textarea>
+                        <p class="text-xs uppercase tracking-wider text-faint font-medium mb-2">Embed Code</p>
+                        <textarea readonly rows="2" class="input text-xs font-mono">{{ file.embed_code }}</textarea>
                     </div>
                 </div>
             </div>

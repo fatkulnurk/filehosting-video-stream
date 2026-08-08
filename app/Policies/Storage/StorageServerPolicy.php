@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Policies;
+declare(strict_types=1);
 
-use App\Models\StorageServer;
-use App\Models\User;
+namespace App\Policies\Storage;
+
+use App\Models\Storage\StorageServer;
+use App\Models\Users\User;
 
 class StorageServerPolicy
 {

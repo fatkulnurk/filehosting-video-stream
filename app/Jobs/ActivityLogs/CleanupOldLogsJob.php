@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Jobs;
+declare(strict_types=1);
 
-use App\Services\Interfaces\ActivityLogServiceInterface;
+namespace App\Jobs\ActivityLogs;
+
+use App\Contracts\Services\ActivityLogs\ActivityLogServiceInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

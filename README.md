@@ -1,3 +1,5 @@
+
+
 # File Hosting Video Stream
 
 A file hosting & streaming platform built with **Laravel 13** + **Inertia.js** + **Vue 3**.
@@ -130,7 +132,7 @@ php artisan serve
 ```
 
 Herd users can simply open the site through their local domain
-(e.g. `https://filehostingvideo.test/`) after setting up a site for this directory.
+(e.g. `https://filehosting-video-stream.test/`) after setting up a site for this directory.
 
 ### Queue worker (required for async URL downloads)
 

@@ -18,11 +18,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable
 {
     use HasFactory, HasUuids, Notifiable, TwoFactorAuthenticatable;
+
+    protected $appends = [
+        'avatar_url',
+    ];
 
     protected $fillable = [
         'name',
@@ -100,6 +105,17 @@ class User extends Authenticatable
     public function hasPermission(string $permission): bool
     {
         return in_array($permission, $this->role->permissions());
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        $avatar = $this->profile?->avatar;
+
+        if (! $avatar) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($avatar);
     }
 
     public function storageLimit(): ?int

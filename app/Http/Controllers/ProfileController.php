@@ -16,14 +16,20 @@ class ProfileController extends Controller
 
         return Inertia::render('Profile/Edit', [
             'user' => $user,
-            'twoFactorEnabled' => (bool) $user->two_factor_secret,
+            'twoFactorEnabled' => ! is_null($user->two_factor_confirmed_at),
         ]);
     }
 
     public function update(UpdateProfileRequest $request)
     {
-        auth()->user()->profile()->updateOrCreate(
-            ['user_id' => auth()->id()],
+        $user = auth()->user();
+
+        $user->update([
+            'name' => $request->name,
+        ]);
+
+        $user->profile()->updateOrCreate(
+            ['user_id' => $user->id],
             [
                 'phone' => $request->phone,
                 'bio' => $request->bio,

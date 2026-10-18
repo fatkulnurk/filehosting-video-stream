@@ -160,7 +160,13 @@ const mobileMenu = ref(null);
                         <span class="hidden sm:block text-sm text-ink-soft">{{ user()?.name }}</span>
                         <details class="relative">
                             <summary class="cursor-pointer list-none">
-                                <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">
+                                <img
+                                    v-if="user()?.avatar_url"
+                                    :src="user().avatar_url"
+                                    :alt="user()?.name || 'User'"
+                                    class="w-8 h-8 rounded-full object-cover"
+                                />
+                                <div v-else class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">
                                     {{ (user()?.name || '?').charAt(0).toUpperCase() }}
                                 </div>
                             </summary>

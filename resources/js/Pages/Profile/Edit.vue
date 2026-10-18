@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import TwoFactorSettings from '@/Components/TwoFactorSettings.vue';
@@ -19,14 +19,8 @@ const profileForm = reactive({
 const passwordForm = reactive({ current_password: '', password: '', password_confirmation: '' });
 
 const submitProfile = () => {
-    router.patch(route('user-profile-information.update'), {
-        name: profileForm.name,
-        email: profileForm.email,
-    }, { preserveScroll: true });
-};
-
-const submitProfileExtra = () => {
     router.patch(route('profile.update'), {
+        name: profileForm.name,
         phone: profileForm.phone,
         bio: profileForm.bio,
     }, { preserveScroll: true });
@@ -44,6 +38,9 @@ const submitPassword = () => {
 };
 
 const avatarFile = ref(null);
+const avatarUrl = computed(() =>
+    props.user.profile?.avatar ? `/storage/${props.user.profile.avatar}` : null,
+);
 const uploadAvatar = () => {
     if (!avatarFile.value) return;
     const form = new FormData();
@@ -66,7 +63,13 @@ watch(avatarFile, (val) => {
             <h2 class="section-title mb-4">Profile Information</h2>
 
             <div class="flex items-center gap-4 mb-6">
-                <div class="w-16 h-16 rounded-full bg-brand-600 text-white flex items-center justify-center text-2xl font-bold">
+                <img
+                    v-if="avatarUrl"
+                    :src="avatarUrl"
+                    :alt="user.name"
+                    class="w-16 h-16 rounded-full object-cover"
+                />
+                <div v-else class="w-16 h-16 rounded-full bg-brand-600 text-white flex items-center justify-center text-2xl font-bold">
                     {{ user.name.charAt(0).toUpperCase() }}
                 </div>
                 <div>
@@ -82,7 +85,7 @@ watch(avatarFile, (val) => {
                     </div>
                     <div>
                         <label class="label">Email</label>
-                        <input v-model="profileForm.email" type="email" placeholder="you@example.com" class="input" />
+                        <input v-model="profileForm.email" type="email" placeholder="you@example.com" class="input bg-surface-soft opacity-70" readonly />
                     </div>
                     <div>
                         <label class="label">Phone</label>
@@ -93,9 +96,8 @@ watch(avatarFile, (val) => {
                         <input v-model="profileForm.bio" type="text" placeholder="Tell us a little about yourself" class="input" />
                     </div>
                 </div>
-                <div class="flex gap-2">
-                    <button type="submit" class="btn btn-primary btn-md">Save Info</button>
-                    <button type="button" @click="submitProfileExtra" class="btn btn-secondary btn-md">Save Phone & Bio</button>
+                <div class="flex">
+                    <button type="submit" class="btn btn-primary btn-md">Save</button>
                 </div>
             </form>
         </div>

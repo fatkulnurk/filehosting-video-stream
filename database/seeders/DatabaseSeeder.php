@@ -117,6 +117,10 @@ class DatabaseSeeder extends Seeder
                 'role' => $role,
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
+                // Two-factor auth is disabled by default for seeded accounts.
+                'two_factor_secret' => null,
+                'two_factor_recovery_codes' => null,
+                'two_factor_confirmed_at' => null,
             ]
         );
     }
